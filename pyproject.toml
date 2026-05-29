@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "farm-ai"
+version = "0.1.0"
+description = "Layout-aware OCR pipeline for farm record tables"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "opencv-python",
+    "matplotlib",
+    "scipy",
+    "pandas",
+    "scikit-image",
+    "pytesseract",
+]
+
+[[project.authors]]
+name = "Ravi Pandey"
+email = "ravipandey@unomaha.edu"
+
+[project.optional-dependencies]
+dev = ["jupyter"]
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
