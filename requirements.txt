@@ -6,3 +6,6 @@ pandas
 scikit-image
 pytesseract
 jupyter
+nox
+mypy
+coverage

@@ -6,7 +6,7 @@ import numpy as np
 import cv2
 
 
-def connected_components(binary: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def connected_components(binary: np.ndarray) -> Tuple[int, np.ndarray, np.ndarray, np.ndarray]:
     """Run connected component analysis on a binary image.
 
     Args:
@@ -23,8 +23,10 @@ def connected_components(binary: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np
     # Ensure background is 0, foreground is 255
     _, thresh = cv2.threshold(bin_img, 127, 255, cv2.THRESH_BINARY)
 
-    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(thresh, connectivity=8)
-    return num_labels, labels, stats, centroids
+    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(
+        thresh, connectivity=8
+    )
+    return int(num_labels), labels, stats, centroids
 
 
 def filter_components_by_area(binary: np.ndarray, min_area: int = 10) -> np.ndarray:
