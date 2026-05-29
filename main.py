@@ -58,11 +58,11 @@ def process_image(
 
 def main() -> None:
 	root = Path(__file__).resolve().parent
-	sample_path = root / "examples" / "sample_01.jpg"
+	sample_path = root / "examples" / "Boar - barn - flash.jpg"
 	debug_dir = root / "debug_outputs"
 
 	# Build pipeline with default parameters
-	pipeline = build_pipeline(window_size=25, k=0.34, denoise_kernel=3)
+	pipeline = build_pipeline(window_size=25, k=0.34, denoise_kernel=2)
 
 	# Process single image
 	result = process_image(sample_path, pipeline, debug_dir=debug_dir)
