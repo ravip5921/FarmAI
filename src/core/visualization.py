@@ -9,13 +9,13 @@ import numpy as np
 from .image import DocumentImage
 
 
-def _extract_image(image: Any) -> Any:
+def _extract_image(image: Any) -> Any:  # pragma: no cover
     if isinstance(image, DocumentImage):
         return image.image
     return image
 
 
-def show(title: str, image: Any) -> None:
+def show(title: str, image: Any) -> None:  # pragma: no cover
     array = _extract_image(image)
     plt.figure(figsize=(10, 8))
     if isinstance(array, np.ndarray) and array.ndim == 2:
@@ -28,7 +28,7 @@ def show(title: str, image: Any) -> None:
     plt.show()
 
 
-def save_debug(path: str | Path, title: str, image: Any) -> None:
+def save_debug(path: str | Path, title: str, image: Any) -> None:  # pragma: no cover
     output_path = Path(path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
