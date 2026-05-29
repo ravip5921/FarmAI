@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
 from src.core.image import DocumentImage
-from src.table.intersections import IntersectionDetectionStage, detect_intersections
+from src.table.intersections import (
+	IntersectionDetectionStage,
+	_filter_intersection_components,
+	_intersection_thresholds,
+	detect_intersections,
+)
 
 
 class TestIntersections(unittest.TestCase):
@@ -58,6 +64,56 @@ class TestIntersections(unittest.TestCase):
 
 		self.assertEqual(result.intersection_mask.shape, horizontal.shape)
 		self.assertEqual(result.centroids, [(1, 1)])
+
+	def test_intersection_thresholds_use_large_image_branch(self) -> None:
+		self.assertEqual(_intersection_thresholds((200, 200)), (2, 200, 3.0))
+
+	def test_filter_intersection_components_rejects_bad_components(self) -> None:
+		intersection_mask = np.zeros((6, 6), dtype=np.uint8)
+		labels = np.array(
+			[
+				[0, 1, 1, 2, 2, 3],
+				[0, 1, 1, 2, 2, 3],
+				[0, 4, 4, 4, 4, 5],
+				[0, 4, 4, 4, 4, 5],
+				[0, 0, 0, 0, 0, 5],
+				[0, 0, 0, 0, 0, 5],
+			],
+			dtype=np.int32,
+		)
+		stats = np.array(
+			[
+				[0, 0, 6, 6, 0],
+				[0, 0, 1, 1, 1],
+				[0, 0, 1, 1, 50],
+				[0, 0, 0, 2, 5],
+				[0, 0, 4, 4, 4],
+				[0, 0, 4, 1, 4],
+			],
+			dtype=np.int32,
+		)
+		centroids = np.array(
+			[
+				[0.0, 0.0],
+				[1.0, 1.0],
+				[3.0, 1.0],
+				[5.0, 1.0],
+				[2.0, 3.0],
+				[4.0, 4.0],
+			],
+			dtype=np.float64,
+		)
+
+		with patch("src.table.intersections.cv2.connectedComponentsWithStats", return_value=(6, labels, stats, centroids)):
+			filtered_mask, centroid_list = _filter_intersection_components(
+				intersection_mask,
+				min_area=2,
+				max_area=10,
+				max_aspect_ratio=3.0,
+			)
+
+		self.assertGreater(int(np.count_nonzero(filtered_mask)), 0)
+		self.assertEqual(centroid_list, [(2, 3)])
 
 
 if __name__ == "__main__":
