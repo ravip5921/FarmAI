@@ -36,5 +36,19 @@ def tests(session: nox.Session) -> None:
         "tests",
         external=True,
     )
-    session.run("coverage", "report", "--show-missing", external=True)
-    session.run("coverage", "xml", "-o", "coverage.xml", external=True)
+
+    session.run(
+        "coverage", 
+        "report", 
+        "--show-missing",  
+        "--fail-under=100", 
+        external=True
+    )
+    
+    session.run(
+        "coverage",
+        "xml",
+        "-o",
+        "coverage.xml",
+        external=True
+    )
