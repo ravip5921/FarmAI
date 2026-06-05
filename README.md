@@ -155,7 +155,7 @@ Image preprocessing and table detection: Work in progress
 The python project can be installed following the listed steps:
 
 ```py
-conda create -n farm-ai
+conda create -n farm-ai python=3.11 -y
 conda activate farm-ai
 git clone https://github.com/ravip5921/FarmAI.git
 cd FarmAI
