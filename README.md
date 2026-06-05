@@ -159,7 +159,7 @@ conda create -n farm-ai python=3.11 -y
 conda activate farm-ai
 git clone https://github.com/ravip5921/FarmAI.git
 cd FarmAI
-pip install -r requirmeents.txt
+pip install -r requirements.txt
 pip install -e . 
 farm-ai ./examples/sample_01.jpg
 ```
