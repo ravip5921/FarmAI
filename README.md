@@ -145,4 +145,21 @@ The final system should produce:
 
 # Status
 
-Prospective research and implementation project.
+Phase 1 under implementation.
+
+Image preprocessing and table detection: Work in progress
+
+
+# Installation Instructions
+
+The python project can be installed following the listed steps:
+
+```py
+conda create -n farm-ai
+conda activate farm-ai
+git clone https://github.com/ravip5921/FarmAI.git
+cd FarmAI
+pip install -r requirmeents.txt
+pip install -e . 
+farm-ai ./examples/sample_01.jpg
+```
