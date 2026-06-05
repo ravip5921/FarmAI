@@ -76,10 +76,10 @@ def find_projection_peaks(
     peaks: list[ProjectionPeak] = []
     for cluster in clusters:
         weights = profile_array[cluster]
-        if float(np.sum(weights)) > 0:
-            position = int(round(float(np.average(cluster, weights=weights))))
-        else:
-            position = int(round(float(np.mean(cluster))))
+
+        assert np.sum(weights) > 0, "Invariant broken"
+        position = int(round(float(np.average(cluster, weights=weights))))
+        
         peaks.append(
             ProjectionPeak(
                 position=position,

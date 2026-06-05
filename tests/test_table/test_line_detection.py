@@ -67,6 +67,34 @@ class TestLineDetection(unittest.TestCase):
 		self.assertIsInstance(result.vertical_mask, np.ndarray)
 		self.assertEqual(result.horizontal_mask.shape, image.shape)
 
+	def test_close_gaps_horizontal_fills_small_gap(self) -> None:
+		image = np.zeros((5, 5), dtype=np.uint8)
+		image[2, 1] = 255
+		image[2, 3] = 255
 
+		stage = LineDetectionStage()
+
+		result = stage._close_gaps(
+			image,
+			orientation="horizontal",
+			gap=3,
+		)
+
+		self.assertEqual(int(result[2, 2]), 255)
+
+	def test_close_gaps_vertical_fills_small_gap(self) -> None:
+		image = np.zeros((5, 5), dtype=np.uint8)
+		image[1, 2] = 255
+		image[3, 2] = 255
+
+		stage = LineDetectionStage()
+
+		result = stage._close_gaps(
+			image,
+			orientation="vertical",
+			gap=3,
+		)
+
+		self.assertEqual(int(result[2, 2]), 255)
 if __name__ == "__main__":
 	unittest.main()

@@ -74,6 +74,19 @@ class TestGridReconstruction(unittest.TestCase):
 		self.assertEqual(result.col_coords, [60, 70])
 		self.assertEqual(result.cells, [])
 
+	def test_no_tolerance(self) -> None:
+		centroids = [
+			(60, 60),
+			(70, 60),
+			(60, 70),
+			(70, 70),
+		]
+
+		result = reconstruct_grid(centroids, image_shape=(50, 50))
+
+		self.assertEqual(result.row_coords, [65])
+		self.assertEqual(result.col_coords, [65])
+		self.assertEqual(result.cells, [])
 
 if __name__ == "__main__":
 	unittest.main()
