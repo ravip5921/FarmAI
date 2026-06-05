@@ -22,7 +22,9 @@ class TestLineRefinement(unittest.TestCase):
         cv2.line(vertical, (12, 4), (12, 20), color=255, thickness=1)
         cv2.line(vertical, (19, 2), (19, 5), color=255, thickness=1)
 
-        result = line_refinement.refine_grid_with_projection_profiles(horizontal, vertical, horizontal.shape)
+        result = line_refinement.refine_grid_with_projection_profiles(
+            horizontal, vertical, horizontal.shape
+        )
 
         self.assertEqual(result.grid.row_coords, [4, 8, 12, 16, 20])
         self.assertEqual(result.grid.col_coords, [4, 12])
@@ -35,21 +37,27 @@ class TestLineRefinement(unittest.TestCase):
         shape = (10, 10)
 
         # Force one valid cell and one out-of-bounds cell
-        row_coords = [12, 12]   # bottom row is within bounds, top edge is fine
-        col_coords = [12, 12]   # right edge is out of bounds
+        row_coords = [12, 12]  # bottom row is within bounds, top edge is fine
+        col_coords = [12, 12]  # right edge is out of bounds
 
-        grid = line_refinement._grid_from_axis_coordinates(row_coords, col_coords, shape)
+        grid = line_refinement._grid_from_axis_coordinates(
+            row_coords, col_coords, shape
+        )
 
         # No cell should be created
         self.assertEqual(len(grid.cells), 0)
 
-    def test_estimate_regular_spacing_returns_zero_with_fewer_than_three_coords(self) -> None:
+    def test_estimate_regular_spacing_returns_zero_with_fewer_than_three_coords(
+        self,
+    ) -> None:
         self.assertEqual(
             line_refinement._estimate_regular_spacing([10, 20], axis_length=100),
             0,
         )
 
-    def test_estimate_regular_spacing_returns_zero_when_no_gaps_are_usable(self) -> None:
+    def test_estimate_regular_spacing_returns_zero_when_no_gaps_are_usable(
+        self,
+    ) -> None:
         # For axis_length=120:
         # min_spacing = max(3, 120 // 120) = 3
         # max_spacing = max(4, 120 // 12) = 10
@@ -59,13 +67,16 @@ class TestLineRefinement(unittest.TestCase):
             line_refinement._estimate_regular_spacing([0, 20, 40], axis_length=120),
             0,
         )
+
     def test_merge_close_positions_returns_empty_for_no_coords(self) -> None:
         self.assertEqual(
             line_refinement._merge_close_positions([], spacing=5),
             [],
         )
 
-    def test_merge_close_positions_returns_sorted_coords_when_spacing_is_not_positive(self) -> None:
+    def test_merge_close_positions_returns_sorted_coords_when_spacing_is_not_positive(
+        self,
+    ) -> None:
         self.assertEqual(
             line_refinement._merge_close_positions([10, 2, 6], spacing=0),
             [2, 6, 10],
@@ -76,16 +87,20 @@ class TestLineRefinement(unittest.TestCase):
             line_refinement._merge_axis_candidates([], tolerance=3),
             [],
         )
-    
-    def test_merge_axis_candidates_clusters_within_tolerance_and_splits_others(self) -> None:
+
+    def test_merge_axis_candidates_clusters_within_tolerance_and_splits_others(
+        self,
+    ) -> None:
         self.assertEqual(
             line_refinement._merge_axis_candidates([10, 12, 30, 31], tolerance=3),
             [11, 30],
         )
 
-    def test_fill_missing_regular_positions_returns_sorted_coords_for_early_exit_cases(self) -> None:
+    def test_fill_missing_regular_positions_returns_sorted_coords_for_early_exit_cases(
+        self,
+    ) -> None:
         cases = [
-            ([8], 4, [8]),          # len(coords) < 2
+            ([8], 4, [8]),  # len(coords) < 2
             ([10, 2, 6], 0, [2, 6, 10]),  # spacing <= 0
         ]
 
@@ -96,7 +111,9 @@ class TestLineRefinement(unittest.TestCase):
                     expected,
                 )
 
-    def test_trim_row_candidates_returns_original_rows_when_trimmed_table_has_less_than_two_rows(self) -> None:
+    def test_trim_row_candidates_returns_original_rows_when_trimmed_table_has_less_than_two_rows(
+        self,
+    ) -> None:
         rows, spacing = line_refinement._trim_row_candidates(
             rows=[0, 4],
             row_support=[0, 2],
@@ -116,7 +133,9 @@ class TestLineRefinement(unittest.TestCase):
         self.assertEqual(rows, [0, 4, 8, 12])
         self.assertEqual(spacing, 4)
 
-    def test_filter_column_candidates_returns_original_cols_when_filtered_has_less_than_two(self) -> None:
+    def test_filter_column_candidates_returns_original_cols_when_filtered_has_less_than_two(
+        self,
+    ) -> None:
         cols = [2, 6, 10]
         filtered = line_refinement._filter_column_candidates(
             cols=cols,
@@ -125,7 +144,7 @@ class TestLineRefinement(unittest.TestCase):
         )
 
         self.assertEqual(filtered, cols)
-    
+
     def test_refine_grid_with_projection_profiles_raises_for_non_2d_masks(self) -> None:
         horizontal = np.zeros((10, 10, 3), dtype=np.uint8)
         vertical = np.zeros((10, 10), dtype=np.uint8)
@@ -140,7 +159,9 @@ class TestLineRefinement(unittest.TestCase):
                 horizontal.shape,
             )
 
-    def test_refine_grid_with_projection_profiles_merges_intersection_centroid_columns(self) -> None:
+    def test_refine_grid_with_projection_profiles_merges_intersection_centroid_columns(
+        self,
+    ) -> None:
         horizontal = np.zeros((24, 24), dtype=np.uint8)
         vertical = np.zeros((24, 24), dtype=np.uint8)
 
@@ -158,5 +179,7 @@ class TestLineRefinement(unittest.TestCase):
         )
 
         self.assertEqual(result.col_candidates, [4, 12])
+
+
 if __name__ == "__main__":
     unittest.main()

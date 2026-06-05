@@ -4,8 +4,8 @@ import unittest
 
 import numpy as np
 
-from src.preprocessing.denoise import MorphologicalDenoiseStage
 from src.core.image import DocumentImage
+from src.preprocessing.denoise import MorphologicalDenoiseStage
 
 
 class TestDenoiseStage(unittest.TestCase):
@@ -32,9 +32,11 @@ class TestDenoiseStage(unittest.TestCase):
         stage = MorphologicalDenoiseStage(kernel_size=3)
         result = stage.process(doc)
 
-        self.assertTrue(np.array_equal(result.image[4, 1:7], np.zeros(6, dtype=np.uint8)))
+        self.assertTrue(
+            np.array_equal(result.image[4, 1:7], np.zeros(6, dtype=np.uint8))
+        )
         self.assertEqual(result.metadata.get("denoise_method"), "connected_components")
-    
+
     def test_non_binary_image(self) -> None:
         img = np.full((5, 5, 3), 128, dtype=np.uint8)
 
@@ -55,8 +57,11 @@ class TestDenoiseStage(unittest.TestCase):
         stage = MorphologicalDenoiseStage(kernel_size=0)
         result = stage.process(doc)
 
-        self.assertTrue(np.array_equal(result.image[4, 1:7], np.zeros(6, dtype=np.uint8)))
+        self.assertTrue(
+            np.array_equal(result.image[4, 1:7], np.zeros(6, dtype=np.uint8))
+        )
         self.assertEqual(result.metadata.get("denoise_method"), "none")
+
 
 if __name__ == "__main__":
     unittest.main()

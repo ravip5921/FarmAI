@@ -5,7 +5,6 @@ from typing import Literal
 
 import numpy as np
 
-
 ProjectionAxis = Literal["horizontal", "vertical"]
 
 
@@ -79,7 +78,7 @@ def find_projection_peaks(
 
         assert np.sum(weights) > 0, "Invariant broken"
         position = int(round(float(np.average(cluster, weights=weights))))
-        
+
         peaks.append(
             ProjectionPeak(
                 position=position,

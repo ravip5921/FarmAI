@@ -6,6 +6,6 @@ from .image import DocumentImage
 
 
 class PipelineStage(ABC):
-	@abstractmethod
-	def process(self, doc: DocumentImage) -> DocumentImage:
-		raise NotImplementedError
+    @abstractmethod
+    def process(self, doc: DocumentImage) -> DocumentImage:
+        raise NotImplementedError

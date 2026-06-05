@@ -10,7 +10,9 @@ from src.core.stage import PipelineStage
 
 
 class SkewCorrectionStage(PipelineStage):
-    def __init__(self, canny_low: int = 50, canny_high: int = 150, hough_threshold: int = 80):
+    def __init__(
+        self, canny_low: int = 50, canny_high: int = 150, hough_threshold: int = 80
+    ):
         self.canny_low = canny_low
         self.canny_high = canny_high
         self.hough_threshold = hough_threshold

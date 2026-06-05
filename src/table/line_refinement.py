@@ -62,14 +62,20 @@ def _crossing_support(
     if not rows or not cols:
         return [0 for _ in rows], [0 for _ in cols]
 
-    horizontal_hits = cv2.dilate(
-        horizontal_mask,
-        cv2.getStructuringElement(cv2.MORPH_RECT, (2 * radius + 1, 2 * radius + 1)),
-    ) > 0
-    vertical_hits = cv2.dilate(
-        vertical_mask,
-        cv2.getStructuringElement(cv2.MORPH_RECT, (2 * radius + 1, 2 * radius + 1)),
-    ) > 0
+    horizontal_hits = (
+        cv2.dilate(
+            horizontal_mask,
+            cv2.getStructuringElement(cv2.MORPH_RECT, (2 * radius + 1, 2 * radius + 1)),
+        )
+        > 0
+    )
+    vertical_hits = (
+        cv2.dilate(
+            vertical_mask,
+            cv2.getStructuringElement(cv2.MORPH_RECT, (2 * radius + 1, 2 * radius + 1)),
+        )
+        > 0
+    )
 
     height, width = horizontal_mask.shape[:2]
     row_support = [0 for _ in rows]
@@ -166,7 +172,11 @@ def _trim_row_candidates(
 
     start_index = 0
     for required_support in (2, 1):
-        supported = [index for index, support in enumerate(row_support) if support >= required_support]
+        supported = [
+            index
+            for index, support in enumerate(row_support)
+            if support >= required_support
+        ]
         if supported:
             start_index = supported[0]
             break
@@ -188,12 +198,16 @@ def _trim_row_candidates(
     return table_rows, spacing
 
 
-def _filter_column_candidates(cols: list[int], col_support: list[int], row_count: int) -> list[int]:
+def _filter_column_candidates(
+    cols: list[int], col_support: list[int], row_count: int
+) -> list[int]:
     if len(cols) < 2 or not col_support:
         return cols
 
     min_support = max(2, min(5, row_count // 6))
-    filtered = [col for col, support in zip(cols, col_support) if support >= min_support]
+    filtered = [
+        col for col, support in zip(cols, col_support) if support >= min_support
+    ]
     if len(filtered) < 2:
         return cols
     return filtered
@@ -253,7 +267,9 @@ def refine_grid_with_projection_profiles(
         col_candidates,
         radius=radius,
     )
-    col_coords = _filter_column_candidates(col_candidates, refined_col_support, len(row_coords))
+    col_coords = _filter_column_candidates(
+        col_candidates, refined_col_support, len(row_coords)
+    )
 
     grid = _grid_from_axis_coordinates(row_coords, col_coords, image_shape)
     return GridRefinementResult(

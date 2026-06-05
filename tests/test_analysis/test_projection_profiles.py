@@ -37,12 +37,13 @@ class TestProjectionProfiles(unittest.TestCase):
 
         smoothed = smooth_profile(profile, window_size=3)
 
-        self.assertTrue(np.allclose(smoothed, np.array([1.0, 1.0, 1.0], dtype=np.float32)))
-    
+        self.assertTrue(
+            np.allclose(smoothed, np.array([1.0, 1.0, 1.0], dtype=np.float32))
+        )
+
     def test_projection_profile_rejects_non_2d_input(self) -> None:
         with self.assertRaises(ValueError):
             projection_profile(np.zeros(5, dtype=np.uint8), "horizontal")
-
 
     def test_projection_profile_rejects_invalid_axis(self) -> None:
         mask = np.zeros((2, 2), dtype=np.uint8)
@@ -50,11 +51,9 @@ class TestProjectionProfiles(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection_profile(mask, "diagonal")  # type: ignore[arg-type]
 
-
     def test_smooth_profile_rejects_non_1d_input(self) -> None:
         with self.assertRaises(ValueError):
             smooth_profile(np.zeros((2, 2), dtype=np.int32))
-
 
     def test_smooth_profile_returns_copy_for_window_size_one(self) -> None:
         profile = np.array([1, 2, 3], dtype=np.int32)
@@ -73,7 +72,9 @@ class TestProjectionProfiles(unittest.TestCase):
 
         self.assertEqual(peaks, [])
 
-    def test_find_projection_peaks_returns_empty_when_threshold_filters_all(self) -> None:
+    def test_find_projection_peaks_returns_empty_when_threshold_filters_all(
+        self,
+    ) -> None:
         profile = np.array([1, 2, 3], dtype=np.int32)
 
         peaks = find_projection_peaks(

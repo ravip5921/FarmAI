@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from typing import Tuple
 
-import numpy as np
 import cv2
+import numpy as np
 
 
-def connected_components(binary: np.ndarray) -> Tuple[int, np.ndarray, np.ndarray, np.ndarray]:
+def connected_components(
+    binary: np.ndarray,
+) -> Tuple[int, np.ndarray, np.ndarray, np.ndarray]:
     """Run connected component analysis on a binary image.
 
     Args:

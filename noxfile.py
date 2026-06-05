@@ -3,7 +3,7 @@ import nox
 # Prefer running tools in the currently-activated environment (e.g. conda).
 # When running `nox` from an activated conda env this file will run the
 # external tools from that environment instead of creating new virtualenvs.
-nox.options.sessions = ["typecheck", "tests"]
+nox.options.sessions = ["typecheck", "tests", "format"]
 # Try to avoid recreating virtualenvs when possible.
 nox.options.reuse_existing_virtualenvs = True
 
@@ -38,17 +38,40 @@ def tests(session: nox.Session) -> None:
     )
 
     session.run(
-        "coverage", 
-        "report", 
-        "--show-missing",  
-        "--fail-under=100", 
-        external=True
+        "coverage", "report", "--show-missing", "--fail-under=100", external=True
     )
-    
+
+    session.run("coverage", "xml", "-o", "coverage.xml", external=True)
+
+
+@nox.session(python="3.11")
+def format(session: nox.Session) -> None:
+    """Auto-format code, sort imports, and remove unused imports/variables."""
+
+    paths = ["src", "tests", "noxfile.py"]
+
     session.run(
-        "coverage",
-        "xml",
-        "-o",
-        "coverage.xml",
-        external=True
+        "autoflake",
+        "--in-place",
+        "--recursive",
+        "--remove-all-unused-imports",
+        "--remove-unused-variables",
+        *paths,
+        external=True,
+    )
+
+    session.run(
+        "isort",
+        "--profile",
+        "black",
+        *paths,
+        external=True,
+    )
+
+    session.run(
+        "black",
+        "--target-version",
+        "py311",
+        *paths,
+        external=True,
     )

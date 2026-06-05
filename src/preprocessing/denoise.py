@@ -49,7 +49,9 @@ class MorphologicalDenoiseStage(PipelineStage):
             cleaned = self._remove_small_foreground_components(image)
             method = "connected_components"
         else:
-            kernel_size = self.kernel_size if self.kernel_size % 2 == 1 else self.kernel_size + 1
+            kernel_size = (
+                self.kernel_size if self.kernel_size % 2 == 1 else self.kernel_size + 1
+            )
             cleaned = cv2.medianBlur(image, kernel_size)
             method = "median_blur"
 

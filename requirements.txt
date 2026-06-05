@@ -9,3 +9,6 @@ jupyter
 nox
 mypy
 coverage
+black
+isort
+autoflake

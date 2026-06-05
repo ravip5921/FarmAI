@@ -4,8 +4,8 @@ import unittest
 
 import numpy as np
 
-from src.preprocessing.sauvola import SauvolaBinarizationStage
 from src.core.image import DocumentImage
+from src.preprocessing.sauvola import SauvolaBinarizationStage
 
 
 class TestSauvolaStage(unittest.TestCase):

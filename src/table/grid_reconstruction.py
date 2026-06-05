@@ -35,7 +35,9 @@ def _cluster_sorted_values(values: list[int], tolerance: int = 10) -> list[int]:
     return [int(round(float(np.mean(cluster)))) for cluster in clusters]
 
 
-def _extract_axis_coordinates(centroids: list[tuple[int, int]], axis: int, tolerance: int = 10) -> list[int]:
+def _extract_axis_coordinates(
+    centroids: list[tuple[int, int]], axis: int, tolerance: int = 10
+) -> list[int]:
     values = [point[axis] for point in centroids]
     return _cluster_sorted_values(values, tolerance=tolerance)
 

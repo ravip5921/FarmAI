@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+
 import cv2
 import numpy as np
 
-from .connected_components import connected_components, estimate_average_character_height
+from .connected_components import (
+    connected_components,
+    estimate_average_character_height,
+)
 
 
 @dataclass
@@ -32,7 +36,10 @@ def _extract_component_heights(binary: np.ndarray, min_area: int = 10) -> list[i
 
     return heights
 
-def estimate_character_size(binary: np.ndarray, min_area: int = 10) -> CharacterSizeReport:
+
+def estimate_character_size(
+    binary: np.ndarray, min_area: int = 10
+) -> CharacterSizeReport:
     """Estimate basic character-size statistics from a binary image."""
 
     heights = _extract_component_heights(binary, min_area=min_area)

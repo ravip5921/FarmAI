@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import unittest
 
-from src.core.stage import PipelineStage
-from src.core.pipeline import Pipeline
 from src.core.image import DocumentImage
+from src.core.pipeline import Pipeline
+from src.core.stage import PipelineStage
 
 
 class IncrementStage(PipelineStage):

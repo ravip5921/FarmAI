@@ -1,15 +1,15 @@
 from __future__ import annotations
 
+import math
 import unittest
 
+import cv2
 import numpy as np
 
-from src.preprocessing.skew import SkewCorrectionStage
-from . import make_tiny_gray_image
-import math
-import numpy as np
-import cv2
 from src.core.image import DocumentImage
+from src.preprocessing.skew import SkewCorrectionStage
+
+from . import make_tiny_gray_image
 
 
 class TestSkewStage(unittest.TestCase):
@@ -25,7 +25,9 @@ class TestSkewStage(unittest.TestCase):
         self.assertEqual(result.metadata.get("skew_angle"), 0.0)
         np.testing.assert_array_equal(result.image, doc.image)
 
-    def _make_skewed_lines(self, angle_deg: float, height: int = 200, width: int = 400, n: int = 5) -> np.ndarray:
+    def _make_skewed_lines(
+        self, angle_deg: float, height: int = 200, width: int = 400, n: int = 5
+    ) -> np.ndarray:
         """Create a white image with several parallel black lines at angle_deg."""
         img = np.full((height, width), 255, dtype=np.uint8)
         theta = math.radians(angle_deg)
