@@ -43,20 +43,24 @@ def _extract_axis_coordinates(centroids: list[tuple[int, int]], axis: int, toler
 def reconstruct_grid(
     centroids: list[tuple[int, int]],
     image_shape: tuple[int, int],
-    tolerance: int = 10,
+    tolerance: int | None = None,
 ) -> GridStructure:
     """Reconstruct a table grid from intersection centroids.
 
     Args:
         centroids: List of intersection centroids as (x, y).
         image_shape: Image shape as (height, width).
-        tolerance: Clustering tolerance in pixels.
+        tolerance: Clustering tolerance in pixels. If omitted, a conservative
+            image-size-scaled tolerance is used.
 
     Returns:
         GridStructure with clustered row/column coordinates and cell boxes.
     """
     if not centroids:
         return GridStructure(row_coords=[], col_coords=[], cells=[])
+
+    if tolerance is None:
+        tolerance = max(10, min(30, min(image_shape[:2]) // 120))
 
     col_coords = _extract_axis_coordinates(centroids, axis=0, tolerance=tolerance)
     row_coords = _extract_axis_coordinates(centroids, axis=1, tolerance=tolerance)

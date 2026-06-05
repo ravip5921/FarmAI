@@ -72,6 +72,9 @@ def process_table_image(
 		debug_dir.mkdir(parents=True, exist_ok=True)
 		line_preview = np.hstack([line_detection.horizontal_mask, line_detection.vertical_mask])
 		_save_preview(debug_dir, "line_detection", stem, line_preview)
+		_save_preview(debug_dir, "line_detection_horizontal", stem, line_detection.horizontal_mask)
+		_save_preview(debug_dir, "line_detection_vertical", stem, line_detection.vertical_mask)
+
 
 	intersections = detect_intersections(
 		line_detection.horizontal_mask,
@@ -103,4 +106,3 @@ __all__ = [
 	"render_grid_structure",
 	"reconstruct_grid",
 ]
-

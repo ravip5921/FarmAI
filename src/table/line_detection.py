@@ -67,6 +67,23 @@ class LineDetectionStage(PipelineStage):
 		char_height = max(1, report.average_height or report.median_height or 10)
 		return max(3, int(char_height * self.min_line_scale))
 
+	def _directional_kernel_sizes(self, binary: np.ndarray, char_height: int) -> tuple[int, int, int]:
+		char_kernel_size = max(3, int(char_height * self.min_line_scale))
+		page_kernel_size = max(3, binary.shape[1] // 32)
+		horizontal_size = max(char_kernel_size, page_kernel_size)
+		vertical_size = max(3, int(horizontal_size * 0.6), binary.shape[0] // 80)
+		return horizontal_size, vertical_size, page_kernel_size
+
+	def _close_gaps(self, binary: np.ndarray, *, orientation: str, gap: int) -> np.ndarray:
+		if gap <= 1:
+			return binary
+
+		if orientation == "horizontal":
+			kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (gap, 1))
+		else:
+			kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, gap))
+		return cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+
 	def _hough_vertical_mask(self, binary: np.ndarray, min_line_length: int) -> np.ndarray:
 		"""Recover weak vertical rules using a near-vertical Hough detector."""
 		edges = cv2.Canny(binary, 50, 150)
@@ -125,23 +142,35 @@ class LineDetectionStage(PipelineStage):
 		binary = self._ensure_binary(doc.image)
 		report = estimate_character_size(binary, min_area=10)
 		char_height = max(1, report.average_height or report.median_height or 10)
-		size = max(3, int(char_height * self.min_line_scale))
+		size, vertical_size, page_kernel_size = self._directional_kernel_sizes(binary, char_height)
+		horizontal_gap = max(1, min(max(1, size // 4), max(1, binary.shape[1] // 180)))
+		vertical_gap = max(1, min(max(1, vertical_size // 2), max(1, binary.shape[0] // 180)))
 
 		horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (size, 1))
-		vertical_size = max(3, int(size * 0.6))
 		vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, vertical_size))
 
-		horizontal_mask = cv2.morphologyEx(binary, cv2.MORPH_OPEN, horizontal_kernel)
-		vertical_mask = cv2.morphologyEx(binary, cv2.MORPH_OPEN, vertical_kernel)
+		horizontal_source = self._close_gaps(
+			binary,
+			orientation="horizontal",
+			gap=horizontal_gap,
+		)
+		vertical_source = self._close_gaps(
+			binary,
+			orientation="vertical",
+			gap=vertical_gap,
+		)
+
+		horizontal_mask = cv2.morphologyEx(horizontal_source, cv2.MORPH_OPEN, horizontal_kernel)
+		vertical_mask = cv2.morphologyEx(vertical_source, cv2.MORPH_OPEN, vertical_kernel)
 
 		# Keep only long/thin structures to suppress text blobs.
 		# Use character-size-driven thresholds so small/partial tables in large
 		# images do not lose all vertical rules.
 		# Cap page-relative minima by character-relative maxima to avoid
 		# over-pruning true rules on large pages while still rejecting text.
-		min_h_length = max(18, min(int(binary.shape[1] * 0.12), int(char_height * 10.0)))
-		min_v_length = max(14, min(int(binary.shape[0] * 0.1), int(char_height * 6.0)))
-		max_thickness = max(2, int(char_height * 0.75))
+		min_h_length = max(18, min(int(binary.shape[1] * 0.08), int(size * 2.0)))
+		min_v_length = max(14, min(int(binary.shape[0] * 0.08), int(vertical_size * 3.0)))
+		max_thickness = max(2, min(24, int(char_height * 2.0)))
 		horizontal_mask = self._filter_line_components(
 			horizontal_mask,
 			orientation="horizontal",
@@ -199,10 +228,13 @@ class LineDetectionStage(PipelineStage):
 		metadata["line_detection"] = {
 			"kernel_size": size,
 			"vertical_kernel_size": vertical_size,
+			"page_kernel_size": page_kernel_size,
 			"estimated_char_height": report.average_height,
 			"min_h_length": min_h_length,
 			"min_v_length": min_v_length,
 			"max_thickness": max_thickness,
+			"horizontal_gap": horizontal_gap,
+			"vertical_gap": vertical_gap,
 			"vertical_crossings_min": crossing_threshold,
 		}
 

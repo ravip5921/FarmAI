@@ -24,6 +24,17 @@ class TestDenoiseStage(unittest.TestCase):
         # center pixel should be closed (become white)
         self.assertEqual(int(result.image[2, 2]), 255)
 
+    def test_preserves_thin_connected_lines(self) -> None:
+        img = np.full((8, 8), 255, dtype=np.uint8)
+        img[4, 1:7] = 0
+
+        doc = DocumentImage(image=img, metadata={})
+        stage = MorphologicalDenoiseStage(kernel_size=3)
+        result = stage.process(doc)
+
+        self.assertTrue(np.array_equal(result.image[4, 1:7], np.zeros(6, dtype=np.uint8)))
+        self.assertEqual(result.metadata.get("denoise_method"), "connected_components")
+
 
 if __name__ == "__main__":
     unittest.main()

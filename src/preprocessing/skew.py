@@ -67,11 +67,15 @@ class SkewCorrectionStage(PipelineStage):
         height, width = image.shape[:2]
         center = (width / 2.0, height / 2.0)
         matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+        is_binary = bool(doc.metadata.get("binary")) or (
+            image.ndim == 2 and len(np.unique(image)) <= 2
+        )
+        interpolation = cv2.INTER_NEAREST if is_binary else cv2.INTER_LINEAR
         rotated = cv2.warpAffine(
             image,
             matrix,
             (width, height),
-            flags=cv2.INTER_LINEAR,
+            flags=interpolation,
             borderMode=cv2.BORDER_CONSTANT,
             borderValue=255,
         )
@@ -79,5 +83,6 @@ class SkewCorrectionStage(PipelineStage):
         metadata = dict(doc.metadata)
         metadata["deskewed"] = True
         metadata["skew_angle"] = angle
+        metadata["skew_interpolation"] = "nearest" if is_binary else "linear"
 
         return DocumentImage(rotated, metadata)

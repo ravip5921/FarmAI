@@ -56,6 +56,8 @@ class TestSkewStage(unittest.TestCase):
         detected = float(result.metadata.get("skew_angle"))
         # Allow some tolerance due to discretization and Hough variability
         self.assertAlmostEqual(detected, angle, delta=1.0)
+        self.assertEqual(result.metadata.get("skew_interpolation"), "nearest")
+        self.assertTrue(set(np.unique(result.image).tolist()).issubset({0, 255}))
 
     def test_process_handles_color_image(self) -> None:
         # Same as above but with 3-channel BGR image to exercise color->gray branch
