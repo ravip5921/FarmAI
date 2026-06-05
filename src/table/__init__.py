@@ -13,6 +13,7 @@ from src.core.visualization import save_debug
 from .grid_reconstruction import GridCell, GridStructure, reconstruct_grid
 from .intersections import IntersectionDetectionStage, IntersectionResult, detect_intersections
 from .line_detection import LineDetectionResult, LineDetectionStage, detect_lines
+from .line_refinement import GridRefinementResult, refine_grid_with_projection_profiles
 
 
 @dataclass
@@ -20,6 +21,7 @@ class TablePipelineResult:
 	line_detection: LineDetectionResult
 	intersections: IntersectionResult
 	grid: GridStructure
+	grid_refinement: GridRefinementResult | None = None
 
 
 def _extract_bitmap(bitmap: Any) -> np.ndarray:
@@ -75,7 +77,6 @@ def process_table_image(
 		_save_preview(debug_dir, "line_detection_horizontal", stem, line_detection.horizontal_mask)
 		_save_preview(debug_dir, "line_detection_vertical", stem, line_detection.vertical_mask)
 
-
 	intersections = detect_intersections(
 		line_detection.horizontal_mask,
 		line_detection.vertical_mask,
@@ -84,16 +85,28 @@ def process_table_image(
 		debug_dir.mkdir(parents=True, exist_ok=True)
 		_save_preview(debug_dir, "intersection", stem, intersections.intersection_mask)
 
-	grid = reconstruct_grid(intersections.centroids, image.shape)
+	raw_grid = reconstruct_grid(intersections.centroids, image.shape)
+	grid_refinement = refine_grid_with_projection_profiles(
+		line_detection.horizontal_mask,
+		line_detection.vertical_mask,
+		image.shape,
+		intersection_centroids=intersections.centroids,
+	)
+	grid = grid_refinement.grid if grid_refinement.grid.cells else raw_grid
+	if debug_dir is not None and save_intersections:
+		_save_preview(debug_dir, "grid_projection", stem, render_grid_structure(grid, image.shape))
+
 	return TablePipelineResult(
 		line_detection=line_detection,
 		intersections=intersections,
 		grid=grid,
+		grid_refinement=grid_refinement,
 	)
 
 
 __all__ = [
 	"GridCell",
+	"GridRefinementResult",
 	"GridStructure",
 	"IntersectionDetectionStage",
 	"IntersectionResult",
@@ -102,6 +115,7 @@ __all__ = [
 	"TablePipelineResult",
 	"detect_intersections",
 	"detect_lines",
+	"refine_grid_with_projection_profiles",
 	"process_table_image",
 	"render_grid_structure",
 	"reconstruct_grid",
