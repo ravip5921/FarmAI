@@ -9,7 +9,9 @@ import src.table.line_refinement as line_refinement
 
 
 class TestLineRefinement(unittest.TestCase):
-    def test_refinement_fills_missing_regular_row_and_filters_weak_column(self) -> None:
+    def test_refinement_fills_missing_regular_row_and_recovers_endpoint_column(
+        self,
+    ) -> None:
         horizontal = np.zeros((24, 24), dtype=np.uint8)
         vertical = np.zeros((24, 24), dtype=np.uint8)
 
@@ -27,8 +29,8 @@ class TestLineRefinement(unittest.TestCase):
         )
 
         self.assertEqual(result.grid.row_coords, [4, 8, 12, 16, 20])
-        self.assertEqual(result.grid.col_coords, [4, 12])
-        self.assertEqual(len(result.grid.cells), 4)
+        self.assertEqual(result.grid.col_coords, [4, 12, 18])
+        self.assertEqual(len(result.grid.cells), 8)
         self.assertEqual(result.estimated_row_spacing, 4)
 
     def test_grid_from_axis_coordinates_skips_out_of_bounds_cells(self) -> None:
@@ -145,6 +147,113 @@ class TestLineRefinement(unittest.TestCase):
 
         self.assertEqual(filtered, cols)
 
+    def test_column_segment_support_ignores_intersection_only_marks(self) -> None:
+        vertical = np.zeros((30, 24), dtype=np.uint8)
+        rows = [2, 8, 14, 20, 26]
+
+        cv2.line(vertical, (4, 2), (4, 26), color=255, thickness=1)
+        for y in rows:
+            cv2.line(vertical, (12, y - 1), (12, y + 1), color=255, thickness=1)
+
+        support = line_refinement._column_segment_support(
+            vertical,
+            rows,
+            [4, 12],
+            radius=2,
+        )
+
+        self.assertEqual(support, [4, 0])
+
+    def test_dedupe_close_columns_keeps_best_supported_axis(self) -> None:
+        deduped = line_refinement._dedupe_close_columns(
+            cols=[4, 11, 13, 24],
+            crossing_support=[5, 2, 5, 4],
+            segment_support=[4, 1, 4, 3],
+            endpoint_support=[4, 1, 4, 3],
+            min_separation=4,
+        )
+
+        self.assertEqual(deduped, [4, 13, 24])
+
+    def test_horizontal_endpoint_candidates_recover_repeated_column_edges(self) -> None:
+        horizontal = np.zeros((24, 30), dtype=np.uint8)
+        rows = [4, 8, 12, 16]
+        for y in rows:
+            cv2.line(horizontal, (3, y), (10, y), color=255, thickness=1)
+            cv2.line(horizontal, (14, y), (24, y), color=255, thickness=1)
+
+        candidates, support = line_refinement._horizontal_endpoint_candidates(
+            horizontal,
+            rows,
+            radius=1,
+            min_run_length=4,
+            tolerance=1,
+        )
+
+        self.assertEqual(candidates, [3, 10, 14, 24])
+        self.assertEqual(support, [4, 4, 4, 4])
+
+    def test_refinement_recovers_missing_verticals_from_horizontal_endpoints(
+        self,
+    ) -> None:
+        horizontal = np.zeros((30, 30), dtype=np.uint8)
+        vertical = np.zeros((30, 30), dtype=np.uint8)
+
+        for y in (4, 8, 12, 16, 20):
+            cv2.line(horizontal, (3, y), (10, y), color=255, thickness=1)
+            cv2.line(horizontal, (14, y), (24, y), color=255, thickness=1)
+
+        cv2.line(vertical, (3, 4), (3, 20), color=255, thickness=1)
+        cv2.line(vertical, (24, 4), (24, 20), color=255, thickness=1)
+
+        result = line_refinement.refine_grid_with_projection_profiles(
+            horizontal, vertical, horizontal.shape
+        )
+
+        self.assertEqual(result.grid.col_coords, [3, 10, 14, 24])
+        self.assertEqual(result.col_endpoint_support, [5, 5, 5, 5])
+
+    def test_refinement_recovers_outer_verticals_from_horizontal_extents(
+        self,
+    ) -> None:
+        horizontal = np.zeros((30, 30), dtype=np.uint8)
+        vertical = np.zeros((30, 30), dtype=np.uint8)
+
+        for y in (4, 8, 12, 16, 20):
+            cv2.line(horizontal, (3, y), (24, y), color=255, thickness=1)
+
+        result = line_refinement.refine_grid_with_projection_profiles(
+            horizontal, vertical, horizontal.shape
+        )
+
+        self.assertEqual(result.grid.col_coords, [3, 24])
+        self.assertEqual(result.col_endpoint_support, [5, 5])
+
+    def test_refinement_keeps_weak_columns_for_recall_first_pass(
+        self,
+    ) -> None:
+        horizontal = np.zeros((30, 28), dtype=np.uint8)
+        vertical = np.zeros((30, 28), dtype=np.uint8)
+
+        for y in (2, 8, 14, 20, 26):
+            cv2.line(horizontal, (2, y), (24, y), color=255, thickness=1)
+
+        cv2.line(vertical, (4, 2), (4, 26), color=255, thickness=1)
+        cv2.line(vertical, (20, 2), (20, 26), color=255, thickness=1)
+        for y in (2, 8, 14, 20, 26):
+            cv2.line(vertical, (12, y - 1), (12, y + 1), color=255, thickness=1)
+
+        result = line_refinement.refine_grid_with_projection_profiles(
+            horizontal, vertical, horizontal.shape
+        )
+
+        self.assertEqual(result.grid.col_coords, [4, 12, 20, 24])
+        self.assertIn(12, result.grid.col_coords)
+        self.assertEqual(
+            result.col_segment_support[result.col_candidates.index(12)],
+            0,
+        )
+
     def test_refine_grid_with_projection_profiles_raises_for_non_2d_masks(self) -> None:
         horizontal = np.zeros((10, 10, 3), dtype=np.uint8)
         vertical = np.zeros((10, 10), dtype=np.uint8)
@@ -178,7 +287,7 @@ class TestLineRefinement(unittest.TestCase):
             intersection_centroids=[(13, 8)],
         )
 
-        self.assertEqual(result.col_candidates, [4, 12])
+        self.assertEqual(result.col_candidates, [2, 4, 12, 18])
 
 
 if __name__ == "__main__":

@@ -21,6 +21,8 @@ class GridRefinementResult:
     col_candidates: list[int]
     row_support: list[int]
     col_support: list[int]
+    col_segment_support: list[int]
+    col_endpoint_support: list[int]
     estimated_row_spacing: int
 
 
@@ -213,6 +215,194 @@ def _filter_column_candidates(
     return filtered
 
 
+def _column_segment_support(
+    vertical_mask: np.ndarray,
+    rows: list[int],
+    cols: list[int],
+    *,
+    radius: int,
+) -> list[int]:
+    """Count row bands where a column has enough vertical ink to be a rule."""
+    if len(rows) < 2 or not cols:
+        return [0 for _ in cols]
+
+    height, width = vertical_mask.shape[:2]
+    foreground = vertical_mask > 0
+    support = [0 for _ in cols]
+
+    for col_index, x in enumerate(cols):
+        x0 = max(0, x - radius)
+        x1 = min(width, x + radius + 1)
+        if x0 >= x1:
+            continue
+
+        for top, bottom in zip(rows, rows[1:]):
+            y0 = max(0, min(top, bottom))
+            y1 = min(height, max(top, bottom) + 1)
+            band_height = y1 - y0
+            if band_height <= 0:
+                continue
+
+            margin = min(max(0, band_height // 3), radius)
+            y0 += margin
+            y1 -= margin
+            band_height = y1 - y0
+            if band_height <= 0:
+                continue
+
+            rows_with_ink = int(
+                np.count_nonzero(np.any(foreground[y0:y1, x0:x1], axis=1))
+            )
+            min_rows_with_ink = max(2, int(round(band_height * 0.30)))
+            if rows_with_ink >= min_rows_with_ink:
+                support[col_index] += 1
+
+    return support
+
+
+def _filter_columns_by_table_support(
+    cols: list[int],
+    crossing_support: list[int],
+    segment_support: list[int],
+    endpoint_support: list[int],
+    row_count: int,
+) -> list[int]:
+    """Keep columns that behave like borders across the reconstructed row grid."""
+    if len(cols) < 2:
+        return cols
+
+    filtered = [
+        col
+        for col, crossings, segments, endpoints in zip(
+            cols, crossing_support, segment_support, endpoint_support
+        )
+        if crossings > 0 or segments > 0 or endpoints > 0
+    ]
+    if len(filtered) >= 2:
+        return filtered
+
+    return _filter_column_candidates(cols, crossing_support, row_count)
+
+
+def _dedupe_close_columns(
+    cols: list[int],
+    crossing_support: list[int],
+    segment_support: list[int],
+    endpoint_support: list[int],
+    *,
+    min_separation: int,
+) -> list[int]:
+    """Collapse close column candidates, keeping the best-supported axis."""
+    if len(cols) < 2 or min_separation <= 1:
+        return cols
+
+    sorted_items = sorted(
+        zip(cols, crossing_support, segment_support, endpoint_support),
+        key=lambda item: item[0],
+    )
+    clusters: list[list[tuple[int, int, int, int]]] = [[sorted_items[0]]]
+    for item in sorted_items[1:]:
+        if item[0] - clusters[-1][-1][0] < min_separation:
+            clusters[-1].append(item)
+        else:
+            clusters.append([item])
+
+    deduped: list[int] = []
+    for cluster in clusters:
+        if len(cluster) == 1:
+            deduped.append(cluster[0][0])
+            continue
+
+        best = max(
+            cluster,
+            key=lambda item: (
+                item[1] + item[2] * 2,
+                item[1],
+                item[2],
+                -item[3],
+            ),
+        )
+        deduped.append(best[0])
+
+    return deduped
+
+
+def _foreground_runs(values: np.ndarray) -> list[tuple[int, int]]:
+    runs: list[tuple[int, int]] = []
+    indices = np.flatnonzero(values)
+    if indices.size == 0:
+        return runs
+
+    start = int(indices[0])
+    previous = start
+    for index in indices[1:]:
+        value = int(index)
+        if value == previous + 1:
+            previous = value
+            continue
+        runs.append((start, previous))
+        start = value
+        previous = value
+
+    runs.append((start, previous))
+    return runs
+
+
+def _horizontal_endpoint_candidates(
+    horizontal_mask: np.ndarray,
+    rows: list[int],
+    *,
+    radius: int,
+    min_run_length: int,
+    tolerance: int,
+) -> tuple[list[int], list[int]]:
+    """Recover column axes from repeated horizontal segment starts and ends."""
+    if not rows:
+        return [], []
+
+    height, width = horizontal_mask.shape[:2]
+    foreground = horizontal_mask > 0
+    endpoints: list[int] = []
+
+    for y in rows:
+        y0 = max(0, y - radius)
+        y1 = min(height, y + radius + 1)
+        if y0 >= y1:
+            continue
+
+        col_has_ink = np.any(foreground[y0:y1, :], axis=0)
+        runs = _foreground_runs(col_has_ink)
+        for start, end in runs:
+            if end - start + 1 >= min_run_length:
+                endpoints.extend([start, end])
+
+    candidates = _merge_axis_candidates(endpoints, tolerance=tolerance)
+    support = _axis_occurrence_support(
+        endpoints,
+        candidates,
+        tolerance=tolerance,
+    )
+    return candidates, support
+
+
+def _axis_occurrence_support(
+    observations: list[int],
+    candidates: list[int],
+    *,
+    tolerance: int,
+) -> list[int]:
+    if not candidates:
+        return []
+
+    support = [0 for _ in candidates]
+    for observation in observations:
+        distances = [abs(candidate - observation) for candidate in candidates]
+        best_index = int(np.argmin(np.asarray(distances)))
+        if distances[best_index] <= tolerance:
+            support[best_index] += 1
+    return support
+
+
 def refine_grid_with_projection_profiles(
     horizontal_mask: np.ndarray,
     vertical_mask: np.ndarray,
@@ -260,6 +450,20 @@ def refine_grid_with_projection_profiles(
     )
     row_coords, spacing = _trim_row_candidates(row_candidates, row_support, height)
 
+    endpoint_tolerance = max(1, min(8, width // 220))
+    endpoint_candidates, endpoint_candidate_support = _horizontal_endpoint_candidates(
+        horizontal_mask,
+        row_coords,
+        radius=max(radius, 2),
+        min_run_length=max(8, width // 90),
+        tolerance=endpoint_tolerance,
+    )
+    if endpoint_candidates:
+        col_candidates = _merge_axis_candidates(
+            col_candidates + endpoint_candidates,
+            tolerance=endpoint_tolerance,
+        )
+
     _, refined_col_support = _crossing_support(
         horizontal_mask,
         vertical_mask,
@@ -267,9 +471,54 @@ def refine_grid_with_projection_profiles(
         col_candidates,
         radius=radius,
     )
-    col_coords = _filter_column_candidates(
-        col_candidates, refined_col_support, len(row_coords)
+    segment_radius = max(radius, 2)
+    col_segment_support = _column_segment_support(
+        vertical_mask,
+        row_coords,
+        col_candidates,
+        radius=segment_radius,
     )
+    col_endpoint_support = [
+        sum(
+            support
+            for candidate, support in zip(
+                endpoint_candidates, endpoint_candidate_support
+            )
+            if abs(candidate - col) <= endpoint_tolerance
+        )
+        for col in col_candidates
+    ]
+    col_coords = _filter_columns_by_table_support(
+        col_candidates,
+        refined_col_support,
+        col_segment_support,
+        col_endpoint_support,
+        len(row_coords),
+    )
+    if len(col_coords) >= 3:
+        min_column_separation = max(3, min(18, width // 250))
+        filtered_support = [
+            support
+            for col, support in zip(col_candidates, refined_col_support)
+            if col in col_coords
+        ]
+        filtered_segment_support = [
+            support
+            for col, support in zip(col_candidates, col_segment_support)
+            if col in col_coords
+        ]
+        filtered_endpoint_support = [
+            support
+            for col, support in zip(col_candidates, col_endpoint_support)
+            if col in col_coords
+        ]
+        col_coords = _dedupe_close_columns(
+            col_coords,
+            filtered_support,
+            filtered_segment_support,
+            filtered_endpoint_support,
+            min_separation=min_column_separation,
+        )
 
     grid = _grid_from_axis_coordinates(row_coords, col_coords, image_shape)
     return GridRefinementResult(
@@ -278,5 +527,7 @@ def refine_grid_with_projection_profiles(
         col_candidates=col_candidates,
         row_support=row_support,
         col_support=refined_col_support,
+        col_segment_support=col_segment_support,
+        col_endpoint_support=col_endpoint_support,
         estimated_row_spacing=spacing,
     )
