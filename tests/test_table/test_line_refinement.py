@@ -147,6 +147,58 @@ class TestLineRefinement(unittest.TestCase):
 
         self.assertEqual(filtered, cols)
 
+    def test_line_refinement_helper_early_exits_and_supported_subset(self) -> None:
+        self.assertEqual(
+            line_refinement._filter_column_candidates([4], [0], row_count=12),
+            [4],
+        )
+        self.assertEqual(
+            line_refinement._filter_column_candidates(
+                [4, 12, 20], [2, 0, 3], row_count=12
+            ),
+            [4, 20],
+        )
+
+        vertical = np.zeros((5, 5), dtype=np.uint8)
+        self.assertEqual(
+            line_refinement._column_segment_support(
+                vertical,
+                rows=[0, 1],
+                cols=[10],
+                radius=1,
+            ),
+            [0],
+        )
+        self.assertEqual(
+            line_refinement._column_segment_support(
+                vertical,
+                rows=[6, 7],
+                cols=[2],
+                radius=1,
+            ),
+            [0],
+        )
+        self.assertEqual(
+            line_refinement._dedupe_close_columns(
+                cols=[4],
+                crossing_support=[1],
+                segment_support=[1],
+                endpoint_support=[1],
+                min_separation=3,
+            ),
+            [4],
+        )
+        self.assertEqual(
+            line_refinement._horizontal_endpoint_candidates(
+                np.zeros((5, 8), dtype=np.uint8),
+                rows=[10],
+                radius=1,
+                min_run_length=2,
+                tolerance=1,
+            ),
+            ([], []),
+        )
+
     def test_column_segment_support_ignores_intersection_only_marks(self) -> None:
         vertical = np.zeros((30, 24), dtype=np.uint8)
         rows = [2, 8, 14, 20, 26]
@@ -163,6 +215,154 @@ class TestLineRefinement(unittest.TestCase):
         )
 
         self.assertEqual(support, [4, 0])
+
+    def test_top_row_column_support_distinguishes_border_from_header_text(
+        self,
+    ) -> None:
+        horizontal = np.zeros((20, 30), dtype=np.uint8)
+        vertical = np.zeros((20, 30), dtype=np.uint8)
+
+        for y in (2, 14):
+            cv2.line(horizontal, (2, y), (24, y), color=255, thickness=1)
+        cv2.line(vertical, (4, 2), (4, 14), color=255, thickness=1)
+        cv2.line(vertical, (12, 5), (12, 11), color=255, thickness=1)
+
+        support = line_refinement._top_row_column_support(
+            horizontal,
+            vertical,
+            rows=[2, 14],
+            cols=[4, 12, 40],
+            radius=1,
+        )
+
+        self.assertEqual(support, [3, 1, 0])
+        self.assertEqual(
+            line_refinement._top_row_column_support(
+                horizontal,
+                vertical,
+                rows=[2],
+                cols=[4],
+                radius=1,
+            ),
+            [0],
+        )
+        self.assertEqual(
+            line_refinement._top_row_column_support(
+                np.zeros((0, 30), dtype=np.uint8),
+                np.zeros((0, 30), dtype=np.uint8),
+                rows=[0, 1],
+                cols=[4],
+                radius=1,
+            ),
+            [0],
+        )
+
+    def test_top_row_column_candidates_recover_profile_and_endpoint_axes(
+        self,
+    ) -> None:
+        horizontal = np.zeros((20, 30), dtype=np.uint8)
+        vertical = np.zeros((20, 30), dtype=np.uint8)
+
+        for y in (2, 14):
+            cv2.line(horizontal, (3, y), (24, y), color=255, thickness=1)
+        cv2.line(vertical, (10, 2), (10, 14), color=255, thickness=1)
+
+        candidates, support = line_refinement._top_row_column_candidates(
+            vertical,
+            horizontal,
+            rows=[2, 14],
+            radius=1,
+            tolerance=1,
+        )
+
+        self.assertEqual(candidates, [3, 10, 24])
+        self.assertEqual(support, [0, 3, 0])
+        self.assertEqual(
+            line_refinement._top_row_column_candidates(
+                vertical,
+                horizontal,
+                rows=[2],
+                radius=1,
+                tolerance=1,
+            ),
+            ([], []),
+        )
+        self.assertEqual(
+            line_refinement._top_row_column_candidates(
+                np.zeros((0, 30), dtype=np.uint8),
+                np.zeros((0, 30), dtype=np.uint8),
+                rows=[0, 1],
+                radius=1,
+                tolerance=1,
+            ),
+            ([], []),
+        )
+
+    def test_filter_columns_by_table_support_uses_header_gate(
+        self,
+    ) -> None:
+        filtered = line_refinement._filter_columns_by_table_support(
+            cols=[4, 12, 20],
+            crossing_support=[4, 0, 4],
+            segment_support=[4, 1, 4],
+            endpoint_support=[0, 0, 0],
+            header_support=[3, 0, 3],
+            row_count=5,
+        )
+
+        self.assertEqual(filtered, [4, 20])
+
+    def test_filter_columns_by_table_support_keeps_legacy_evidence_without_header(
+        self,
+    ) -> None:
+        filtered = line_refinement._filter_columns_by_table_support(
+            cols=[4, 12, 20],
+            crossing_support=[1, 0, 0],
+            segment_support=[0, 1, 0],
+            endpoint_support=[0, 0, 1],
+            header_support=[0, 0, 0],
+            row_count=5,
+        )
+
+        self.assertEqual(filtered, [4, 12, 20])
+        self.assertEqual(
+            line_refinement._filter_columns_by_table_support(
+                cols=[4, 12, 20],
+                crossing_support=[2, 0, 0],
+                segment_support=[0, 0, 0],
+                endpoint_support=[0, 0, 0],
+                header_support=[0, 0, 0],
+                row_count=12,
+            ),
+            [4, 12, 20],
+        )
+
+    def test_refinement_filters_lower_row_text_vertical_with_header_anchors(
+        self,
+    ) -> None:
+        horizontal = np.zeros((30, 40), dtype=np.uint8)
+        vertical = np.zeros((30, 40), dtype=np.uint8)
+
+        for y in (2, 8, 14, 20, 26):
+            cv2.line(horizontal, (4, y), (34, y), color=255, thickness=1)
+        for x in (4, 20, 34):
+            cv2.line(vertical, (x, 2), (x, 26), color=255, thickness=1)
+        cv2.line(vertical, (12, 10), (12, 12), color=255, thickness=1)
+
+        result = line_refinement.refine_grid_with_projection_profiles(
+            horizontal, vertical, horizontal.shape
+        )
+
+        self.assertEqual(result.grid.col_coords, [4, 20, 34])
+        self.assertNotIn(12, result.grid.col_coords)
+        self.assertEqual(
+            result.col_segment_support[result.col_candidates.index(12)],
+            1,
+        )
+        self.assertLess(
+            result.col_header_support[result.col_candidates.index(12)],
+            2,
+        )
 
     def test_dedupe_close_columns_keeps_best_supported_axis(self) -> None:
         deduped = line_refinement._dedupe_close_columns(

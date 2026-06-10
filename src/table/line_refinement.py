@@ -23,6 +23,8 @@ class GridRefinementResult:
     col_support: list[int]
     col_segment_support: list[int]
     col_endpoint_support: list[int]
+    col_header_support: list[int]
+    header_col_candidates: list[int]
     estimated_row_spacing: int
 
 
@@ -247,8 +249,6 @@ def _column_segment_support(
             y0 += margin
             y1 -= margin
             band_height = y1 - y0
-            if band_height <= 0:
-                continue
 
             rows_with_ink = int(
                 np.count_nonzero(np.any(foreground[y0:y1, x0:x1], axis=1))
@@ -260,23 +260,140 @@ def _column_segment_support(
     return support
 
 
+def _top_row_column_support(
+    horizontal_mask: np.ndarray,
+    vertical_mask: np.ndarray,
+    rows: list[int],
+    cols: list[int],
+    *,
+    radius: int,
+) -> list[int]:
+    """Score column candidates against the printed-header row geometry."""
+    if len(rows) < 2 or not cols:
+        return [0 for _ in cols]
+
+    height, width = vertical_mask.shape[:2]
+    top = max(0, min(rows[0], rows[1]))
+    bottom = min(height - 1, max(rows[0], rows[1]))
+    band_height = bottom - top + 1
+    if band_height <= 0:
+        return [0 for _ in cols]
+
+    foreground = vertical_mask > 0
+    horizontal_hits = (
+        cv2.dilate(
+            horizontal_mask,
+            cv2.getStructuringElement(cv2.MORPH_RECT, (2 * radius + 1, 2 * radius + 1)),
+        )
+        > 0
+    )
+    vertical_hits = (
+        cv2.dilate(
+            vertical_mask,
+            cv2.getStructuringElement(cv2.MORPH_RECT, (2 * radius + 1, 2 * radius + 1)),
+        )
+        > 0
+    )
+    support = [0 for _ in cols]
+
+    for col_index, x in enumerate(cols):
+        x0 = max(0, x - radius)
+        x1 = min(width, x + radius + 1)
+        if x0 >= x1:
+            continue
+
+        rows_with_ink = int(
+            np.count_nonzero(np.any(foreground[top : bottom + 1, x0:x1], axis=1))
+        )
+        if rows_with_ink >= max(2, int(round(band_height * 0.45))):
+            support[col_index] += 1
+
+        for y in (top, bottom):
+            y0 = max(0, y - radius)
+            y1 = min(height, y + radius + 1)
+            if np.any(horizontal_hits[y0:y1, x0:x1] & vertical_hits[y0:y1, x0:x1]):
+                support[col_index] += 1
+
+    return support
+
+
+def _top_row_column_candidates(
+    vertical_mask: np.ndarray,
+    horizontal_mask: np.ndarray,
+    rows: list[int],
+    *,
+    radius: int,
+    tolerance: int,
+) -> tuple[list[int], list[int]]:
+    """Recover candidate x-axes from the first table row alone."""
+    if len(rows) < 2:
+        return [], []
+
+    height = vertical_mask.shape[0]
+    top = max(0, min(rows[0], rows[1]))
+    bottom = min(height, max(rows[0], rows[1]) + 1)
+    if bottom <= top:
+        return [], []
+
+    header_band = vertical_mask[top:bottom, :]
+    band_height = bottom - top
+    profile_candidates = peak_positions(
+        find_projection_peaks(
+            projection_profile(header_band, "vertical"),
+            min_peak_ratio=0.12,
+            min_peak_value=max(2, band_height * 0.25),
+            max_gap=max(1, tolerance),
+        )
+    )
+    endpoint_candidates, _ = _horizontal_endpoint_candidates(
+        horizontal_mask,
+        rows[:2],
+        radius=max(radius, 2),
+        min_run_length=max(4, horizontal_mask.shape[1] // 120),
+        tolerance=tolerance,
+    )
+    candidates = _merge_axis_candidates(
+        profile_candidates + endpoint_candidates,
+        tolerance=tolerance,
+    )
+    support = _top_row_column_support(
+        horizontal_mask,
+        vertical_mask,
+        rows,
+        candidates,
+        radius=radius,
+    )
+    return candidates, support
+
+
 def _filter_columns_by_table_support(
     cols: list[int],
     crossing_support: list[int],
     segment_support: list[int],
     endpoint_support: list[int],
+    header_support: list[int],
     row_count: int,
 ) -> list[int]:
     """Keep columns that behave like borders across the reconstructed row grid."""
     if len(cols) < 2:
         return cols
 
+    row_intervals = max(0, row_count - 1)
+    min_segment_support = max(2, min(4, row_intervals // 12))
+    min_endpoint_support = max(3, min(8, row_count // 4))
+
     filtered = [
         col
-        for col, crossings, segments, endpoints in zip(
-            cols, crossing_support, segment_support, endpoint_support
+        for col, crossings, segments, endpoints, header in zip(
+            cols,
+            crossing_support,
+            segment_support,
+            endpoint_support,
+            header_support,
         )
-        if crossings > 0 or segments > 0 or endpoints > 0
+        if header >= 2
+        or segments >= min_segment_support
+        or endpoints >= min_endpoint_support
     ]
     if len(filtered) >= 2:
         return filtered
@@ -458,9 +575,16 @@ def refine_grid_with_projection_profiles(
         min_run_length=max(8, width // 90),
         tolerance=endpoint_tolerance,
     )
-    if endpoint_candidates:
+    header_col_candidates, _ = _top_row_column_candidates(
+        vertical_mask,
+        horizontal_mask,
+        row_coords,
+        radius=max(radius, 2),
+        tolerance=endpoint_tolerance,
+    )
+    if endpoint_candidates or header_col_candidates:
         col_candidates = _merge_axis_candidates(
-            col_candidates + endpoint_candidates,
+            col_candidates + endpoint_candidates + header_col_candidates,
             tolerance=endpoint_tolerance,
         )
 
@@ -478,6 +602,13 @@ def refine_grid_with_projection_profiles(
         col_candidates,
         radius=segment_radius,
     )
+    col_header_support = _top_row_column_support(
+        horizontal_mask,
+        vertical_mask,
+        row_coords,
+        col_candidates,
+        radius=max(radius, 2),
+    )
     col_endpoint_support = [
         sum(
             support
@@ -493,6 +624,7 @@ def refine_grid_with_projection_profiles(
         refined_col_support,
         col_segment_support,
         col_endpoint_support,
+        col_header_support,
         len(row_coords),
     )
     if len(col_coords) >= 3:
@@ -529,5 +661,7 @@ def refine_grid_with_projection_profiles(
         col_support=refined_col_support,
         col_segment_support=col_segment_support,
         col_endpoint_support=col_endpoint_support,
+        col_header_support=col_header_support,
+        header_col_candidates=header_col_candidates,
         estimated_row_spacing=spacing,
     )
