@@ -5,6 +5,7 @@ scipy
 pandas
 scikit-image
 pytesseract
+pypdfium2
 jupyter
 nox
 mypy

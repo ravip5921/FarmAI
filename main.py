@@ -7,6 +7,7 @@ from typing import Any
 import cv2
 
 from src.core.image import DocumentImage
+from src.core.io import LoadedDocument, load_document
 from src.core.pipeline import Pipeline
 from src.core.visualization import save_debug, show
 from src.ocr import export_table_ocr
@@ -102,18 +103,23 @@ def build_pipeline(
 
 
 def process_image(
-    image_path: str | Path,
+    image_source: str | Path | DocumentImage,
     pipeline: Pipeline,
     debug_dir: Path | None = None,
     image_name: str | Path | None = None,
 ) -> DocumentImage:
     """Process a single image through the pipeline."""
-    image = cv2.imread(str(image_path))
-    if image is None:
-        raise FileNotFoundError(f"Could not read image: {image_path}")
+    if isinstance(image_source, DocumentImage):
+        doc = image_source
+        source_label = str(image_name or "document")
+    else:
+        image = cv2.imread(str(image_source))
+        if image is None:
+            raise FileNotFoundError(f"Could not read image: {image_source}")
+        doc = DocumentImage(image)
+        source_label = str(image_name or image_source)
 
-    doc = DocumentImage(image)
-    stem = Path(str(image_name or image_path)).stem
+    stem = Path(source_label).stem
 
     # Run the pipeline: output of stage N becomes input to stage N+1
     if debug_dir:
@@ -148,6 +154,60 @@ def process_table(
     )
 
 
+def _run_page(
+    page: DocumentImage,
+    *,
+    pipeline: Pipeline,
+    debug_dir: Path | None,
+    image_name: str,
+    args: argparse.Namespace,
+    source_path: Path | None = None,
+) -> None:
+    result = process_image(page, pipeline, debug_dir=debug_dir, image_name=image_name)
+    table_result = process_table(
+        result.image,
+        image_name=image_name,
+        debug_dir=debug_dir,
+        save_line_detection=args.save_line_detection or args.save_all,
+        save_intersections=args.save_intersections or args.save_all,
+    )
+    ocr_result = process_ocr(
+        result.image,
+        table_result,
+        image_name=image_name,
+        debug_dir=debug_dir,
+        save_csv=args.save_csv or args.save_all,
+        save_json=args.save_json or args.save_all,
+        padding=args.ocr_padding,
+    )
+    table_image = render_grid_structure(table_result.grid, result.image.shape)
+
+    if debug_dir is not None and (args.save_image or args.save_all):
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        print(
+            f"Saving final detected table image to: {debug_dir / f'final_table_{image_name}.png'}"
+        )
+        save_debug(
+            debug_dir / f"final_table_{image_name}.png",
+            "Final Detected Table",
+            table_image,
+        )
+    if debug_dir is not None and (args.save_overlay or args.save_all):
+        overlay = render_grid_overlay(page.image, table_result.grid)
+        print(
+            f"Saving table overlay image to: {debug_dir / f'table_overlay_{image_name}.png'}"
+        )
+        save_debug(
+            debug_dir / f"table_overlay_{image_name}.png", "Table Overlay", overlay
+        )
+    if ocr_result.csv_path is not None:
+        print(f"Saved OCR CSV to: {ocr_result.csv_path}")
+    if ocr_result.json_path is not None:
+        print(f"Saved OCR JSON to: {ocr_result.json_path}")
+    show("Final Output", result)
+    show("Detected Table", table_image)
+
+
 def process_ocr(
     image,
     table_result: TablePipelineResult,
@@ -180,60 +240,30 @@ def main() -> None:
     args = parse_args()
     image_path = args.image_path
     debug_dir = None if args.no_debug else args.debug_dir
-    image_name = image_path.stem
-
-    # Build pipeline with default parameters
     pipeline = build_pipeline(window_size=25, k=0.34, denoise_kernel=2)
+    loaded = load_document(image_path)
 
-    # Process single image
-    result = process_image(
-        image_path, pipeline, debug_dir=debug_dir, image_name=image_name
-    )
-    table_result = process_table(
-        result.image,
-        image_name=image_name,
-        debug_dir=debug_dir,
-        save_line_detection=args.save_line_detection or args.save_all,
-        save_intersections=args.save_intersections or args.save_all,
-    )
-    ocr_result = process_ocr(
-        result.image,
-        table_result,
-        image_name=image_name,
-        debug_dir=debug_dir,
-        save_csv=args.save_csv or args.save_all,
-        save_json=args.save_json or args.save_all,
-        padding=args.ocr_padding,
-    )
-    table_image = render_grid_structure(table_result.grid, result.image.shape)
-
-    if debug_dir is not None and (args.save_image or args.save_all):
-        debug_dir.mkdir(parents=True, exist_ok=True)
-        print(
-            f"Saving final detected table image to: {debug_dir / f'final_table_{image_name}.png'}"
+    if isinstance(loaded, LoadedDocument):
+        for page in loaded.pages:
+            image_name = f"{image_path.stem}_p{page.metadata.get('page_index', 1)}"
+            _run_page(
+                page,
+                pipeline=pipeline,
+                debug_dir=debug_dir,
+                image_name=image_name,
+                args=args,
+                source_path=image_path,
+            )
+    else:
+        image_name = image_path.stem
+        _run_page(
+            loaded,
+            pipeline=pipeline,
+            debug_dir=debug_dir,
+            image_name=image_name,
+            args=args,
+            source_path=image_path,
         )
-        save_debug(
-            debug_dir / f"final_table_{image_name}.png",
-            "Final Detected Table",
-            table_image,
-        )
-    if debug_dir is not None and (args.save_overlay or args.save_all):
-        original = cv2.imread(str(image_path))
-        if original is None:
-            raise FileNotFoundError(f"Could not read image: {image_path}")
-        overlay = render_grid_overlay(original, table_result.grid)
-        print(
-            f"Saving table overlay image to: {debug_dir / f'table_overlay_{image_name}.png'}"
-        )
-        save_debug(
-            debug_dir / f"table_overlay_{image_name}.png", "Table Overlay", overlay
-        )
-    if ocr_result.csv_path is not None:
-        print(f"Saved OCR CSV to: {ocr_result.csv_path}")
-    if ocr_result.json_path is not None:
-        print(f"Saved OCR JSON to: {ocr_result.json_path}")
-    show("Final Output", result)
-    show("Detected Table", table_image)
 
 
 if __name__ == "__main__":
