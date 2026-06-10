@@ -13,44 +13,56 @@ from src.preprocessing.denoise import MorphologicalDenoiseStage
 from src.preprocessing.grayscale import GrayscaleStage
 from src.preprocessing.sauvola import SauvolaBinarizationStage
 from src.preprocessing.skew import SkewCorrectionStage
-from src.table import process_table_image, render_grid_structure, TablePipelineResult
+from src.table import (
+    TablePipelineResult,
+    process_table_image,
+    render_grid_overlay,
+    render_grid_structure,
+)
 
 
 def parse_args() -> argparse.Namespace:
-	parser = argparse.ArgumentParser(description="Run Farm AI preprocessing and table extraction on an image.")
-	parser.add_argument("image_path", type=Path, help="Path to the input image")
-	parser.add_argument(
-		"--debug-dir",
-		type=Path,
-		default=Path(__file__).resolve().parent / "debug_outputs",
-		help="Directory for intermediate debug images",
-	)
-	parser.add_argument(
-		"--no-debug",
-		action="store_true",
-		help="Disable saving intermediate preprocessing and table debug images",
-	)
-	parser.add_argument(
-		"--save-line-detection",
-		action="store_true",
-		help="Save table line-detection previews",
-	)
-	parser.add_argument(
-		"--save-intersections",
-		action="store_true",
-		help="Save table intersection previews",
-	)
-	parser.add_argument(
-		"--save-image",
-		action="store_true",
-		help="Save the final detected table image",
-	)
-	parser.add_argument(
-		"--save-all",
-		action="store_true",
-		help="Save all debug images (line detection, intersections, and final table)",
-	)
-	return parser.parse_args()
+    parser = argparse.ArgumentParser(
+        description="Run Farm AI preprocessing and table extraction on an image."
+    )
+    parser.add_argument("image_path", type=Path, help="Path to the input image")
+    parser.add_argument(
+        "--debug-dir",
+        type=Path,
+        default=Path(__file__).resolve().parent / "debug_outputs",
+        help="Directory for intermediate debug images",
+    )
+    parser.add_argument(
+        "--no-debug",
+        action="store_true",
+        help="Disable saving intermediate preprocessing and table debug images",
+    )
+    parser.add_argument(
+        "--save-line-detection",
+        action="store_true",
+        help="Save table line-detection previews",
+    )
+    parser.add_argument(
+        "--save-intersections",
+        action="store_true",
+        help="Save table intersection previews",
+    )
+    parser.add_argument(
+        "--save-image",
+        action="store_true",
+        help="Save the final detected table image",
+    )
+    parser.add_argument(
+        "--save-overlay",
+        action="store_true",
+        help="Save the detected table grid overlaid on the original image",
+    )
+    parser.add_argument(
+        "--save-all",
+        action="store_true",
+        help="Save all debug images (line detection, intersections, final table, and overlay)",
+    )
+    return parser.parse_args()
 
 
 def build_pipeline(
@@ -58,93 +70,110 @@ def build_pipeline(
     k: float = 0.34,
     denoise_kernel: int = 3,
 ) -> Pipeline:
-	"""Build a preprocessing pipeline with configurable parameters."""
-	return Pipeline(
-		[
-			GrayscaleStage(),
-			SauvolaBinarizationStage(window_size=window_size, k=k),
-			MorphologicalDenoiseStage(kernel_size=denoise_kernel),
-			SkewCorrectionStage(),
-		]
-	)
+    """Build a preprocessing pipeline with configurable parameters."""
+    return Pipeline(
+        [
+            GrayscaleStage(),
+            SauvolaBinarizationStage(window_size=window_size, k=k),
+            MorphologicalDenoiseStage(kernel_size=denoise_kernel),
+            SkewCorrectionStage(),
+        ]
+    )
 
 
 def process_image(
     image_path: str | Path,
     pipeline: Pipeline,
     debug_dir: Path | None = None,
-	image_name: str | Path | None = None,
+    image_name: str | Path | None = None,
 ) -> DocumentImage:
-	"""Process a single image through the pipeline."""
-	image = cv2.imread(str(image_path))
-	if image is None:
-		raise FileNotFoundError(f"Could not read image: {image_path}")
+    """Process a single image through the pipeline."""
+    image = cv2.imread(str(image_path))
+    if image is None:
+        raise FileNotFoundError(f"Could not read image: {image_path}")
 
-	doc = DocumentImage(image)
-	stem = Path(str(image_name or image_path)).stem
+    doc = DocumentImage(image)
+    stem = Path(str(image_name or image_path)).stem
 
-	# Run the pipeline: output of stage N becomes input to stage N+1
-	if debug_dir:
-		debug_dir.mkdir(parents=True, exist_ok=True)
-		current = doc
-		for stage_index, stage in enumerate(pipeline.stages, start=1):
-			current = stage.process(current)
-			stage_name = stage.__class__.__name__
-			filename = debug_dir / f"stage_{stage_index:02d}_{stage_name}_{stem}.png"
-			save_debug(filename, stage_name, current)
-		return current
-	else:
-		# If no debug, just run the whole pipeline at once
-		return pipeline.run(doc)
+    # Run the pipeline: output of stage N becomes input to stage N+1
+    if debug_dir:
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        current = doc
+        for stage_index, stage in enumerate(pipeline.stages, start=1):
+            current = stage.process(current)
+            stage_name = stage.__class__.__name__
+            filename = debug_dir / f"stage_{stage_index:02d}_{stage_name}_{stem}.png"
+            save_debug(filename, stage_name, current)
+        return current
+    else:
+        # If no debug, just run the whole pipeline at once
+        return pipeline.run(doc)
 
 
 def process_table(
-	bitmap: Any,
-	*,
-	image_name: str | Path | None = None,
-	debug_dir: Path | None = None,
-	save_line_detection: bool = False,
-	save_intersections: bool = False,
-) -> TablePipelineResult:	
-	"""Run table-structure extraction after preprocessing."""
-	return process_table_image(
-		bitmap,
-		image_name=image_name,
-		debug_dir=debug_dir,
-		save_line_detection=save_line_detection,
-		save_intersections=save_intersections,
-	)
+    bitmap: Any,
+    *,
+    image_name: str | Path | None = None,
+    debug_dir: Path | None = None,
+    save_line_detection: bool = False,
+    save_intersections: bool = False,
+) -> TablePipelineResult:
+    """Run table-structure extraction after preprocessing."""
+    return process_table_image(
+        bitmap,
+        image_name=image_name,
+        debug_dir=debug_dir,
+        save_line_detection=save_line_detection,
+        save_intersections=save_intersections,
+    )
 
 
 def main() -> None:
-	args = parse_args()
-	image_path = args.image_path
-	debug_dir = None if args.no_debug else args.debug_dir
-	image_name = image_path.stem
+    args = parse_args()
+    image_path = args.image_path
+    debug_dir = None if args.no_debug else args.debug_dir
+    image_name = image_path.stem
 
-	# Build pipeline with default parameters
-	pipeline = build_pipeline(window_size=25, k=0.34, denoise_kernel=2)
+    # Build pipeline with default parameters
+    pipeline = build_pipeline(window_size=25, k=0.34, denoise_kernel=2)
 
-	# Process single image
-	result = process_image(image_path, pipeline, debug_dir=debug_dir, image_name=image_name)
-	table_result = process_table(
-		result.image,
-		image_name=image_name,
-		debug_dir=debug_dir,
-		save_line_detection=args.save_line_detection or args.save_all,
-		save_intersections=args.save_intersections or args.save_all,
-	)
-	table_image = render_grid_structure(table_result.grid, result.image.shape)
+    # Process single image
+    result = process_image(
+        image_path, pipeline, debug_dir=debug_dir, image_name=image_name
+    )
+    table_result = process_table(
+        result.image,
+        image_name=image_name,
+        debug_dir=debug_dir,
+        save_line_detection=args.save_line_detection or args.save_all,
+        save_intersections=args.save_intersections or args.save_all,
+    )
+    table_image = render_grid_structure(table_result.grid, result.image.shape)
 
-	if debug_dir is not None and (args.save_image or args.save_all):
-		debug_dir.mkdir(parents=True, exist_ok=True)
-		print(f"Saving final detected table image to: {debug_dir / f'final_table_{image_name}.png'}")
-		save_debug(debug_dir / f"final_table_{image_name}.png", "Final Detected Table", table_image)
-	show("Final Output", result)
-	show("Detected Table", table_image)
-
-
+    if debug_dir is not None and (args.save_image or args.save_all):
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        print(
+            f"Saving final detected table image to: {debug_dir / f'final_table_{image_name}.png'}"
+        )
+        save_debug(
+            debug_dir / f"final_table_{image_name}.png",
+            "Final Detected Table",
+            table_image,
+        )
+    if debug_dir is not None and (args.save_overlay or args.save_all):
+        original = cv2.imread(str(image_path))
+        if original is None:
+            raise FileNotFoundError(f"Could not read image: {image_path}")
+        overlay = render_grid_overlay(original, table_result.grid)
+        print(
+            f"Saving table overlay image to: {debug_dir / f'table_overlay_{image_name}.png'}"
+        )
+        save_debug(
+            debug_dir / f"table_overlay_{image_name}.png", "Table Overlay", overlay
+        )
+    show("Final Output", result)
+    show("Detected Table", table_image)
 
 
 if __name__ == "__main__":
-	main()
+    main()
