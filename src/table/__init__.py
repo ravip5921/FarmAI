@@ -10,6 +10,7 @@ import numpy as np
 from src.core.image import DocumentImage
 from src.core.visualization import save_debug
 
+from .cell_extraction import ExtractedCell, crop_cell, extract_cell_images
 from .grid_reconstruction import GridCell, GridStructure, reconstruct_grid
 from .intersections import (
     IntersectionDetectionStage,
@@ -167,6 +168,7 @@ __all__ = [
     "GridCell",
     "GridRefinementResult",
     "GridStructure",
+    "ExtractedCell",
     "IntersectionDetectionStage",
     "IntersectionResult",
     "LineDetectionResult",
@@ -174,6 +176,8 @@ __all__ = [
     "TablePipelineResult",
     "detect_intersections",
     "detect_lines",
+    "crop_cell",
+    "extract_cell_images",
     "refine_grid_with_projection_profiles",
     "process_table_image",
     "render_grid_overlay",

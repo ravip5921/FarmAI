@@ -9,6 +9,7 @@ import cv2
 from src.core.image import DocumentImage
 from src.core.pipeline import Pipeline
 from src.core.visualization import save_debug, show
+from src.ocr import export_table_ocr
 from src.preprocessing.denoise import MorphologicalDenoiseStage
 from src.preprocessing.grayscale import GrayscaleStage
 from src.preprocessing.sauvola import SauvolaBinarizationStage
@@ -58,9 +59,28 @@ def parse_args() -> argparse.Namespace:
         help="Save the detected table grid overlaid on the original image",
     )
     parser.add_argument(
+        "--save-csv",
+        action="store_true",
+        help="Save OCR output as a CSV file after table detection",
+    )
+    parser.add_argument(
+        "--save-json",
+        action="store_true",
+        help="Save OCR output as a JSON file after table detection",
+    )
+    parser.add_argument(
+        "--ocr-padding",
+        type=int,
+        default=2,
+        help="Padding to trim from each extracted cell before OCR",
+    )
+    parser.add_argument(
         "--save-all",
         action="store_true",
-        help="Save all debug images (line detection, intersections, final table, and overlay)",
+        help=(
+            "Save all debug images and OCR exports "
+            "(line detection, intersections, final table, overlay, CSV, JSON)"
+        ),
     )
     return parser.parse_args()
 
@@ -128,6 +148,34 @@ def process_table(
     )
 
 
+def process_ocr(
+    image,
+    table_result: TablePipelineResult,
+    *,
+    image_name: str | Path | None = None,
+    debug_dir: Path | None = None,
+    save_csv: bool = False,
+    save_json: bool = False,
+    padding: int = 2,
+):
+    """Run OCR for the detected grid and optionally save CSV/JSON exports."""
+    stem = Path(str(image_name or "table")).stem or "table"
+    csv_path = json_path = None
+    if debug_dir is not None and (save_csv or save_json):
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        if save_csv:
+            csv_path = debug_dir / f"table_ocr_{stem}.csv"
+        if save_json:
+            json_path = debug_dir / f"table_ocr_{stem}.json"
+    return export_table_ocr(
+        image,
+        table_result.grid,
+        csv_path=csv_path,
+        json_path=json_path,
+        padding=padding,
+    )
+
+
 def main() -> None:
     args = parse_args()
     image_path = args.image_path
@@ -147,6 +195,15 @@ def main() -> None:
         debug_dir=debug_dir,
         save_line_detection=args.save_line_detection or args.save_all,
         save_intersections=args.save_intersections or args.save_all,
+    )
+    ocr_result = process_ocr(
+        result.image,
+        table_result,
+        image_name=image_name,
+        debug_dir=debug_dir,
+        save_csv=args.save_csv or args.save_all,
+        save_json=args.save_json or args.save_all,
+        padding=args.ocr_padding,
     )
     table_image = render_grid_structure(table_result.grid, result.image.shape)
 
@@ -171,6 +228,10 @@ def main() -> None:
         save_debug(
             debug_dir / f"table_overlay_{image_name}.png", "Table Overlay", overlay
         )
+    if ocr_result.csv_path is not None:
+        print(f"Saved OCR CSV to: {ocr_result.csv_path}")
+    if ocr_result.json_path is not None:
+        print(f"Saved OCR JSON to: {ocr_result.json_path}")
     show("Final Output", result)
     show("Detected Table", table_image)
 
