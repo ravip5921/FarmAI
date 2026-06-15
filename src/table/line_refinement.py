@@ -406,6 +406,7 @@ def _dedupe_close_columns(
     crossing_support: list[int],
     segment_support: list[int],
     endpoint_support: list[int],
+    header_support: list[int] | None = None,
     *,
     min_separation: int,
 ) -> list[int]:
@@ -413,13 +414,16 @@ def _dedupe_close_columns(
     if len(cols) < 2 or min_separation <= 1:
         return cols
 
+    if header_support is None:
+        header_support = [0 for _ in cols]
+
     sorted_items = sorted(
-        zip(cols, crossing_support, segment_support, endpoint_support),
+        zip(cols, crossing_support, segment_support, endpoint_support, header_support),
         key=lambda item: item[0],
     )
-    clusters: list[list[tuple[int, int, int, int]]] = [[sorted_items[0]]]
+    clusters: list[list[tuple[int, int, int, int, int]]] = [[sorted_items[0]]]
     for item in sorted_items[1:]:
-        if item[0] - clusters[-1][-1][0] < min_separation:
+        if item[0] - clusters[-1][-1][0] <= min_separation:
             clusters[-1].append(item)
         else:
             clusters.append([item])
@@ -433,15 +437,82 @@ def _dedupe_close_columns(
         best = max(
             cluster,
             key=lambda item: (
-                item[1] + item[2] * 2,
-                item[1],
+                item[1] + item[2] * 2 + item[4] * 4,
+                item[4],
                 item[2],
+                item[1],
                 -item[3],
             ),
         )
         deduped.append(best[0])
 
     return deduped
+
+
+def _dynamic_column_separation(width: int, row_spacing: int) -> int:
+    """Choose a duplicate-column tolerance from the observed table scale."""
+    spacing_based = int(round(row_spacing * 0.50)) if row_spacing > 0 else 0
+    page_based = width // 250
+    return max(3, min(44, max(page_based, spacing_based)))
+
+
+def _prune_columns_inside_wide_spans(
+    cols: list[int],
+    crossing_support: list[int],
+    segment_support: list[int],
+    endpoint_support: list[int],
+    header_support: list[int],
+    *,
+    image_width: int,
+    row_spacing: int,
+) -> list[int]:
+    """Remove handwriting-like axes inside a very wide table field.
+
+    The farm forms often have a wide notes/comments field. Handwritten strokes inside
+    that field can look like strong vertical rules, but they usually lack the printed
+    header evidence that true field borders have.
+    """
+    if len(cols) < 4 or row_spacing <= 0:
+        return cols
+
+    gaps = np.diff(cols)
+    if gaps.size == 0:
+        return cols
+
+    wide_gap_threshold = max(
+        int(round(row_spacing * 6.0)),
+        int(round(image_width * 0.20)),
+    )
+    wide_gap_indices = [
+        int(index) for index, gap in enumerate(gaps) if int(gap) >= wide_gap_threshold
+    ]
+    if not wide_gap_indices:
+        return cols
+
+    gap_index = max(wide_gap_indices, key=lambda index: int(gaps[index]))
+    right_index = gap_index + 1
+    header_anchor_indices = [
+        index for index in range(right_index) if header_support[index] >= 2
+    ]
+    if not header_anchor_indices:
+        return cols
+
+    left_index = header_anchor_indices[-1]
+    if right_index - left_index <= 1:
+        return cols
+
+    pruned: list[int] = []
+    for index, col in enumerate(cols):
+        inside_wide_field = left_index < index < right_index
+        if not inside_wide_field:
+            pruned.append(col)
+            continue
+
+        keep_as_structural = header_support[index] >= 2
+        if keep_as_structural:
+            pruned.append(col)
+
+    return pruned if len(pruned) >= 2 else cols
 
 
 def _foreground_runs(values: np.ndarray) -> list[tuple[int, int]]:
@@ -628,7 +699,7 @@ def refine_grid_with_projection_profiles(
         len(row_coords),
     )
     if len(col_coords) >= 3:
-        min_column_separation = max(3, min(18, width // 250))
+        min_column_separation = _dynamic_column_separation(width, spacing)
         filtered_support = [
             support
             for col, support in zip(col_candidates, refined_col_support)
@@ -644,12 +715,31 @@ def refine_grid_with_projection_profiles(
             for col, support in zip(col_candidates, col_endpoint_support)
             if col in col_coords
         ]
+        filtered_header_support = [
+            support
+            for col, support in zip(col_candidates, col_header_support)
+            if col in col_coords
+        ]
         col_coords = _dedupe_close_columns(
             col_coords,
             filtered_support,
             filtered_segment_support,
             filtered_endpoint_support,
+            filtered_header_support,
             min_separation=min_column_separation,
+        )
+        support_by_col = dict(zip(col_candidates, refined_col_support))
+        segment_by_col = dict(zip(col_candidates, col_segment_support))
+        endpoint_by_col = dict(zip(col_candidates, col_endpoint_support))
+        header_by_col = dict(zip(col_candidates, col_header_support))
+        col_coords = _prune_columns_inside_wide_spans(
+            col_coords,
+            [support_by_col.get(col, 0) for col in col_coords],
+            [segment_by_col.get(col, 0) for col in col_coords],
+            [endpoint_by_col.get(col, 0) for col in col_coords],
+            [header_by_col.get(col, 0) for col in col_coords],
+            image_width=width,
+            row_spacing=spacing,
         )
 
     grid = _grid_from_axis_coordinates(row_coords, col_coords, image_shape)

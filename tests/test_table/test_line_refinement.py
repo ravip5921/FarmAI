@@ -375,6 +375,31 @@ class TestLineRefinement(unittest.TestCase):
 
         self.assertEqual(deduped, [4, 13, 24])
 
+    def test_dedupe_close_columns_prefers_header_supported_axis(self) -> None:
+        deduped = line_refinement._dedupe_close_columns(
+            cols=[100, 118, 140],
+            crossing_support=[8, 9, 5],
+            segment_support=[8, 8, 4],
+            endpoint_support=[0, 0, 0],
+            header_support=[2, 0, 1],
+            min_separation=20,
+        )
+
+        self.assertEqual(deduped, [100, 140])
+
+    def test_prune_columns_inside_wide_spans_removes_handwriting_axes(self) -> None:
+        pruned = line_refinement._prune_columns_inside_wide_spans(
+            cols=[330, 445, 545, 680, 720, 820, 930, 1050, 2390, 2480, 2560],
+            crossing_support=[5, 7, 4, 10, 2, 12, 15, 6, 11, 4, 2],
+            segment_support=[10, 26, 4, 26, 4, 26, 26, 2, 9, 3, 0],
+            endpoint_support=[5, 2, 1, 1, 0, 10, 1, 0, 1, 0, 8],
+            header_support=[1, 1, 2, 2, 0, 1, 1, 0, 2, 0, 0],
+            image_width=3072,
+            row_spacing=79,
+        )
+
+        self.assertEqual(pruned, [330, 445, 545, 680, 2390, 2480, 2560])
+
     def test_horizontal_endpoint_candidates_recover_repeated_column_edges(self) -> None:
         horizontal = np.zeros((24, 30), dtype=np.uint8)
         rows = [4, 8, 12, 16]
