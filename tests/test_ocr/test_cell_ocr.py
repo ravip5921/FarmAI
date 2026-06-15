@@ -8,6 +8,8 @@ from src.ocr.cell_ocr import recognize_table_cells
 from src.ocr.table_ocr import export_table_ocr
 from src.ocr.tesseract_engine import OcrText, TesseractConfig
 from src.table.grid_reconstruction import GridCell, GridStructure
+from src.export.csv_export import table_to_csv_string
+from src.ocr.cell_ocr import OcrCell, OcrTable
 
 
 class FakeEngine:
@@ -49,6 +51,15 @@ class TestCellOcr(unittest.TestCase):
             config.to_config_string(),
             "--oem 1 --psm 7 -c preserve_interword_spaces=1",
         )
+
+    def test_table_to_csv_string_quotes_values_and_fills_empty_cells(self) -> None:
+        table = OcrTable(
+            cells=[OcrCell(row=0, col=0, bbox=(0, 0, 1, 1), text="a,b")],
+            row_count=2,
+            col_count=2,
+        )
+
+        self.assertEqual(table_to_csv_string(table, fill_value="-"), '"a,b",-\n-,-\n')
 
     def test_export_table_ocr_writes_requested_outputs(self) -> None:
         from pathlib import Path

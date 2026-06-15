@@ -2,10 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 import cv2
-import numpy as np
 
 try:  # pragma: no cover - import availability depends on local environment
     import pypdfium2 as pdfium

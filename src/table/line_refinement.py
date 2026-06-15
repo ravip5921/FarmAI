@@ -313,9 +313,7 @@ def _top_row_column_support(
         rows_with_ink = int(
             np.count_nonzero(np.any(foreground[top : bottom + 1, x0:x1], axis=1))
         )
-        if border_hits == 2 and rows_with_ink >= max(
-            2, int(round(band_height * 0.45))
-        ):
+        if border_hits == 2 and rows_with_ink >= max(2, int(round(band_height * 0.45))):
             support[col_index] += 1
 
     return support
@@ -480,7 +478,7 @@ def _prune_columns_inside_wide_spans(
         return cols
 
     gaps = np.diff(cols)
-    if gaps.size == 0:
+    if len(gaps) == 0:
         return cols
 
     wide_gap_threshold = max(

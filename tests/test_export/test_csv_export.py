@@ -24,11 +24,11 @@ class TestCsvExport(unittest.TestCase):
     def test_table_to_csv_string_quotes_values(self) -> None:
         table = OcrTable(
             cells=[OcrCell(row=0, col=0, bbox=(0, 0, 1, 1), text="a,b")],
-            row_count=1,
-            col_count=1,
+            row_count=2,
+            col_count=2,
         )
 
-        self.assertEqual(table_to_csv_string(table), '"a,b"\n')
+        self.assertEqual(table_to_csv_string(table, fill_value="-"), '"a,b",-\n-,-\n')
 
     def test_write_table_csv_creates_parent_directory(self) -> None:
         table = OcrTable(

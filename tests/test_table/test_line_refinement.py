@@ -8,6 +8,24 @@ import numpy as np
 import src.table.line_refinement as line_refinement
 
 
+class LateStructuralHeaderSupport:
+    def __init__(self, values: list[int], late_index: int) -> None:
+        self.values = values
+        self.late_index = late_index
+        self.calls_by_index = [0 for _ in values]
+
+    def __getitem__(self, index: int) -> int:
+        self.calls_by_index[index] += 1
+        if index == self.late_index and self.calls_by_index[index] > 1:
+            return 2
+        return self.values[index]
+
+
+class DiffEmptyColumns(list[int]):
+    def __array__(self, dtype: object | None = None) -> np.ndarray:
+        return np.array([], dtype=np.int64)
+
+
 class TestLineRefinement(unittest.TestCase):
     def test_refinement_fills_missing_regular_row_and_recovers_endpoint_column(
         self,
@@ -399,6 +417,60 @@ class TestLineRefinement(unittest.TestCase):
         )
 
         self.assertEqual(pruned, [330, 445, 545, 680, 2390, 2480, 2560])
+
+    def test_prune_columns_inside_wide_spans_returns_original_for_edge_cases(
+        self,
+    ) -> None:
+        cases = [
+            {
+                "cols": DiffEmptyColumns([10, 60, 110, 160]),
+                "header_support": [0, 0, 0, 0],
+                "image_width": 300,
+                "row_spacing": 20,
+            },
+            {
+                "cols": [10, 180, 220, 260],
+                "header_support": [2, 0, 0, 0],
+                "image_width": 300,
+                "row_spacing": 20,
+            },
+            {
+                "cols": [10, 60, 110, 240],
+                "header_support": [0, 0, 0, 0],
+                "image_width": 300,
+                "row_spacing": 20,
+            },
+        ]
+
+        for case in cases:
+            with self.subTest(cols=list(case["cols"])):
+                self.assertEqual(
+                    line_refinement._prune_columns_inside_wide_spans(
+                        cols=case["cols"],
+                        crossing_support=[0 for _ in case["cols"]],
+                        segment_support=[0 for _ in case["cols"]],
+                        endpoint_support=[0 for _ in case["cols"]],
+                        header_support=case["header_support"],
+                        image_width=case["image_width"],
+                        row_spacing=case["row_spacing"],
+                    ),
+                    case["cols"],
+                )
+
+    def test_prune_columns_inside_wide_spans_keeps_structural_inner_axis(
+        self,
+    ) -> None:
+        pruned = line_refinement._prune_columns_inside_wide_spans(
+            cols=[10, 50, 90, 240],
+            crossing_support=[0, 0, 0, 0],
+            segment_support=[0, 0, 0, 0],
+            endpoint_support=[0, 0, 0, 0],
+            header_support=LateStructuralHeaderSupport([2, 0, 0, 0], late_index=2),
+            image_width=300,
+            row_spacing=20,
+        )
+
+        self.assertEqual(pruned, [10, 90, 240])
 
     def test_horizontal_endpoint_candidates_recover_repeated_column_edges(self) -> None:
         horizontal = np.zeros((24, 30), dtype=np.uint8)
