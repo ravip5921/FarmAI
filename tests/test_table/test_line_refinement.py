@@ -153,6 +153,16 @@ class TestLineRefinement(unittest.TestCase):
         self.assertEqual(rows, [0, 4, 8, 12])
         self.assertEqual(spacing, 4)
 
+    def test_trim_row_candidates_estimates_spacing_from_supported_rows(self) -> None:
+        rows, spacing = line_refinement._trim_row_candidates(
+            rows=[185, 206, 226, 246, 266, 306, 346, 386, 426, 466, 506, 551],
+            row_support=[7, 0, 7, 0, 7, 7, 7, 7, 7, 7, 7, 0],
+            axis_length=1584,
+        )
+
+        self.assertEqual(rows, [185, 226, 266, 306, 346, 386, 426, 466, 506])
+        self.assertEqual(spacing, 40)
+
     def test_filter_column_candidates_returns_original_cols_when_filtered_has_less_than_two(
         self,
     ) -> None:

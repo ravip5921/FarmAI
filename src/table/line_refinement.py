@@ -186,14 +186,22 @@ def _trim_row_candidates(
             break
 
     table_rows = rows[start_index:]
-    spacing = _estimate_regular_spacing(table_rows, axis_length)
+    supported_table_rows = [
+        row
+        for row, support in zip(rows[start_index:], row_support[start_index:])
+        if support >= 1
+    ]
+    spacing_rows = (
+        supported_table_rows if len(supported_table_rows) >= 2 else table_rows
+    )
+    spacing = _estimate_regular_spacing(spacing_rows, axis_length)
     if spacing > 0:
-        end_index = len(table_rows)
-        for index, gap in enumerate(np.diff(table_rows)):
+        end_index = len(spacing_rows)
+        for index, gap in enumerate(np.diff(spacing_rows)):
             if int(gap) > spacing * 3.25:
                 end_index = index + 1
                 break
-        table_rows = table_rows[:end_index]
+        table_rows = spacing_rows[:end_index]
         table_rows = _merge_close_positions(table_rows, spacing)
         table_rows = _fill_missing_regular_positions(table_rows, spacing)
 

@@ -4,12 +4,11 @@ import unittest
 
 import numpy as np
 
-from src.ocr.cell_ocr import recognize_table_cells
+from src.export.csv_export import table_to_csv_string
+from src.ocr.cell_ocr import OcrCell, OcrTable, recognize_table_cells
 from src.ocr.table_ocr import export_table_ocr
 from src.ocr.tesseract_engine import OcrText, TesseractConfig
 from src.table.grid_reconstruction import GridCell, GridStructure
-from src.export.csv_export import table_to_csv_string
-from src.ocr.cell_ocr import OcrCell, OcrTable
 
 
 class FakeEngine:

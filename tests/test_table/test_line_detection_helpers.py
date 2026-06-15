@@ -83,6 +83,44 @@ class TestLineDetectionHelpers(unittest.TestCase):
 
         self.assertGreater(int(np.count_nonzero(result.metadata["vertical_mask"])), 0)
 
+    def test_retain_horizontal_components_requires_vertical_crossings(self) -> None:
+        stage = LineDetectionStage()
+        horizontal = np.zeros((30, 40), dtype=np.uint8)
+        vertical = np.zeros((30, 40), dtype=np.uint8)
+
+        horizontal[10, 2:32] = 255
+        horizontal[20, 22:34] = 255
+        for x in (4, 16, 28):
+            vertical[4:26, x] = 255
+
+        filtered = stage._retain_horizontal_components_with_crossings(
+            horizontal,
+            vertical,
+            min_crossings=2,
+        )
+
+        self.assertGreater(int(np.count_nonzero(filtered[10])), 0)
+        self.assertEqual(int(np.count_nonzero(filtered[20])), 0)
+
+    def test_retain_horizontal_components_keeps_top_border_with_endpoint_gap(
+        self,
+    ) -> None:
+        stage = LineDetectionStage()
+        horizontal = np.zeros((40, 50), dtype=np.uint8)
+        vertical = np.zeros((40, 50), dtype=np.uint8)
+
+        horizontal[10, 5:46] = 255
+        for x in (5, 25, 45):
+            vertical[12:35, x] = 255
+
+        filtered = stage._retain_horizontal_components_with_crossings(
+            horizontal,
+            vertical,
+            min_crossings=2,
+        )
+
+        self.assertGreater(int(np.count_nonzero(filtered[10])), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
