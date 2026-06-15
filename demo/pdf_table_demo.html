@@ -109,6 +109,11 @@
         cursor: pointer;
       }
 
+      .button:disabled {
+        cursor: not-allowed;
+        opacity: 0.58;
+      }
+
       .button.primary {
         border-color: var(--leaf-dark);
         background: var(--leaf);
@@ -124,9 +129,13 @@
       }
 
       .step {
+        border: 0;
         padding: 12px 20px;
         background: var(--panel);
+        color: inherit;
+        cursor: pointer;
         min-width: 0;
+        text-align: left;
       }
 
       .step strong {
@@ -144,6 +153,15 @@
         text-overflow: ellipsis;
       }
 
+      .step:hover,
+      .step:focus-visible {
+        background: #f8fbf8;
+      }
+
+      .step.is-active {
+        box-shadow: inset 0 -3px 0 var(--leaf);
+      }
+
       main {
         display: grid;
         grid-template-columns: minmax(340px, 0.92fr) minmax(420px, 1.08fr);
@@ -156,7 +174,7 @@
         padding: 22px;
       }
 
-      .pane + .pane {
+      .right-pane {
         border-left: 1px solid var(--line);
       }
 
@@ -204,6 +222,24 @@
         padding: 30px;
         color: var(--muted);
         text-align: center;
+      }
+
+      .image-stage {
+        height: calc(100vh - 205px);
+        min-height: 520px;
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f1f4f0;
+        box-shadow: var(--shadow);
+      }
+
+      .image-stage img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: white;
       }
 
       .output-stack {
@@ -314,6 +350,10 @@
         background: var(--panel);
       }
 
+      .pane[hidden] {
+        display: none;
+      }
+
       .confidence-track {
         flex: 1;
         height: 10px;
@@ -346,18 +386,20 @@
           grid-template-columns: 1fr;
         }
 
-        .pane + .pane {
+        .right-pane {
           border-left: 0;
           border-top: 1px solid var(--line);
         }
 
         .pdf-stage,
+        .image-stage,
         .output-stack {
           height: auto;
           min-height: 460px;
         }
 
-        .pdf-stage {
+        .pdf-stage,
+        .image-stage {
           height: 62vh;
         }
       }
@@ -398,26 +440,26 @@
       </header>
 
       <section class="steps" aria-label="Demo workflow">
-        <div class="step">
+        <button class="step is-active" type="button" data-view="pdf" aria-pressed="true">
           <strong>1. PDF input</strong>
           <span>Original scanned record</span>
-        </div>
-        <div class="step">
+        </button>
+        <button class="step" type="button" data-view="detection" aria-pressed="false">
           <strong>2. Table detection</strong>
           <span>Rows and columns located</span>
-        </div>
-        <div class="step">
+        </button>
+        <button class="step" type="button" data-view="ocr" aria-pressed="false">
           <strong>3. OCR cells</strong>
           <span>Text read cell by cell</span>
-        </div>
-        <div class="step">
+        </button>
+        <button class="step" type="button" data-view="review" aria-pressed="false">
           <strong>4. Human review</strong>
           <span>Editable table output</span>
-        </div>
+        </button>
       </section>
 
       <main>
-        <section class="pane" aria-label="PDF input preview">
+        <section class="pane" id="leftPdfPane" aria-label="PDF input preview">
           <div class="section-head">
             <div>
               <h2>PDF Input</h2>
@@ -434,7 +476,46 @@
           </div>
         </section>
 
-        <section class="pane" aria-label="Editable table output">
+        <section class="pane" id="leftLinePane" aria-label="Line detection preview" hidden>
+          <div class="section-head">
+            <div>
+              <h2>Line Detection</h2>
+              <div class="meta">debug_outputs/line_detection_farm_record_table_p1.png</div>
+            </div>
+            <div class="meta">Detected grid lines</div>
+          </div>
+          <div class="image-stage">
+            <img src="../debug_outputs/line_detection_farm_record_table_p1.png" alt="Detected table lines on the farm record page" />
+          </div>
+        </section>
+
+        <section class="pane" id="leftOverlayPane" aria-label="Table overlay preview" hidden>
+          <div class="section-head">
+            <div>
+              <h2>Table Overlay</h2>
+              <div class="meta">debug_outputs/table_overlay_farm_record_table_p1.png</div>
+            </div>
+            <div class="meta">Cell boxes over source page</div>
+          </div>
+          <div class="image-stage">
+            <img src="../debug_outputs/table_overlay_farm_record_table_p1.png" alt="Detected table cells overlaid on the farm record page" />
+          </div>
+        </section>
+
+        <section class="pane right-pane" id="rightOverlayPane" aria-label="Table overlay output" hidden>
+          <div class="section-head">
+            <div>
+              <h2>Table Overlay</h2>
+              <div class="meta">debug_outputs/table_overlay_farm_record_table_p1.png</div>
+            </div>
+            <div class="meta">Detected cells</div>
+          </div>
+          <div class="image-stage">
+            <img src="../debug_outputs/table_overlay_farm_record_table_p1.png" alt="Detected table overlay output" />
+          </div>
+        </section>
+
+        <section class="pane right-pane" id="rightTablePane" aria-label="Editable table output">
           <div class="section-head">
             <div>
               <h2>Editable Table Output</h2>
@@ -446,31 +527,22 @@
           <div class="output-stack">
             <div class="summary">
               <div class="metric">
-                <b>42</b>
+                <b id="cellCount">0</b>
                 <span>cells detected</span>
               </div>
               <div class="metric">
-                <b>88%</b>
+                <b id="averageConfidence">0%</b>
                 <span>average confidence</span>
               </div>
               <div class="metric">
-                <b>5</b>
+                <b id="flaggedCount">0</b>
                 <span>cells flagged</span>
               </div>
             </div>
 
             <div class="table-wrap">
               <table aria-label="Editable OCR result table">
-                <thead>
-                  <tr>
-                    <th>Pen</th>
-                    <th>Date</th>
-                    <th>Animal ID</th>
-                    <th>Feed</th>
-                    <th>Weight</th>
-                    <th>Notes</th>
-                  </tr>
-                </thead>
+                <thead id="tableHead"></thead>
                 <tbody id="tableBody"></tbody>
               </table>
             </div>
@@ -478,53 +550,120 @@
             <div class="confidence" aria-label="Confidence summary">
               <strong>Review readiness</strong>
               <div class="confidence-track">
-                <div class="confidence-fill"></div>
+                <div class="confidence-fill" id="confidenceFill"></div>
               </div>
-              <span>88%</span>
+              <span id="confidencePercent">0%</span>
             </div>
           </div>
         </section>
       </main>
     </div>
 
-    <script>
-      const sampleRows = [
-        ["A1", "06/03/26", "B-104", "Starter", "78 lb", "Normal"],
-        ["A2", "06/03/26", "B-117", "Starter", "81 lb", "Check mark"],
-        ["A3", "06/04/26", "B-121", "Grower", "86 lb", ""],
-        ["B1", "06/05/26", "B-143", "Grower", "91 lb", "Low confidence"],
-        ["B2", "06/05/26", "B-155", "Finisher", "103 lb", "Reviewed"],
-        ["B3", "06/06/26", "B-162", "Finisher", "107 lb", ""],
-        ["C1", "06/06/26", "B-170", "Finisher", "112 lb", "Ready"],
-      ];
+    <script type="application/json" id="embeddedOcrData">
+      {"row_count":8,"col_count":6,"cells":[{"row":0,"col":0,"bbox":[96,187,114,37],"text":"Pen","confidence":95.0},{"row":0,"col":1,"bbox":[214,187,154,37],"text":"Date","confidence":97.0},{"row":0,"col":2,"bbox":[372,187,168,37],"text":"Animal ID","confidence":95.0},{"row":0,"col":3,"bbox":[544,187,162,37],"text":"Feed","confidence":96.0},{"row":0,"col":4,"bbox":[710,187,142,37],"text":"Weight","confidence":96.0},{"row":0,"col":5,"bbox":[856,187,268,37],"text":"Notes","confidence":96.0},{"row":1,"col":0,"bbox":[96,228,114,36],"text":"Al","confidence":91.0},{"row":1,"col":1,"bbox":[214,228,154,36],"text":"06/03/26","confidence":96.0},{"row":1,"col":2,"bbox":[372,228,168,36],"text":"B-104","confidence":91.0},{"row":1,"col":3,"bbox":[544,228,162,36],"text":"Starter","confidence":96.0},{"row":1,"col":4,"bbox":[710,228,142,36],"text":"78 Ib","confidence":93.0},{"row":1,"col":5,"bbox":[856,228,268,36],"text":"Normal","confidence":96.0},{"row":2,"col":0,"bbox":[96,268,114,36],"text":"A2","confidence":81.0},{"row":2,"col":1,"bbox":[214,268,154,36],"text":"06/03/26","confidence":96.0},{"row":2,"col":2,"bbox":[372,268,168,36],"text":"B-117","confidence":92.0},{"row":2,"col":3,"bbox":[544,268,162,36],"text":"Starter","confidence":96.0},{"row":2,"col":4,"bbox":[710,268,142,36],"text":"81 Ib","confidence":87.5},{"row":2,"col":5,"bbox":[856,268,268,36],"text":"Check mark","confidence":95.0},{"row":3,"col":0,"bbox":[96,308,114,36],"text":"A3","confidence":59.0},{"row":3,"col":1,"bbox":[214,308,154,36],"text":"06/04/26","confidence":96.0},{"row":3,"col":2,"bbox":[372,308,168,36],"text":"B-121","confidence":91.0},{"row":3,"col":3,"bbox":[544,308,162,36],"text":"Grower","confidence":96.0},{"row":3,"col":4,"bbox":[710,308,142,36],"text":"86 Ib","confidence":93.5},{"row":3,"col":5,"bbox":[856,308,268,36],"text":"Needs review","confidence":96.0},{"row":4,"col":0,"bbox":[96,348,114,36],"text":"B1","confidence":86.0},{"row":4,"col":1,"bbox":[214,348,154,36],"text":"06/05/26","confidence":96.0},{"row":4,"col":2,"bbox":[372,348,168,36],"text":"B-143","confidence":92.0},{"row":4,"col":3,"bbox":[544,348,162,36],"text":"Grower","confidence":96.0},{"row":4,"col":4,"bbox":[710,348,142,36],"text":"91 Ib","confidence":91.5},{"row":4,"col":5,"bbox":[856,348,268,36],"text":"Low confidence","confidence":96.0},{"row":5,"col":0,"bbox":[96,388,114,36],"text":"B2","confidence":92.0},{"row":5,"col":1,"bbox":[214,388,154,36],"text":"06/05/26","confidence":96.0},{"row":5,"col":2,"bbox":[372,388,168,36],"text":"B-155","confidence":92.0},{"row":5,"col":3,"bbox":[544,388,162,36],"text":"Finisher","confidence":96.0},{"row":5,"col":4,"bbox":[710,388,142,36],"text":"103 Ib","confidence":94.5},{"row":5,"col":5,"bbox":[856,388,268,36],"text":"Reviewed","confidence":96.0},{"row":6,"col":0,"bbox":[96,428,114,36],"text":"B3","confidence":92.0},{"row":6,"col":1,"bbox":[214,428,154,36],"text":"06/06/26","confidence":96.0},{"row":6,"col":2,"bbox":[372,428,168,36],"text":"B-162","confidence":93.0},{"row":6,"col":3,"bbox":[544,428,162,36],"text":"Finisher","confidence":96.0},{"row":6,"col":4,"bbox":[710,428,142,36],"text":"107 Ib","confidence":94.5},{"row":6,"col":5,"bbox":[856,428,268,36],"text":"Needs review","confidence":96.0},{"row":7,"col":0,"bbox":[96,468,114,36],"text":"C1","confidence":52.0},{"row":7,"col":1,"bbox":[214,468,154,36],"text":"06/06/26","confidence":96.0},{"row":7,"col":2,"bbox":[372,468,168,36],"text":"B-170","confidence":92.0},{"row":7,"col":3,"bbox":[544,468,162,36],"text":"Finisher","confidence":96.0},{"row":7,"col":4,"bbox":[710,468,142,36],"text":"112 Ib","confidence":92.5},{"row":7,"col":5,"bbox":[856,468,268,36],"text":"Ready","confidence":96.0}]}
+    </script>
 
-      const lowConfidenceCells = new Set(["3-5", "1-5", "2-2", "5-5", "0-4"]);
+    <script>
+      const OCR_JSON_PATH = "table_ocr_farm_record_table_p1.json";
+      const LOW_CONFIDENCE_THRESHOLD = 90;
+
+      let ocrData = null;
+      let currentColumnCount = 6;
+
+      const tableHead = document.querySelector("#tableHead");
       const tableBody = document.querySelector("#tableBody");
       const resetButton = document.querySelector("#resetButton");
       const downloadButton = document.querySelector("#downloadButton");
+      const cellCount = document.querySelector("#cellCount");
+      const averageConfidence = document.querySelector("#averageConfidence");
+      const flaggedCount = document.querySelector("#flaggedCount");
+      const confidenceFill = document.querySelector("#confidenceFill");
+      const confidencePercent = document.querySelector("#confidencePercent");
+      const steps = [...document.querySelectorAll(".step")];
+      const panes = {
+        leftPdf: document.querySelector("#leftPdfPane"),
+        leftLine: document.querySelector("#leftLinePane"),
+        leftOverlay: document.querySelector("#leftOverlayPane"),
+        rightOverlay: document.querySelector("#rightOverlayPane"),
+        rightTable: document.querySelector("#rightTablePane"),
+      };
 
-      function renderTable() {
+      function buildGrid(data) {
+        const grid = Array.from({ length: data.row_count }, () =>
+          Array.from({ length: data.col_count }, () => ({
+            text: "",
+            confidence: 0,
+          }))
+        );
+
+        data.cells.forEach((cell) => {
+          if (grid[cell.row] && grid[cell.row][cell.col]) {
+            grid[cell.row][cell.col] = cell;
+          }
+        });
+
+        return grid;
+      }
+
+      function renderTable(data) {
+        const grid = buildGrid(data);
+        const headerCells = grid[0] || [];
+        const bodyRows = grid.slice(1);
+
+        currentColumnCount = data.col_count;
+        tableHead.innerHTML = "";
         tableBody.innerHTML = "";
-        sampleRows.forEach((row, rowIndex) => {
+
+        const headerRow = document.createElement("tr");
+        headerCells.forEach((cell, colIndex) => {
+          const th = document.createElement("th");
+          th.textContent = cell.text || `Column ${colIndex + 1}`;
+          headerRow.appendChild(th);
+        });
+        tableHead.appendChild(headerRow);
+
+        bodyRows.forEach((row) => {
           const tr = document.createElement("tr");
-          row.forEach((value, colIndex) => {
+          row.forEach((cell) => {
             const td = document.createElement("td");
             td.contentEditable = "true";
             td.spellcheck = false;
-            td.textContent = value || "Needs review";
-            if (!value) td.classList.add("empty");
-            if (lowConfidenceCells.has(`${rowIndex}-${colIndex}`)) td.classList.add("low");
+            td.textContent = cell.text || "Needs review";
+            td.dataset.confidence = cell.confidence ?? 0;
+            if (!cell.text) td.classList.add("empty");
+            if ((cell.confidence ?? 0) < LOW_CONFIDENCE_THRESHOLD) td.classList.add("low");
             td.addEventListener("focus", () => td.classList.remove("empty"));
             tr.appendChild(td);
           });
           tableBody.appendChild(tr);
         });
+
+        updateSummary(data);
+      }
+
+      function updateSummary(data) {
+        const confidences = data.cells.map((cell) => cell.confidence ?? 0);
+        const average = confidences.length
+          ? Math.round(confidences.reduce((sum, confidence) => sum + confidence, 0) / confidences.length)
+          : 0;
+        const flagged = data.cells.filter(
+          (cell) => !cell.text || (cell.confidence ?? 0) < LOW_CONFIDENCE_THRESHOLD
+        ).length;
+
+        cellCount.textContent = String(data.cells.length);
+        averageConfidence.textContent = `${average}%`;
+        flaggedCount.textContent = String(flagged);
+        confidencePercent.textContent = `${average}%`;
+        confidenceFill.style.width = `${average}%`;
       }
 
       function tableToCsv() {
-        const rows = [...document.querySelectorAll("tbody tr")].map((tr) =>
+        const header = [...document.querySelectorAll("thead th")].map((th) => th.textContent.trim());
+        const body = [...document.querySelectorAll("tbody tr")].map((tr) =>
           [...tr.children].map((td) => td.textContent.trim())
         );
+        const rows = header.length ? [header, ...body] : body;
+
         return rows
           .map((row) =>
             row
@@ -534,7 +673,49 @@
           .join("\n");
       }
 
-      resetButton.addEventListener("click", renderTable);
+      function getEmbeddedOcrData() {
+        return JSON.parse(document.querySelector("#embeddedOcrData").textContent);
+      }
+
+      async function loadOcrTable() {
+        downloadButton.disabled = true;
+        tableBody.innerHTML = `<tr><td colspan="${currentColumnCount}">Loading OCR results...</td></tr>`;
+
+        try {
+          const response = await fetch(OCR_JSON_PATH);
+          if (!response.ok) throw new Error(`Unable to load ${OCR_JSON_PATH}`);
+          ocrData = await response.json();
+          renderTable(ocrData);
+          downloadButton.disabled = false;
+        } catch (error) {
+          console.warn(`${OCR_JSON_PATH} could not be fetched; using embedded OCR JSON.`, error);
+          ocrData = getEmbeddedOcrData();
+          renderTable(ocrData);
+          downloadButton.disabled = false;
+        }
+      }
+
+      function setView(view) {
+        steps.forEach((step) => {
+          const isActive = step.dataset.view === view;
+          step.classList.toggle("is-active", isActive);
+          step.setAttribute("aria-pressed", String(isActive));
+        });
+
+        panes.leftPdf.hidden = view !== "pdf";
+        panes.leftLine.hidden = view !== "detection";
+        panes.leftOverlay.hidden = view !== "ocr" && view !== "review";
+        panes.rightOverlay.hidden = view !== "detection";
+        panes.rightTable.hidden = view === "detection";
+      }
+
+      resetButton.addEventListener("click", () => {
+        if (ocrData) renderTable(ocrData);
+        else loadOcrTable();
+      });
+      steps.forEach((step) => {
+        step.addEventListener("click", () => setView(step.dataset.view));
+      });
       downloadButton.addEventListener("click", () => {
         const blob = new Blob([tableToCsv()], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
@@ -545,7 +726,8 @@
         URL.revokeObjectURL(url);
       });
 
-      renderTable();
+      setView("pdf");
+      loadOcrTable();
     </script>
   </body>
 </html>

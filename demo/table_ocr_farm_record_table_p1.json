@@ -1,0 +1,582 @@
+{
+  "row_count": 8,
+  "col_count": 6,
+  "cells": [
+    {
+      "row": 0,
+      "col": 0,
+      "bbox": [
+        96,
+        187,
+        114,
+        37
+      ],
+      "text": "Pen",
+      "confidence": 95.0
+    },
+    {
+      "row": 0,
+      "col": 1,
+      "bbox": [
+        214,
+        187,
+        154,
+        37
+      ],
+      "text": "Date",
+      "confidence": 97.0
+    },
+    {
+      "row": 0,
+      "col": 2,
+      "bbox": [
+        372,
+        187,
+        168,
+        37
+      ],
+      "text": "Animal ID",
+      "confidence": 95.0
+    },
+    {
+      "row": 0,
+      "col": 3,
+      "bbox": [
+        544,
+        187,
+        162,
+        37
+      ],
+      "text": "Feed",
+      "confidence": 96.0
+    },
+    {
+      "row": 0,
+      "col": 4,
+      "bbox": [
+        710,
+        187,
+        142,
+        37
+      ],
+      "text": "Weight",
+      "confidence": 96.0
+    },
+    {
+      "row": 0,
+      "col": 5,
+      "bbox": [
+        856,
+        187,
+        268,
+        37
+      ],
+      "text": "Notes",
+      "confidence": 96.0
+    },
+    {
+      "row": 1,
+      "col": 0,
+      "bbox": [
+        96,
+        228,
+        114,
+        36
+      ],
+      "text": "Al",
+      "confidence": 91.0
+    },
+    {
+      "row": 1,
+      "col": 1,
+      "bbox": [
+        214,
+        228,
+        154,
+        36
+      ],
+      "text": "06/03/26",
+      "confidence": 96.0
+    },
+    {
+      "row": 1,
+      "col": 2,
+      "bbox": [
+        372,
+        228,
+        168,
+        36
+      ],
+      "text": "B-104",
+      "confidence": 91.0
+    },
+    {
+      "row": 1,
+      "col": 3,
+      "bbox": [
+        544,
+        228,
+        162,
+        36
+      ],
+      "text": "Starter",
+      "confidence": 96.0
+    },
+    {
+      "row": 1,
+      "col": 4,
+      "bbox": [
+        710,
+        228,
+        142,
+        36
+      ],
+      "text": "78 Ib",
+      "confidence": 93.0
+    },
+    {
+      "row": 1,
+      "col": 5,
+      "bbox": [
+        856,
+        228,
+        268,
+        36
+      ],
+      "text": "Normal",
+      "confidence": 96.0
+    },
+    {
+      "row": 2,
+      "col": 0,
+      "bbox": [
+        96,
+        268,
+        114,
+        36
+      ],
+      "text": "A2",
+      "confidence": 81.0
+    },
+    {
+      "row": 2,
+      "col": 1,
+      "bbox": [
+        214,
+        268,
+        154,
+        36
+      ],
+      "text": "06/03/26",
+      "confidence": 96.0
+    },
+    {
+      "row": 2,
+      "col": 2,
+      "bbox": [
+        372,
+        268,
+        168,
+        36
+      ],
+      "text": "B-117",
+      "confidence": 92.0
+    },
+    {
+      "row": 2,
+      "col": 3,
+      "bbox": [
+        544,
+        268,
+        162,
+        36
+      ],
+      "text": "Starter",
+      "confidence": 96.0
+    },
+    {
+      "row": 2,
+      "col": 4,
+      "bbox": [
+        710,
+        268,
+        142,
+        36
+      ],
+      "text": "81 Ib",
+      "confidence": 87.5
+    },
+    {
+      "row": 2,
+      "col": 5,
+      "bbox": [
+        856,
+        268,
+        268,
+        36
+      ],
+      "text": "Check mark",
+      "confidence": 95.0
+    },
+    {
+      "row": 3,
+      "col": 0,
+      "bbox": [
+        96,
+        308,
+        114,
+        36
+      ],
+      "text": "A3",
+      "confidence": 59.0
+    },
+    {
+      "row": 3,
+      "col": 1,
+      "bbox": [
+        214,
+        308,
+        154,
+        36
+      ],
+      "text": "06/04/26",
+      "confidence": 96.0
+    },
+    {
+      "row": 3,
+      "col": 2,
+      "bbox": [
+        372,
+        308,
+        168,
+        36
+      ],
+      "text": "B-121",
+      "confidence": 91.0
+    },
+    {
+      "row": 3,
+      "col": 3,
+      "bbox": [
+        544,
+        308,
+        162,
+        36
+      ],
+      "text": "Grower",
+      "confidence": 96.0
+    },
+    {
+      "row": 3,
+      "col": 4,
+      "bbox": [
+        710,
+        308,
+        142,
+        36
+      ],
+      "text": "86 Ib",
+      "confidence": 93.5
+    },
+    {
+      "row": 3,
+      "col": 5,
+      "bbox": [
+        856,
+        308,
+        268,
+        36
+      ],
+      "text": "Needs review",
+      "confidence": 96.0
+    },
+    {
+      "row": 4,
+      "col": 0,
+      "bbox": [
+        96,
+        348,
+        114,
+        36
+      ],
+      "text": "B1",
+      "confidence": 86.0
+    },
+    {
+      "row": 4,
+      "col": 1,
+      "bbox": [
+        214,
+        348,
+        154,
+        36
+      ],
+      "text": "06/05/26",
+      "confidence": 96.0
+    },
+    {
+      "row": 4,
+      "col": 2,
+      "bbox": [
+        372,
+        348,
+        168,
+        36
+      ],
+      "text": "B-143",
+      "confidence": 92.0
+    },
+    {
+      "row": 4,
+      "col": 3,
+      "bbox": [
+        544,
+        348,
+        162,
+        36
+      ],
+      "text": "Grower",
+      "confidence": 96.0
+    },
+    {
+      "row": 4,
+      "col": 4,
+      "bbox": [
+        710,
+        348,
+        142,
+        36
+      ],
+      "text": "91 Ib",
+      "confidence": 91.5
+    },
+    {
+      "row": 4,
+      "col": 5,
+      "bbox": [
+        856,
+        348,
+        268,
+        36
+      ],
+      "text": "Low confidence",
+      "confidence": 96.0
+    },
+    {
+      "row": 5,
+      "col": 0,
+      "bbox": [
+        96,
+        388,
+        114,
+        36
+      ],
+      "text": "B2",
+      "confidence": 92.0
+    },
+    {
+      "row": 5,
+      "col": 1,
+      "bbox": [
+        214,
+        388,
+        154,
+        36
+      ],
+      "text": "06/05/26",
+      "confidence": 96.0
+    },
+    {
+      "row": 5,
+      "col": 2,
+      "bbox": [
+        372,
+        388,
+        168,
+        36
+      ],
+      "text": "B-155",
+      "confidence": 92.0
+    },
+    {
+      "row": 5,
+      "col": 3,
+      "bbox": [
+        544,
+        388,
+        162,
+        36
+      ],
+      "text": "Finisher",
+      "confidence": 96.0
+    },
+    {
+      "row": 5,
+      "col": 4,
+      "bbox": [
+        710,
+        388,
+        142,
+        36
+      ],
+      "text": "103 Ib",
+      "confidence": 94.5
+    },
+    {
+      "row": 5,
+      "col": 5,
+      "bbox": [
+        856,
+        388,
+        268,
+        36
+      ],
+      "text": "Reviewed",
+      "confidence": 96.0
+    },
+    {
+      "row": 6,
+      "col": 0,
+      "bbox": [
+        96,
+        428,
+        114,
+        36
+      ],
+      "text": "B3",
+      "confidence": 92.0
+    },
+    {
+      "row": 6,
+      "col": 1,
+      "bbox": [
+        214,
+        428,
+        154,
+        36
+      ],
+      "text": "06/06/26",
+      "confidence": 96.0
+    },
+    {
+      "row": 6,
+      "col": 2,
+      "bbox": [
+        372,
+        428,
+        168,
+        36
+      ],
+      "text": "B-162",
+      "confidence": 93.0
+    },
+    {
+      "row": 6,
+      "col": 3,
+      "bbox": [
+        544,
+        428,
+        162,
+        36
+      ],
+      "text": "Finisher",
+      "confidence": 96.0
+    },
+    {
+      "row": 6,
+      "col": 4,
+      "bbox": [
+        710,
+        428,
+        142,
+        36
+      ],
+      "text": "107 Ib",
+      "confidence": 94.5
+    },
+    {
+      "row": 6,
+      "col": 5,
+      "bbox": [
+        856,
+        428,
+        268,
+        36
+      ],
+      "text": "Needs review",
+      "confidence": 96.0
+    },
+    {
+      "row": 7,
+      "col": 0,
+      "bbox": [
+        96,
+        468,
+        114,
+        36
+      ],
+      "text": "C1",
+      "confidence": 52.0
+    },
+    {
+      "row": 7,
+      "col": 1,
+      "bbox": [
+        214,
+        468,
+        154,
+        36
+      ],
+      "text": "06/06/26",
+      "confidence": 96.0
+    },
+    {
+      "row": 7,
+      "col": 2,
+      "bbox": [
+        372,
+        468,
+        168,
+        36
+      ],
+      "text": "B-170",
+      "confidence": 92.0
+    },
+    {
+      "row": 7,
+      "col": 3,
+      "bbox": [
+        544,
+        468,
+        162,
+        36
+      ],
+      "text": "Finisher",
+      "confidence": 96.0
+    },
+    {
+      "row": 7,
+      "col": 4,
+      "bbox": [
+        710,
+        468,
+        142,
+        36
+      ],
+      "text": "112 Ib",
+      "confidence": 92.5
+    },
+    {
+      "row": 7,
+      "col": 5,
+      "bbox": [
+        856,
+        468,
+        268,
+        36
+      ],
+      "text": "Ready",
+      "confidence": 96.0
+    }
+  ]
+}
