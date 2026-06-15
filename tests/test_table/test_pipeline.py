@@ -72,6 +72,8 @@ class TestTablePipeline(unittest.TestCase):
         self.assertEqual(overlay.shape, (12, 12, 3))
         self.assertTrue(np.array_equal(image, np.full((12, 12), 255, dtype=np.uint8)))
         self.assertLess(int(overlay[2, 3, 0]), 255)
+        self.assertEqual(int(overlay[0, 3, 0]), 255)
+        self.assertEqual(int(overlay[2, 0, 0]), 255)
 
     def test_render_grid_overlay_rejects_unsupported_dimensions(self) -> None:
         grid = GridStructure(row_coords=[], col_coords=[], cells=[])

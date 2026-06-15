@@ -302,17 +302,21 @@ def _top_row_column_support(
         if x0 >= x1:
             continue
 
-        rows_with_ink = int(
-            np.count_nonzero(np.any(foreground[top : bottom + 1, x0:x1], axis=1))
-        )
-        if rows_with_ink >= max(2, int(round(band_height * 0.45))):
-            support[col_index] += 1
-
+        border_hits = 0
         for y in (top, bottom):
             y0 = max(0, y - radius)
             y1 = min(height, y + radius + 1)
             if np.any(horizontal_hits[y0:y1, x0:x1] & vertical_hits[y0:y1, x0:x1]):
+                border_hits += 1
                 support[col_index] += 1
+
+        rows_with_ink = int(
+            np.count_nonzero(np.any(foreground[top : bottom + 1, x0:x1], axis=1))
+        )
+        if border_hits == 2 and rows_with_ink >= max(
+            2, int(round(band_height * 0.45))
+        ):
+            support[col_index] += 1
 
     return support
 

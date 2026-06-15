@@ -66,7 +66,7 @@ def render_grid_overlay(
     thickness: int = 2,
     alpha: float = 0.75,
 ) -> np.ndarray:
-    """Draw the reconstructed table grid over an image for visual inspection."""
+    """Draw the reconstructed table cells over an image for visual inspection."""
     if image.ndim == 2:
         base = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
     elif image.ndim == 3:
@@ -78,21 +78,16 @@ def render_grid_overlay(
     max_h, max_w = base.shape[:2]
     line_thickness = max(1, int(thickness))
 
-    for x in grid.col_coords:
-        x_coord = int(np.clip(x, 0, max_w - 1))
-        cv2.line(
+    for cell in grid.cells:
+        x, y, w, h = cell.bbox
+        left = int(np.clip(x, 0, max_w - 1))
+        top = int(np.clip(y, 0, max_h - 1))
+        right = int(np.clip(x + w, 0, max_w - 1))
+        bottom = int(np.clip(y + h, 0, max_h - 1))
+        cv2.rectangle(
             overlay,
-            (x_coord, 0),
-            (x_coord, max_h - 1),
-            color=color,
-            thickness=line_thickness,
-        )
-    for y in grid.row_coords:
-        y_coord = int(np.clip(y, 0, max_h - 1))
-        cv2.line(
-            overlay,
-            (0, y_coord),
-            (max_w - 1, y_coord),
+            (left, top),
+            (right, bottom),
             color=color,
             thickness=line_thickness,
         )

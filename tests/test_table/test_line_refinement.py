@@ -235,7 +235,7 @@ class TestLineRefinement(unittest.TestCase):
             radius=1,
         )
 
-        self.assertEqual(support, [3, 1, 0])
+        self.assertEqual(support, [3, 0, 0])
         self.assertEqual(
             line_refinement._top_row_column_support(
                 horizontal,
