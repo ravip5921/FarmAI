@@ -5,8 +5,6 @@ from pathlib import Path
 
 import numpy as np
 
-from src.export.csv_export import write_table_csv
-from src.export.json_export import write_table_json
 from src.table.grid_reconstruction import GridStructure
 
 from .cell_ocr import CellOcrEngine, OcrTable, recognize_table_cells
@@ -38,6 +36,10 @@ def export_table_ocr(
     engine: CellOcrEngine | None = None,
     padding: int = 2,
 ) -> TableOcrExportResult:
+
+    from src.export.csv_export import write_table_csv
+    from src.export.json_export import write_table_json
+
     table = run_table_ocr(image, grid, engine=engine, padding=padding)
     written_csv = write_table_csv(table, csv_path) if csv_path is not None else None
     written_json = write_table_json(table, json_path) if json_path is not None else None
