@@ -163,3 +163,16 @@ pip install -r requirements.txt
 pip install -e . 
 farm-ai ./examples/sample_01.jpg
 ```
+
+## Local GUI
+
+The first local review interface is a Streamlit app. It accepts an image or PDF,
+runs the existing FarmAI table pipeline on one page, shows document previews on
+the left, and opens the OCR result in an editable table on the right.
+
+```py
+conda activate farm-ai
+pip install -r requirements.txt
+pip install -e .
+streamlit run streamlit_app.py
+```

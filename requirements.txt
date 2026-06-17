@@ -6,6 +6,7 @@ pandas
 scikit-image
 pytesseract
 pypdfium2
+streamlit
 jupyter
 nox
 mypy

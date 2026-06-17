@@ -4,7 +4,27 @@ from dataclasses import dataclass
 
 import cv2
 import numpy as np
-import pytesseract
+
+try:  # pragma: no cover - import availability depends on local environment
+    import pytesseract
+except Exception:  # pragma: no cover - handled at OCR runtime
+    class _UnavailablePytesseract:
+        class Output:
+            DICT = "dict"
+
+        def image_to_string(self, *args, **kwargs):
+            raise RuntimeError(
+                "pytesseract is not installed. Install project dependencies and "
+                "make sure the Tesseract OCR executable is available on PATH."
+            )
+
+        def image_to_data(self, *args, **kwargs):
+            raise RuntimeError(
+                "pytesseract is not installed. Install project dependencies and "
+                "make sure the Tesseract OCR executable is available on PATH."
+            )
+
+    pytesseract = _UnavailablePytesseract()
 
 
 @dataclass(frozen=True)

@@ -16,6 +16,8 @@ dependencies = [
     "pandas",
     "scikit-image",
     "pytesseract",
+    "pypdfium2",
+    "streamlit",
 ]
 
 [[project.authors]]

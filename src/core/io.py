@@ -38,23 +38,32 @@ def _load_pdf_file(path: Path) -> LoadedDocument:
         except Exception as exc:  # pragma: no cover - depends on local backend
             raise RuntimeError(f"Could not open PDF {path} with pypdfium2.") from exc
 
-        for page_index in range(len(pdf)):
-            page = pdf[page_index]
-            bitmap = page.render(scale=2.0)
-            rgb = bitmap.to_numpy()
-            if rgb.ndim == 2:
-                bgr = cv2.cvtColor(rgb, cv2.COLOR_GRAY2BGR)
-            else:
-                bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
-            pages.append(
-                DocumentImage(
-                    bgr,
-                    metadata={
-                        "source_path": str(path),
-                        "page_index": page_index + 1,
-                    },
+        try:
+            for page_index in range(len(pdf)):
+                page = pdf[page_index]
+                try:
+                    bitmap = page.render(scale=2.0)
+                    rgb = bitmap.to_numpy()
+                finally:
+                    if hasattr(page, "close"):
+                        page.close()
+
+                if rgb.ndim == 2:
+                    bgr = cv2.cvtColor(rgb, cv2.COLOR_GRAY2BGR)
+                else:
+                    bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+                pages.append(
+                    DocumentImage(
+                        bgr,
+                        metadata={
+                            "source_path": str(path),
+                            "page_index": page_index + 1,
+                        },
+                    )
                 )
-            )
+        finally:
+            if hasattr(pdf, "close"):
+                pdf.close()
     else:
         raise RuntimeError(
             f"Could not open PDF {path}. Install `pypdfium2` or convert the PDF "
