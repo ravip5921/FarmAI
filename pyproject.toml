@@ -26,6 +26,7 @@ email = "ravipandey@unomaha.edu"
 
 [project.optional-dependencies]
 dev = ["jupyter"]
+htr = ["transformers", "Pillow"]
 
 [project.scripts]
 farm-ai = "main:main"

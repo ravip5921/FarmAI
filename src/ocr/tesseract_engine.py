@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import shutil
 from dataclasses import dataclass
 
 import cv2
 import numpy as np
 
+from .base import OcrText
+
 try:  # pragma: no cover - import availability depends on local environment
     import pytesseract
 except Exception:  # pragma: no cover - handled at OCR runtime
+
     class _UnavailablePytesseract:
         class Output:
             DICT = "dict"
@@ -25,12 +29,6 @@ except Exception:  # pragma: no cover - handled at OCR runtime
             )
 
     pytesseract = _UnavailablePytesseract()
-
-
-@dataclass(frozen=True)
-class OcrText:
-    text: str
-    confidence: float | None = None
 
 
 @dataclass(frozen=True)
@@ -62,14 +60,28 @@ class TesseractOcrEngine:
         return array
 
     def recognize(self, image: np.ndarray) -> OcrText:
+        executable = shutil.which("tesseract")
+        if executable is None:
+            raise RuntimeError(
+                "Tesseract OCR executable was not found on PATH. Install the "
+                "`tesseract-ocr` system package or use another OCR backend such "
+                "as `--ocr-engine trocr-handwritten`."
+            )
         prepared = self._prepare_image(image)
         config = self.config.to_config_string()
-        text = pytesseract.image_to_string(
-            prepared,
-            lang=self.config.lang,
-            config=config,
-        ).strip()
-        confidence = self._mean_confidence(prepared, config)
+        try:
+            text = pytesseract.image_to_string(
+                prepared,
+                lang=self.config.lang,
+                config=config,
+            ).strip()
+            confidence = self._mean_confidence(prepared, config)
+        except PermissionError as exc:
+            raise RuntimeError(
+                f"Tesseract OCR executable is not runnable: {executable}. Check "
+                "that it is the real tesseract binary and has execute "
+                "permission, or use `--ocr-engine trocr-handwritten`."
+            ) from exc
         return OcrText(text=text, confidence=confidence)
 
     def _mean_confidence(self, image: np.ndarray, config: str) -> float | None:

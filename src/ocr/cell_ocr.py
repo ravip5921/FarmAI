@@ -1,18 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
 
 import numpy as np
 
 from src.table.cell_extraction import ExtractedCell, extract_cell_images
 from src.table.grid_reconstruction import GridStructure
 
-from .tesseract_engine import OcrText, TesseractOcrEngine
-
-
-class CellOcrEngine(Protocol):
-    def recognize(self, image: np.ndarray) -> OcrText: ...
+from .base import CellOcrEngine
 
 
 @dataclass(frozen=True)
@@ -47,7 +42,12 @@ def recognize_extracted_cells(
     row_count: int | None = None,
     col_count: int | None = None,
 ) -> OcrTable:
-    ocr_engine = engine or TesseractOcrEngine()
+    if engine is None:
+        from .registry import create_ocr_engine
+
+        ocr_engine = create_ocr_engine("tesseract")
+    else:
+        ocr_engine = engine
     recognized: list[OcrCell] = []
     for cell in cells:
         result = ocr_engine.recognize(cell.image)

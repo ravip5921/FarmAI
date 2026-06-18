@@ -176,3 +176,39 @@ pip install -r requirements.txt
 pip install -e .
 streamlit run streamlit_app.py
 ```
+
+### OCR engines
+
+FarmAI runs OCR after table detection, one extracted cell image at a time. The
+OCR backend can be changed without changing table detection:
+
+```py
+farm-ai ./examples/sample_01.jpg --ocr-engine tesseract
+farm-ai ./examples/sample_01.jpg --ocr-engine trocr-handwritten
+```
+
+`tesseract` is the lightweight default. `trocr-handwritten` uses the Microsoft
+TrOCR handwritten model and requires the optional handwritten OCR dependencies.
+Install PyTorch explicitly for your machine first, then install FarmAI's HTR
+extra.
+
+CPU-only Linux install:
+
+```py
+export TMPDIR="$HOME/tmp"
+mkdir -p "$TMPDIR"
+pip install --index-url https://download.pytorch.org/whl/cpu torch
+pip install -e .[htr]
+```
+
+Windows or conda local install:
+
+```py
+conda activate farm-ai
+pip install torch
+pip install -e .[htr]
+```
+
+If pip reports `/tmp` as read-only, set `TMPDIR` to a writable folder before
+installing. Avoid installing this from an unrelated environment such as
+`clingo6`; use the FarmAI environment you plan to run the app from.

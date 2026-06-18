@@ -77,3 +77,4 @@ debug_outputs/
 .env.*.local
 **/chats.txt
 **/__pycache__/**
+demo/*.mp4

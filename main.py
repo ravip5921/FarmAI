@@ -10,7 +10,14 @@ from src.core.image import DocumentImage
 from src.core.io import LoadedDocument, load_document
 from src.core.pipeline import Pipeline
 from src.core.visualization import save_debug, show
-from src.ocr import export_table_ocr
+from src.export.csv_export import table_to_csv_string
+from src.ocr import (
+    CellOcrEngine,
+    DEFAULT_OCR_ENGINE,
+    create_ocr_engine,
+    export_table_ocr,
+    get_ocr_engine_names,
+)
 from src.preprocessing.denoise import MorphologicalDenoiseStage
 from src.preprocessing.grayscale import GrayscaleStage
 from src.preprocessing.sauvola import SauvolaBinarizationStage
@@ -70,10 +77,26 @@ def parse_args() -> argparse.Namespace:
         help="Save OCR output as a JSON file after table detection",
     )
     parser.add_argument(
+        "--no-print-csv",
+        action="store_true",
+        help="Do not print OCR output as CSV after processing",
+    )
+    parser.add_argument(
         "--ocr-padding",
         type=int,
         default=2,
         help="Padding to trim from each extracted cell before OCR",
+    )
+    parser.add_argument(
+        "--ocr-engine",
+        choices=get_ocr_engine_names(),
+        default=DEFAULT_OCR_ENGINE,
+        help="OCR backend to use for per-cell image-to-text recognition",
+    )
+    parser.add_argument(
+        "--trocr-model",
+        default="microsoft/trocr-base-handwritten",
+        help="Hugging Face model name used when --ocr-engine=trocr-handwritten",
     )
     parser.add_argument(
         "--save-all",
@@ -161,6 +184,7 @@ def _run_page(
     debug_dir: Path | None,
     image_name: str,
     args: argparse.Namespace,
+    ocr_engine: CellOcrEngine,
     source_path: Path | None = None,
 ) -> None:
     result = process_image(page, pipeline, debug_dir=debug_dir, image_name=image_name)
@@ -179,6 +203,7 @@ def _run_page(
         save_csv=args.save_csv or args.save_all,
         save_json=args.save_json or args.save_all,
         padding=args.ocr_padding,
+        engine=ocr_engine,
     )
     table_image = render_grid_structure(table_result.grid, result.image.shape)
 
@@ -204,8 +229,18 @@ def _run_page(
         print(f"Saved OCR CSV to: {ocr_result.csv_path}")
     if ocr_result.json_path is not None:
         print(f"Saved OCR JSON to: {ocr_result.json_path}")
+    if not args.no_print_csv:
+        print_ocr_csv(ocr_result.table, image_name=image_name)
     show("Final Output", result)
     show("Detected Table", table_image)
+
+
+def print_ocr_csv(table, *, image_name: str | Path | None = None) -> None:
+    """Print OCR table output as CSV for command-line inspection."""
+    label = Path(str(image_name or "table")).stem or "table"
+    print(f"\n--- OCR CSV: {label} ---")
+    print(table_to_csv_string(table), end="")
+    print(f"--- END OCR CSV: {label} ---\n")
 
 
 def process_ocr(
@@ -217,6 +252,7 @@ def process_ocr(
     save_csv: bool = False,
     save_json: bool = False,
     padding: int = 2,
+    engine: CellOcrEngine | None = None,
 ):
     """Run OCR for the detected grid and optionally save CSV/JSON exports."""
     stem = Path(str(image_name or "table")).stem or "table"
@@ -232,6 +268,7 @@ def process_ocr(
         table_result.grid,
         csv_path=csv_path,
         json_path=json_path,
+        engine=engine,
         padding=padding,
     )
 
@@ -241,6 +278,10 @@ def main() -> None:
     image_path = args.image_path
     debug_dir = None if args.no_debug else args.debug_dir
     pipeline = build_pipeline(window_size=25, k=0.34, denoise_kernel=2)
+    ocr_engine = create_ocr_engine(
+        args.ocr_engine,
+        model_name=args.trocr_model,
+    )
     loaded = load_document(image_path)
 
     if isinstance(loaded, LoadedDocument):
@@ -252,6 +293,7 @@ def main() -> None:
                 debug_dir=debug_dir,
                 image_name=image_name,
                 args=args,
+                ocr_engine=ocr_engine,
                 source_path=image_path,
             )
     else:
@@ -262,6 +304,7 @@ def main() -> None:
             debug_dir=debug_dir,
             image_name=image_name,
             args=args,
+            ocr_engine=ocr_engine,
             source_path=image_path,
         )
 

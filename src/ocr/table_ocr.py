@@ -7,7 +7,8 @@ import numpy as np
 
 from src.table.grid_reconstruction import GridStructure
 
-from .cell_ocr import CellOcrEngine, OcrTable, recognize_table_cells
+from .base import CellOcrEngine
+from .cell_ocr import OcrTable, recognize_table_cells
 
 
 @dataclass(frozen=True)

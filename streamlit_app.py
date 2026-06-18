@@ -15,7 +15,13 @@ import streamlit as st
 from src.core.image import DocumentImage
 from src.core.io import LoadedDocument, load_document
 from src.core.pipeline import Pipeline
-from src.ocr import OcrTable, export_table_ocr
+from src.ocr import (
+    DEFAULT_OCR_ENGINE,
+    OcrTable,
+    create_ocr_engine,
+    export_table_ocr,
+    get_ocr_engine_specs,
+)
 from src.preprocessing.denoise import MorphologicalDenoiseStage
 from src.preprocessing.grayscale import GrayscaleStage
 from src.preprocessing.sauvola import SauvolaBinarizationStage
@@ -44,6 +50,7 @@ class AppResult:
     grid_preview: np.ndarray
     line_preview: np.ndarray
     original_df: pd.DataFrame
+    ocr_engine_name: str
 
 
 def build_pipeline(
@@ -110,12 +117,26 @@ def load_first_page(uploaded_file: Any) -> DocumentImage:
     return loaded
 
 
-def run_farmai(uploaded_file: Any) -> AppResult:
+def run_farmai(
+    uploaded_file: Any,
+    *,
+    ocr_engine_name: str = DEFAULT_OCR_ENGINE,
+    trocr_model_name: str = "microsoft/trocr-base-handwritten",
+) -> AppResult:
     page = load_first_page(uploaded_file)
     pipeline = build_pipeline()
     processed = pipeline.run(page)
     table_result = process_table_image(processed.image, image_name=uploaded_file.name)
-    ocr_result = export_table_ocr(processed.image, table_result.grid, padding=2)
+    ocr_engine = create_ocr_engine(
+        ocr_engine_name,
+        model_name=trocr_model_name,
+    )
+    ocr_result = export_table_ocr(
+        processed.image,
+        table_result.grid,
+        engine=ocr_engine,
+        padding=2,
+    )
 
     overlay = render_grid_overlay(page.image, table_result.grid)
     grid = render_grid_structure(table_result.grid, processed.image.shape)
@@ -138,6 +159,7 @@ def run_farmai(uploaded_file: Any) -> AppResult:
         grid_preview=grid,
         line_preview=line_preview,
         original_df=df,
+        ocr_engine_name=ocr_engine_name,
     )
 
 
@@ -191,6 +213,21 @@ def main() -> None:
             type=SUPPORTED_TYPES,
             accept_multiple_files=False,
         )
+        engine_specs = get_ocr_engine_specs()
+        engine_names = [spec.name for spec in engine_specs]
+        engine_labels = {spec.name: spec.label for spec in engine_specs}
+        ocr_engine_name = st.selectbox(
+            "OCR engine",
+            options=engine_names,
+            index=engine_names.index(DEFAULT_OCR_ENGINE),
+            format_func=lambda name: engine_labels[name],
+        )
+        trocr_model_name = "microsoft/trocr-base-handwritten"
+        if ocr_engine_name == "trocr-handwritten":
+            trocr_model_name = st.text_input(
+                "TrOCR model",
+                value=trocr_model_name,
+            )
         run_clicked = st.button(
             "Go",
             type="primary",
@@ -209,7 +246,11 @@ def main() -> None:
     if run_clicked and uploaded_file is not None:
         try:
             with st.spinner("Detecting table and reading cells..."):
-                result = run_farmai(uploaded_file)
+                result = run_farmai(
+                    uploaded_file,
+                    ocr_engine_name=ocr_engine_name,
+                    trocr_model_name=trocr_model_name,
+                )
             st.session_state.result = result
             st.session_state.edited_df = result.original_df.copy()
         except Exception as exc:
@@ -241,6 +282,7 @@ def main() -> None:
 
     with right:
         st.subheader("Editable Table Output")
+        st.caption(f"OCR engine: {result.ocr_engine_name}")
         cells, average, flagged = summarize_ocr(result.ocr_table)
         metric_cols = st.columns(3)
         metric_cols[0].metric("Cells detected", cells)
