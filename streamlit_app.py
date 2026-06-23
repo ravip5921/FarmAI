@@ -77,9 +77,27 @@ def bgr_to_rgb(image: np.ndarray) -> np.ndarray:
     return cv2.cvtColor(array, cv2.COLOR_BGR2RGB)
 
 
+def _make_unique_columns(headers: list[str]) -> list[str]:
+    columns: list[str] = []
+    counts: dict[str, int] = {}
+    for index, header in enumerate(headers):
+        base = header.strip() or f"Column {index + 1}"
+        counts[base] = counts.get(base, 0) + 1
+        if counts[base] == 1:
+            columns.append(base)
+        else:
+            columns.append(f"{base} ({counts[base]})")
+    return columns
+
+
 def table_to_dataframe(table: OcrTable) -> pd.DataFrame:
-    columns = [f"Column {index + 1}" for index in range(table.col_count)]
-    return pd.DataFrame(table.text_matrix(fill_value=""), columns=columns)
+    matrix = table.text_matrix(fill_value="")
+    if not matrix:
+        columns = [f"Column {index + 1}" for index in range(table.col_count)]
+        return pd.DataFrame(columns=columns)
+
+    columns = _make_unique_columns(matrix[0])
+    return pd.DataFrame(matrix[1:], columns=columns)
 
 
 def dataframe_to_csv(df: pd.DataFrame) -> str:
