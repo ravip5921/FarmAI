@@ -14,6 +14,7 @@ from src.export.csv_export import table_to_csv_string
 from src.ocr import (
     CellOcrEngine,
     DEFAULT_OCR_ENGINE,
+    FILTER_OUT_COLUMNS,
     create_ocr_engine,
     export_table_ocr,
     get_ocr_engine_names,
@@ -270,6 +271,7 @@ def process_ocr(
         json_path=json_path,
         engine=engine,
         padding=padding,
+        filter_out_columns=FILTER_OUT_COLUMNS,
     )
 
 

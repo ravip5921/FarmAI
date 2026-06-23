@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Collection
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -24,8 +25,15 @@ def run_table_ocr(
     *,
     engine: CellOcrEngine | None = None,
     padding: int = 2,
+    filter_out_columns: Collection[str] | None = None,
 ) -> OcrTable:
-    return recognize_table_cells(image, grid, engine=engine, padding=padding)
+    return recognize_table_cells(
+        image,
+        grid,
+        engine=engine,
+        padding=padding,
+        filter_out_columns=filter_out_columns,
+    )
 
 
 def export_table_ocr(
@@ -36,12 +44,19 @@ def export_table_ocr(
     json_path: str | Path | None = None,
     engine: CellOcrEngine | None = None,
     padding: int = 2,
+    filter_out_columns: Collection[str] | None = None,
 ) -> TableOcrExportResult:
 
     from src.export.csv_export import write_table_csv
     from src.export.json_export import write_table_json
 
-    table = run_table_ocr(image, grid, engine=engine, padding=padding)
+    table = run_table_ocr(
+        image,
+        grid,
+        engine=engine,
+        padding=padding,
+        filter_out_columns=filter_out_columns,
+    )
     written_csv = write_table_csv(table, csv_path) if csv_path is not None else None
     written_json = write_table_json(table, json_path) if json_path is not None else None
     return TableOcrExportResult(

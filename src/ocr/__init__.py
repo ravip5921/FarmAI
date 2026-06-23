@@ -5,6 +5,7 @@ from .cell_ocr import (
     recognize_extracted_cells,
     recognize_table_cells,
 )
+from .column_filter import FILTER_OUT_COLUMNS
 from .registry import (
     DEFAULT_OCR_ENGINE,
     OcrEngineSpec,
@@ -19,6 +20,7 @@ from .trocr_engine import TrOcrConfig, TrOcrHandwrittenEngine
 __all__ = [
     "CellOcrEngine",
     "DEFAULT_OCR_ENGINE",
+    "FILTER_OUT_COLUMNS",
     "OcrCell",
     "OcrEngineSpec",
     "OcrTable",

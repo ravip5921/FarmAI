@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import io
 import tempfile
+from collections.abc import Collection
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -17,6 +18,7 @@ from src.core.io import LoadedDocument, load_document
 from src.core.pipeline import Pipeline
 from src.ocr import (
     DEFAULT_OCR_ENGINE,
+    FILTER_OUT_COLUMNS,
     OcrTable,
     create_ocr_engine,
     export_table_ocr,
@@ -88,6 +90,16 @@ def dataframe_to_csv(df: pd.DataFrame) -> str:
     return output.getvalue()
 
 
+def parse_filter_out_columns(value: str) -> set[str]:
+    return {item.strip() for item in value.split(",") if item.strip()}
+
+
+def resolve_filter_out_columns(ui_columns: Collection[str] | None) -> Collection[str]:
+    if ui_columns:
+        return set(ui_columns)
+    return FILTER_OUT_COLUMNS
+
+
 def summarize_ocr(table: OcrTable) -> tuple[int, int, int]:
     confidences = [
         float(cell.confidence)
@@ -122,6 +134,7 @@ def run_farmai(
     *,
     ocr_engine_name: str = DEFAULT_OCR_ENGINE,
     trocr_model_name: str = "microsoft/trocr-base-handwritten",
+    filter_out_columns: Collection[str] | None = None,
 ) -> AppResult:
     page = load_first_page(uploaded_file)
     pipeline = build_pipeline()
@@ -136,6 +149,7 @@ def run_farmai(
         table_result.grid,
         engine=ocr_engine,
         padding=2,
+        filter_out_columns=resolve_filter_out_columns(filter_out_columns),
     )
 
     overlay = render_grid_overlay(page.image, table_result.grid)
@@ -228,6 +242,11 @@ def main() -> None:
                 "TrOCR model",
                 value=trocr_model_name,
             )
+        filter_out_columns_text = st.text_input(
+            "Filter out columns",
+            value="",
+            placeholder="Pen, Date, Notes",
+        )
         run_clicked = st.button(
             "Go",
             type="primary",
@@ -250,6 +269,9 @@ def main() -> None:
                     uploaded_file,
                     ocr_engine_name=ocr_engine_name,
                     trocr_model_name=trocr_model_name,
+                    filter_out_columns=parse_filter_out_columns(
+                        filter_out_columns_text
+                    ),
                 )
             st.session_state.result = result
             st.session_state.edited_df = result.original_df.copy()

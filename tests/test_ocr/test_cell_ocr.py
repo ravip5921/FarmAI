@@ -20,6 +20,17 @@ class FakeEngine:
         return OcrText(text=f"cell-{self.calls}", confidence=90.0)
 
 
+class SequenceEngine:
+    def __init__(self, values: list[str]) -> None:
+        self.values = values
+        self.calls = 0
+
+    def recognize(self, image: np.ndarray) -> OcrText:
+        value = self.values[self.calls]
+        self.calls += 1
+        return OcrText(text=value, confidence=90.0)
+
+
 class TestCellOcr(unittest.TestCase):
     def test_recognize_table_cells_returns_structured_ocr_table(self) -> None:
         image = np.zeros((10, 10), dtype=np.uint8)
@@ -40,6 +51,45 @@ class TestCellOcr(unittest.TestCase):
         self.assertEqual([cell.text for cell in table.cells], ["cell-1", "cell-2"])
         self.assertEqual(table.text_matrix(), [["cell-1"], ["cell-2"]])
         self.assertEqual(engine.calls, 2)
+
+    def test_recognize_table_cells_filters_matching_header_columns(self) -> None:
+        image = np.zeros((10, 15), dtype=np.uint8)
+        grid = GridStructure(
+            row_coords=[0, 5, 10],
+            col_coords=[0, 5, 10, 15],
+            cells=[
+                GridCell(row=0, col=0, bbox=(0, 0, 5, 5)),
+                GridCell(row=0, col=1, bbox=(5, 0, 5, 5)),
+                GridCell(row=0, col=2, bbox=(10, 0, 5, 5)),
+                GridCell(row=1, col=0, bbox=(0, 5, 5, 5)),
+                GridCell(row=1, col=1, bbox=(5, 5, 5, 5)),
+                GridCell(row=1, col=2, bbox=(10, 5, 5, 5)),
+            ],
+        )
+        engine = SequenceEngine(
+            ["Keep A", " Remove   Me ", "Keep B", "value-a", "value-b"]
+        )
+
+        table = recognize_table_cells(
+            image,
+            grid,
+            engine=engine,
+            padding=0,
+            filter_out_columns={"remove me"},
+        )
+
+        self.assertEqual(engine.calls, 5)
+        self.assertEqual(table.row_count, 2)
+        self.assertEqual(table.col_count, 2)
+        self.assertEqual(
+            table.text_matrix(),
+            [["Keep A", "Keep B"], ["value-a", "value-b"]],
+        )
+        self.assertEqual(
+            table_to_csv_string(table),
+            "Keep A,Keep B\nvalue-a,value-b\n",
+        )
+        self.assertEqual([cell.col for cell in table.cells], [0, 1, 0, 1])
 
     def test_tesseract_config_builds_config_string(self) -> None:
         config = TesseractConfig(
@@ -79,6 +129,7 @@ class TestCellOcr(unittest.TestCase):
                 json_path=Path(tmpdir) / "table.json",
                 engine=FakeEngine(),
                 padding=0,
+                filter_out_columns=set(),
             )
 
             self.assertEqual(result.table.text_matrix(), [["cell-1"]])
