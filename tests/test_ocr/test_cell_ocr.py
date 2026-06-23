@@ -1,13 +1,21 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
 from src.export.csv_export import table_to_csv_string
-from src.ocr.cell_ocr import OcrCell, OcrTable, recognize_table_cells
+from src.ocr.cell_ocr import (
+    OcrCell,
+    OcrTable,
+    _get_ocr_engine,
+    recognize_extracted_cells,
+    recognize_table_cells,
+)
 from src.ocr.table_ocr import export_table_ocr
 from src.ocr.tesseract_engine import OcrText, TesseractConfig
+from src.table.cell_extraction import ExtractedCell
 from src.table.grid_reconstruction import GridCell, GridStructure
 
 
@@ -32,6 +40,29 @@ class SequenceEngine:
 
 
 class TestCellOcr(unittest.TestCase):
+    def test_recognize_extracted_cells_creates_default_engine(self) -> None:
+        cell = ExtractedCell(
+            row=2,
+            col=3,
+            bbox=(0, 0, 1, 1),
+            image=np.zeros((1, 1), dtype=np.uint8),
+        )
+        engine = FakeEngine()
+
+        with patch("src.ocr.registry.create_ocr_engine", return_value=engine):
+            table = recognize_extracted_cells([cell])
+
+        self.assertEqual(engine.calls, 1)
+        self.assertEqual(table.row_count, 3)
+        self.assertEqual(table.col_count, 4)
+        self.assertEqual(table.text_matrix()[2][3], "cell-1")
+
+    def test_get_ocr_engine_creates_default_engine(self) -> None:
+        engine = FakeEngine()
+
+        with patch("src.ocr.registry.create_ocr_engine", return_value=engine):
+            self.assertIs(_get_ocr_engine(None), engine)
+
     def test_recognize_table_cells_returns_structured_ocr_table(self) -> None:
         image = np.zeros((10, 10), dtype=np.uint8)
         grid = GridStructure(

@@ -55,6 +55,26 @@ class TestTesseractOcrEngine(unittest.TestCase):
         self.assertEqual(image_to_string.call_args.kwargs["lang"], "eng")
         self.assertEqual(image_to_string.call_args.kwargs["config"], "--oem 3 --psm 6")
 
+    @patch("src.ocr.tesseract_engine.shutil.which", return_value=None)
+    def test_recognize_requires_tesseract_executable(self, which) -> None:
+        engine = TesseractOcrEngine()
+
+        with self.assertRaisesRegex(RuntimeError, "not found on PATH"):
+            engine.recognize(np.array([[0, 255]], dtype=np.uint8))
+
+        which.assert_called_once_with("tesseract")
+
+    @patch("src.ocr.tesseract_engine.pytesseract.image_to_string")
+    @patch("src.ocr.tesseract_engine.shutil.which", return_value="tesseract")
+    def test_recognize_wraps_permission_errors(self, which, image_to_string) -> None:
+        image_to_string.side_effect = PermissionError("blocked")
+        engine = TesseractOcrEngine()
+
+        with self.assertRaisesRegex(RuntimeError, "not runnable"):
+            engine.recognize(np.array([[0, 255]], dtype=np.uint8))
+
+        which.assert_called_once_with("tesseract")
+
     @patch("src.ocr.tesseract_engine.pytesseract.image_to_data")
     def test_mean_confidence_returns_none_without_valid_values(
         self, image_to_data
