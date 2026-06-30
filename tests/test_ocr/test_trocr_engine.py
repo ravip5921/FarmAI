@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import numpy as np
 
+from src.ocr.image_preprocessing import CellImagePreprocessConfig
 from src.ocr.trocr_engine import TrOcrConfig, TrOcrHandwrittenEngine
 
 
@@ -117,7 +118,16 @@ class TestTrOcrHandwrittenEngine(unittest.TestCase):
 
     def test_prepare_image_accepts_grayscale_bgr_bgra_and_clips_values(self) -> None:
         with patch.dict(sys.modules, _fake_modules()):
-            engine = TrOcrHandwrittenEngine(TrOcrConfig(device="cpu"))
+            engine = TrOcrHandwrittenEngine(
+                TrOcrConfig(
+                    device="cpu",
+                    preprocess=CellImagePreprocessConfig(
+                        crop_to_ink=False,
+                        border=0,
+                        target_height=None,
+                    ),
+                )
+            )
 
         gray = engine._prepare_image(np.array([[300.0, -1.0]], dtype=np.float32))
         bgr = engine._prepare_image(np.zeros((1, 1, 3), dtype=np.uint8))
@@ -127,6 +137,27 @@ class TestTrOcrHandwrittenEngine(unittest.TestCase):
         self.assertEqual(gray[1].shape, (1, 2, 3))
         self.assertEqual(bgr[1].shape, (1, 1, 3))
         self.assertEqual(bgra[1].shape, (1, 1, 3))
+
+    def test_prepare_image_defaults_to_padded_line_crop(self) -> None:
+        with patch.dict(sys.modules, _fake_modules()):
+            engine = TrOcrHandwrittenEngine(TrOcrConfig(device="cpu"))
+
+        image = np.full((50, 140), 255, dtype=np.uint8)
+        image[20:26, 60:92] = 0
+
+        prepared = engine._prepare_image(image)
+        with patch.dict(sys.modules, _fake_modules()):
+            uncropped_engine = TrOcrHandwrittenEngine(
+                TrOcrConfig(
+                    device="cpu",
+                    preprocess=CellImagePreprocessConfig(crop_to_ink=False),
+                )
+            )
+        uncropped = uncropped_engine._prepare_image(image)
+
+        self.assertEqual(prepared[1].dtype, np.uint8)
+        self.assertEqual(prepared[1].shape[2], 3)
+        self.assertLess(prepared[1].shape[1], uncropped[1].shape[1])
 
     def test_prepare_image_rejects_unsupported_shapes(self) -> None:
         with patch.dict(sys.modules, _fake_modules()):

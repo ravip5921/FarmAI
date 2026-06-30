@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .base import CellOcrEngine
+from .image_preprocessing import CellImagePreprocessConfig
 from .tesseract_engine import TesseractConfig, TesseractOcrEngine
 from .trocr_engine import TrOcrConfig, TrOcrHandwrittenEngine
 
@@ -43,13 +44,17 @@ def create_ocr_engine(
     **kwargs,
 ) -> CellOcrEngine:
     normalized = name.strip().lower()
+    preprocess = kwargs.get("preprocess")
+    if preprocess is None:
+        preprocess = CellImagePreprocessConfig()
     if normalized == "tesseract":
         return TesseractOcrEngine(
             TesseractConfig(
                 lang=kwargs.get("lang", "eng"),
-                psm=int(kwargs.get("psm", 6)),
+                psm=int(kwargs.get("psm", 13)),
                 oem=int(kwargs.get("oem", 3)),
                 extra_config=kwargs.get("extra_config", ""),
+                preprocess=preprocess,
             )
         )
     if normalized in {"trocr", "trocr-handwritten"}:
@@ -61,6 +66,7 @@ def create_ocr_engine(
                 ),
                 device=kwargs.get("device"),
                 max_new_tokens=int(kwargs.get("max_new_tokens", 64)),
+                preprocess=preprocess,
             )
         )
 

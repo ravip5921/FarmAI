@@ -5,12 +5,21 @@ from unittest.mock import patch
 
 import numpy as np
 
+from src.ocr.image_preprocessing import CellImagePreprocessConfig
 from src.ocr.tesseract_engine import OcrText, TesseractConfig, TesseractOcrEngine
 
 
 class TestTesseractOcrEngine(unittest.TestCase):
     def test_prepare_image_converts_color_and_clips_to_uint8(self) -> None:
-        engine = TesseractOcrEngine()
+        engine = TesseractOcrEngine(
+            TesseractConfig(
+                preprocess=CellImagePreprocessConfig(
+                    crop_to_ink=False,
+                    border=0,
+                    target_height=None,
+                )
+            )
+        )
         image = np.array(
             [
                 [[300.0, 0.0, 0.0], [0.0, 300.0, 0.0]],
@@ -27,12 +36,42 @@ class TestTesseractOcrEngine(unittest.TestCase):
         self.assertTrue(np.all(prepared <= 255))
 
     def test_prepare_image_keeps_uint8_grayscale_values(self) -> None:
-        engine = TesseractOcrEngine(TesseractConfig(lang="spa", psm=7, oem=1))
+        engine = TesseractOcrEngine(
+            TesseractConfig(
+                lang="spa",
+                psm=7,
+                oem=1,
+                preprocess=CellImagePreprocessConfig(
+                    crop_to_ink=False,
+                    border=0,
+                    target_height=None,
+                ),
+            )
+        )
         image = np.array([[0, 128], [200, 255]], dtype=np.uint8)
 
         prepared = engine._prepare_image(image)
 
         np.testing.assert_array_equal(prepared, image)
+
+    def test_prepare_image_defaults_to_line_like_cell_crop(self) -> None:
+        engine = TesseractOcrEngine()
+        image = np.full((40, 120), 255, dtype=np.uint8)
+        image[18:22, 50:70] = 0
+
+        prepared = engine._prepare_image(image)
+        uncropped = TesseractOcrEngine(
+            TesseractConfig(
+                preprocess=CellImagePreprocessConfig(
+                    crop_to_ink=False,
+                )
+            )
+        )._prepare_image(image)
+
+        self.assertEqual(prepared.dtype, np.uint8)
+        self.assertLess(prepared.shape[1], uncropped.shape[1])
+        self.assertGreater(prepared.shape[0], 4)
+        self.assertTrue(np.all(prepared[[0, -1], :] == 255))
 
     @patch("src.ocr.tesseract_engine.pytesseract.image_to_data")
     @patch("src.ocr.tesseract_engine.pytesseract.image_to_string")

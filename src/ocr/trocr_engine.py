@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 
 from .base import OcrText
+from .image_preprocessing import CellImagePreprocessConfig, prepare_cell_image_for_ocr
 
 
 @dataclass(frozen=True)
@@ -13,6 +14,7 @@ class TrOcrConfig:
     model_name: str = "microsoft/trocr-base-handwritten"
     device: str | None = None
     max_new_tokens: int = 64
+    preprocess: CellImagePreprocessConfig = CellImagePreprocessConfig()
 
 
 class TrOcrHandwrittenEngine:
@@ -43,7 +45,10 @@ class TrOcrHandwrittenEngine:
         self.model.eval()
 
     def _prepare_image(self, image: np.ndarray):
-        array = np.asarray(image)
+        array = prepare_cell_image_for_ocr(
+            np.asarray(image),
+            self.config.preprocess,
+        )
         if array.ndim == 2:
             rgb = cv2.cvtColor(array, cv2.COLOR_GRAY2RGB)
         elif array.ndim == 3 and array.shape[2] == 3:

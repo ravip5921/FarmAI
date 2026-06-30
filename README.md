@@ -192,6 +192,12 @@ TrOCR handwritten model and requires the optional handwritten OCR dependencies.
 Install PyTorch explicitly for your machine first, then install FarmAI's HTR
 extra.
 
+Both engines receive one cropped cell at a time. Before OCR, FarmAI normalizes
+each crop into a line-like image by enforcing dark ink on a light background,
+cropping to visible ink, adding a clean white border, and upscaling small text.
+The Tesseract backend defaults to page segmentation mode 13 so the cropped cell
+is treated as a raw text line instead of a page or text block.
+
 CPU-only Linux install:
 
 ```py

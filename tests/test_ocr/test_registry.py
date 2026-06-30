@@ -29,6 +29,12 @@ class TestOcrRegistry(unittest.TestCase):
         self.assertEqual(engine.config.psm, 7)
         self.assertEqual(engine.config.oem, 1)
 
+    def test_create_tesseract_engine_defaults_to_raw_line_psm(self) -> None:
+        engine = create_ocr_engine("tesseract")
+
+        self.assertIsInstance(engine, TesseractOcrEngine)
+        self.assertEqual(engine.config.psm, 13)
+
     def test_create_trocr_engine_passes_model_options(self) -> None:
         with patch("src.ocr.registry.TrOcrHandwrittenEngine") as engine_cls:
             create_ocr_engine(

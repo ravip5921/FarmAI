@@ -3,10 +3,10 @@ from __future__ import annotations
 import shutil
 from dataclasses import dataclass
 
-import cv2
 import numpy as np
 
 from .base import OcrText
+from .image_preprocessing import CellImagePreprocessConfig, prepare_cell_image_for_ocr
 
 try:  # pragma: no cover - import availability depends on local environment
     import pytesseract
@@ -34,9 +34,10 @@ except Exception:  # pragma: no cover - handled at OCR runtime
 @dataclass(frozen=True)
 class TesseractConfig:
     lang: str = "eng"
-    psm: int = 6
+    psm: int = 13
     oem: int = 3
     extra_config: str = ""
+    preprocess: CellImagePreprocessConfig = CellImagePreprocessConfig()
 
     def to_config_string(self) -> str:
         parts = [f"--oem {self.oem}", f"--psm {self.psm}"]
@@ -52,12 +53,7 @@ class TesseractOcrEngine:
         self.config = config or TesseractConfig()
 
     def _prepare_image(self, image: np.ndarray) -> np.ndarray:
-        array = np.asarray(image)
-        if array.ndim == 3:
-            array = cv2.cvtColor(array, cv2.COLOR_BGR2GRAY)
-        if array.dtype != np.uint8:
-            array = np.clip(array, 0, 255).astype(np.uint8)
-        return array
+        return prepare_cell_image_for_ocr(np.asarray(image), self.config.preprocess)
 
     def recognize(self, image: np.ndarray) -> OcrText:
         executable = shutil.which("tesseract")
