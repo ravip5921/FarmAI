@@ -4,6 +4,7 @@ from .cell_ocr import (
     OcrTable,
     recognize_extracted_cells,
     recognize_table_cells,
+    save_extracted_cell_images,
 )
 from .column_filter import FILTER_OUT_COLUMNS
 from .image_preprocessing import CellImagePreprocessConfig, prepare_cell_image_for_ocr
@@ -40,4 +41,5 @@ __all__ = [
     "recognize_extracted_cells",
     "recognize_table_cells",
     "run_table_ocr",
+    "save_extracted_cell_images",
 ]

@@ -28,6 +28,17 @@ class TestCellExtraction(unittest.TestCase):
 
         self.assertIsNone(crop_cell(image, cell, padding=2))
 
+    def test_crop_cell_expands_with_context_padding(self) -> None:
+        image = np.arange(100, dtype=np.uint8).reshape(10, 10)
+        cell = GridCell(row=0, col=1, bbox=(2, 2, 4, 4))
+
+        extracted = crop_cell(image, cell, padding=1, context_padding=3)
+
+        self.assertIsNotNone(extracted)
+        assert extracted is not None
+        self.assertEqual(extracted.bbox, (0, 0, 8, 8))
+        self.assertTrue(np.array_equal(extracted.image, image[0:8, 0:8]))
+
     def test_extract_cell_images_returns_row_major_cells(self) -> None:
         image = np.zeros((10, 10), dtype=np.uint8)
         grid = GridStructure(

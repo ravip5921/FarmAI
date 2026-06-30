@@ -19,15 +19,17 @@ def _clip_bbox(
     bbox: tuple[int, int, int, int],
     image_shape: tuple[int, ...],
     padding: int = 0,
+    context_padding: int = 0,
 ) -> tuple[int, int, int, int] | None:
     height, width = image_shape[:2]
     x, y, w, h = bbox
     pad = max(0, int(padding))
+    context = max(0, int(context_padding))
 
-    left = max(0, int(x) + pad)
-    top = max(0, int(y) + pad)
-    right = min(width, int(x + w) - pad)
-    bottom = min(height, int(y + h) - pad)
+    left = max(0, int(x) - context + pad)
+    top = max(0, int(y) - context + pad)
+    right = min(width, int(x + w) + context - pad)
+    bottom = min(height, int(y + h) + context - pad)
 
     if right <= left or bottom <= top:
         return None
@@ -39,9 +41,15 @@ def crop_cell(
     cell: GridCell,
     *,
     padding: int = 2,
+    context_padding: int = 0,
 ) -> ExtractedCell | None:
     """Crop one grid cell from an image, clipping safely to image bounds."""
-    clipped = _clip_bbox(cell.bbox, image.shape, padding=padding)
+    clipped = _clip_bbox(
+        cell.bbox,
+        image.shape,
+        padding=padding,
+        context_padding=context_padding,
+    )
     if clipped is None:
         return None
 
@@ -59,11 +67,17 @@ def extract_cell_images(
     grid: GridStructure,
     *,
     padding: int = 2,
+    context_padding: int = 0,
 ) -> list[ExtractedCell]:
     """Crop every valid cell in row-major order."""
     cells: list[ExtractedCell] = []
     for cell in sorted(grid.cells, key=lambda item: (item.row, item.col)):
-        extracted = crop_cell(image, cell, padding=padding)
+        extracted = crop_cell(
+            image,
+            cell,
+            padding=padding,
+            context_padding=context_padding,
+        )
         if extracted is not None:
             cells.append(extracted)
     return cells

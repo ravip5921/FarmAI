@@ -198,6 +198,15 @@ cropping to visible ink, adding a clean white border, and upscaling small text.
 The Tesseract backend defaults to page segmentation mode 13 so the cropped cell
 is treated as a raw text line instead of a page or text block.
 
+For scanned sheets where handwriting is cut off by tight grid detection, save
+the cropped cells and add outward crop context:
+
+```py
+farm-ai ./examples/sample_01.jpg --save-cells --ocr-padding 0 --ocr-context-padding 8
+```
+
+The expanded crops are written under `debug_outputs/<image_name>_cells/`.
+
 CPU-only Linux install:
 
 ```py

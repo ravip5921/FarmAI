@@ -45,11 +45,13 @@ def _args(**overrides):
         "save_intersections": True,
         "save_csv": True,
         "save_json": True,
+        "save_cells": True,
         "save_image": True,
         "save_overlay": True,
         "save_all": False,
         "no_print_csv": False,
         "ocr_padding": 4,
+        "ocr_context_padding": 0,
     }
     values.update(overrides)
     return argparse.Namespace(**values)
@@ -62,8 +64,11 @@ class TestMainPipeline(unittest.TestCase):
             "sample.jpg",
             "--no-debug",
             "--save-all",
+            "--save-cells",
             "--ocr-padding",
             "9",
+            "--ocr-context-padding",
+            "11",
             "--ocr-engine",
             "tesseract",
         ]
@@ -74,7 +79,9 @@ class TestMainPipeline(unittest.TestCase):
         self.assertEqual(args.image_path, Path("sample.jpg"))
         self.assertTrue(args.no_debug)
         self.assertTrue(args.save_all)
+        self.assertTrue(args.save_cells)
         self.assertEqual(args.ocr_padding, 9)
+        self.assertEqual(args.ocr_context_padding, 11)
 
     def test_build_pipeline_uses_requested_parameters(self) -> None:
         pipeline = main.build_pipeline(window_size=31, k=0.2, denoise_kernel=5)
@@ -142,7 +149,9 @@ class TestMainPipeline(unittest.TestCase):
                     debug_dir=Path(tmpdir),
                     save_csv=True,
                     save_json=True,
+                    save_cells=True,
                     padding=7,
+                    context_padding=8,
                     engine="engine",
                 )
 
@@ -153,7 +162,9 @@ class TestMainPipeline(unittest.TestCase):
         self.assertEqual(
             export.call_args.kwargs["json_path"].name, "table_ocr_record.json"
         )
+        self.assertEqual(export.call_args.kwargs["cell_image_dir"].name, "record_cells")
         self.assertEqual(export.call_args.kwargs["padding"], 7)
+        self.assertEqual(export.call_args.kwargs["context_padding"], 8)
 
     def test_process_ocr_without_exports_keeps_paths_empty(self) -> None:
         table_result = Mock()
@@ -169,6 +180,7 @@ class TestMainPipeline(unittest.TestCase):
         self.assertEqual(result, "ocr")
         self.assertIsNone(export.call_args.kwargs["csv_path"])
         self.assertIsNone(export.call_args.kwargs["json_path"])
+        self.assertIsNone(export.call_args.kwargs["cell_image_dir"])
 
     def test_run_page_saves_outputs_and_prints_csv(self) -> None:
         page = DocumentImage(np.zeros((2, 2), dtype=np.uint8))
@@ -216,6 +228,7 @@ class TestMainPipeline(unittest.TestCase):
             debug_dir=Path("debug"),
             ocr_engine="tesseract",
             trocr_model="model",
+            save_cells=False,
         )
         page = DocumentImage(np.zeros((1, 1)), metadata={"page_index": 2})
         loaded = LoadedDocument([page], Path("record.pdf"))
@@ -240,6 +253,7 @@ class TestMainPipeline(unittest.TestCase):
             debug_dir=Path("debug"),
             ocr_engine="tesseract",
             trocr_model="model",
+            save_cells=False,
         )
         loaded = DocumentImage(np.zeros((1, 1)))
 

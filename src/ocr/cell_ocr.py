@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from collections.abc import Collection
 from dataclasses import dataclass
+from pathlib import Path
 
+import cv2
 import numpy as np
 
 from src.table.cell_extraction import ExtractedCell, extract_cell_images
@@ -79,6 +81,31 @@ def _get_ocr_engine(engine: CellOcrEngine | None) -> CellOcrEngine:
     return engine
 
 
+def _cell_image_filename(cell: ExtractedCell) -> str:
+    x, y, width, height = cell.bbox
+    return (
+        f"row_{cell.row:03d}_col_{cell.col:03d}"
+        f"_x{x:04d}_y{y:04d}_w{width:04d}_h{height:04d}.png"
+    )
+
+
+def save_extracted_cell_images(
+    cells: list[ExtractedCell],
+    directory: str | Path,
+) -> list[Path]:
+    """Save cropped cell images with row/column and bbox coordinates."""
+    output_dir = Path(directory)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    written: list[Path] = []
+    for cell in cells:
+        path = output_dir / _cell_image_filename(cell)
+        if not cv2.imwrite(str(path), cell.image):
+            raise RuntimeError(f"Could not write cell image: {path}")
+        written.append(path)
+    return written
+
+
 def _normalize_column_name(value: str) -> str:
     return " ".join(value.casefold().split())
 
@@ -119,9 +146,19 @@ def recognize_table_cells(
     *,
     engine: CellOcrEngine | None = None,
     padding: int = 2,
+    context_padding: int = 0,
     filter_out_columns: Collection[str] | None = None,
+    cell_image_dir: str | Path | None = None,
 ) -> OcrTable:
-    extracted_cells = extract_cell_images(image, grid, padding=padding)
+    extracted_cells = extract_cell_images(
+        image,
+        grid,
+        padding=padding,
+        context_padding=context_padding,
+    )
+    if cell_image_dir is not None:
+        save_extracted_cell_images(extracted_cells, cell_image_dir)
+
     row_count = max(0, len(grid.row_coords) - 1)
     col_count = max(0, len(grid.col_coords) - 1)
     normalized_filter = {

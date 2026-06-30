@@ -167,6 +167,43 @@ class TestCellOcr(unittest.TestCase):
             self.assertTrue(result.csv_path is not None and result.csv_path.exists())
             self.assertTrue(result.json_path is not None and result.json_path.exists())
 
+    def test_export_table_ocr_saves_cropped_cell_images(self) -> None:
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        image = np.arange(100, dtype=np.uint8).reshape(10, 10)
+        grid = GridStructure(
+            row_coords=[0, 5, 10],
+            col_coords=[0, 5],
+            cells=[
+                GridCell(row=0, col=0, bbox=(0, 0, 5, 5)),
+                GridCell(row=1, col=0, bbox=(0, 5, 5, 5)),
+            ],
+        )
+
+        with TemporaryDirectory() as tmpdir:
+            cell_dir = Path(tmpdir) / "record_cells"
+            result = export_table_ocr(
+                image,
+                grid,
+                cell_image_dir=cell_dir,
+                engine=FakeEngine(),
+                padding=0,
+                context_padding=1,
+                filter_out_columns=set(),
+            )
+
+            files = sorted(path.name for path in cell_dir.glob("*.png"))
+
+        self.assertEqual(result.table.text_matrix(), [["cell-1"], ["cell-2"]])
+        self.assertEqual(
+            files,
+            [
+                "row_000_col_000_x0000_y0000_w0006_h0006.png",
+                "row_001_col_000_x0000_y0004_w0006_h0006.png",
+            ],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

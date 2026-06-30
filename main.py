@@ -78,6 +78,11 @@ def parse_args() -> argparse.Namespace:
         help="Save OCR output as a JSON file after table detection",
     )
     parser.add_argument(
+        "--save-cells",
+        action="store_true",
+        help="Save cropped OCR cell images under debug output",
+    )
+    parser.add_argument(
         "--no-print-csv",
         action="store_true",
         help="Do not print OCR output as CSV after processing",
@@ -87,6 +92,12 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=2,
         help="Padding to trim from each extracted cell before OCR",
+    )
+    parser.add_argument(
+        "--ocr-context-padding",
+        type=int,
+        default=0,
+        help="Extra pixels to expand each cell crop outward before OCR",
     )
     parser.add_argument(
         "--ocr-engine",
@@ -104,7 +115,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help=(
             "Save all debug images and OCR exports "
-            "(line detection, intersections, final table, overlay, CSV, JSON)"
+            "(line detection, intersections, final table, overlay, cells, CSV, JSON)"
         ),
     )
     return parser.parse_args()
@@ -203,7 +214,9 @@ def _run_page(
         debug_dir=debug_dir,
         save_csv=args.save_csv or args.save_all,
         save_json=args.save_json or args.save_all,
+        save_cells=args.save_cells or args.save_all,
         padding=args.ocr_padding,
+        context_padding=args.ocr_context_padding,
         engine=ocr_engine,
     )
     table_image = render_grid_structure(table_result.grid, result.image.shape)
@@ -252,18 +265,23 @@ def process_ocr(
     debug_dir: Path | None = None,
     save_csv: bool = False,
     save_json: bool = False,
+    save_cells: bool = False,
     padding: int = 2,
+    context_padding: int = 0,
     engine: CellOcrEngine | None = None,
 ):
     """Run OCR for the detected grid and optionally save CSV/JSON exports."""
     stem = Path(str(image_name or "table")).stem or "table"
     csv_path = json_path = None
-    if debug_dir is not None and (save_csv or save_json):
+    cell_image_dir = None
+    if debug_dir is not None and (save_csv or save_json or save_cells):
         debug_dir.mkdir(parents=True, exist_ok=True)
         if save_csv:
             csv_path = debug_dir / f"table_ocr_{stem}.csv"
         if save_json:
             json_path = debug_dir / f"table_ocr_{stem}.json"
+        if save_cells:
+            cell_image_dir = debug_dir / f"{stem}_cells"
     return export_table_ocr(
         image,
         table_result.grid,
@@ -271,7 +289,9 @@ def process_ocr(
         json_path=json_path,
         engine=engine,
         padding=padding,
+        context_padding=context_padding,
         filter_out_columns=FILTER_OUT_COLUMNS,
+        cell_image_dir=cell_image_dir,
     )
 
 
