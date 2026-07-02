@@ -71,6 +71,8 @@ class TestMainPipeline(unittest.TestCase):
             "11",
             "--ocr-engine",
             "tesseract",
+            "--template",
+            "boar_room",
         ]
 
         with patch.object(sys, "argv", argv):
@@ -82,6 +84,7 @@ class TestMainPipeline(unittest.TestCase):
         self.assertTrue(args.save_cells)
         self.assertEqual(args.ocr_padding, 9)
         self.assertEqual(args.ocr_context_padding, 11)
+        self.assertEqual(args.template, "boar_room")
 
     def test_build_pipeline_uses_requested_parameters(self) -> None:
         pipeline = main.build_pipeline(window_size=31, k=0.2, denoise_kernel=5)
@@ -127,10 +130,12 @@ class TestMainPipeline(unittest.TestCase):
                 debug_dir=Path("debug"),
                 save_line_detection=True,
                 save_intersections=True,
+                template="template",
             )
 
         self.assertEqual(result, "table")
         process.assert_called_once()
+        self.assertEqual(process.call_args.kwargs["template"], "template")
 
     def test_process_ocr_sets_requested_export_paths(self) -> None:
         table_result = Mock()
@@ -165,6 +170,7 @@ class TestMainPipeline(unittest.TestCase):
         self.assertEqual(export.call_args.kwargs["cell_image_dir"].name, "record_cells")
         self.assertEqual(export.call_args.kwargs["padding"], 7)
         self.assertEqual(export.call_args.kwargs["context_padding"], 8)
+        self.assertIsNone(export.call_args.kwargs["filter_out_column_indices"])
 
     def test_process_ocr_without_exports_keeps_paths_empty(self) -> None:
         table_result = Mock()
@@ -229,6 +235,7 @@ class TestMainPipeline(unittest.TestCase):
             ocr_engine="tesseract",
             trocr_model="model",
             save_cells=False,
+            template=None,
         )
         page = DocumentImage(np.zeros((1, 1)), metadata={"page_index": 2})
         loaded = LoadedDocument([page], Path("record.pdf"))
@@ -254,6 +261,7 @@ class TestMainPipeline(unittest.TestCase):
             ocr_engine="tesseract",
             trocr_model="model",
             save_cells=False,
+            template=None,
         )
         loaded = DocumentImage(np.zeros((1, 1)))
 

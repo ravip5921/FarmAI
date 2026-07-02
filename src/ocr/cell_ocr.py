@@ -148,6 +148,8 @@ def recognize_table_cells(
     padding: int = 2,
     context_padding: int = 0,
     filter_out_columns: Collection[str] | None = None,
+    filter_out_column_indices: Collection[int] | None = None,
+    column_names: Collection[str] | None = None,
     cell_image_dir: str | Path | None = None,
 ) -> OcrTable:
     extracted_cells = extract_cell_images(
@@ -161,24 +163,82 @@ def recognize_table_cells(
 
     row_count = max(0, len(grid.row_coords) - 1)
     col_count = max(0, len(grid.col_coords) - 1)
+    filtered_cols = {
+        int(col)
+        for col in (filter_out_column_indices or ())
+        if 0 <= int(col) < col_count
+    }
     normalized_filter = {
         _normalize_column_name(name)
         for name in (filter_out_columns or ())
         if _normalize_column_name(name)
     }
+    known_column_names = list(column_names or [])
+    if known_column_names and len(known_column_names) == col_count:
+        ocr_engine = _get_ocr_engine(engine)
+        header_cells = {
+            cell.col: cell
+            for cell in extracted_cells
+            if cell.row == 0 and cell.col not in filtered_cols
+        }
+        recognized = [
+            OcrCell(
+                row=0,
+                col=col,
+                bbox=header_cells[col].bbox if col in header_cells else (0, 0, 1, 1),
+                text=known_column_names[col],
+                confidence=None,
+            )
+            for col in range(col_count)
+            if col not in filtered_cols
+        ]
+        for cell in (
+            cell
+            for cell in extracted_cells
+            if cell.row != 0 and cell.col not in filtered_cols
+        ):
+            result = ocr_engine.recognize(cell.image)
+            recognized.append(
+                OcrCell(
+                    row=cell.row,
+                    col=cell.col,
+                    bbox=cell.bbox,
+                    text=result.text,
+                    confidence=result.confidence,
+                )
+            )
+
+        return _compact_columns(
+            recognized,
+            row_count=row_count,
+            original_col_count=col_count,
+            filtered_cols=filtered_cols,
+        )
+
     if not normalized_filter:
-        return recognize_extracted_cells(
-            extracted_cells,
+        table = recognize_extracted_cells(
+            [cell for cell in extracted_cells if cell.col not in filtered_cols],
             engine=engine,
             row_count=row_count,
-            col_count=col_count,
+            col_count=col_count if not filtered_cols else None,
         )
+        if filtered_cols:
+            return _compact_columns(
+                table.cells,
+                row_count=row_count,
+                original_col_count=col_count,
+                filtered_cols=filtered_cols,
+            )
+        return table
 
     ocr_engine = _get_ocr_engine(engine)
     recognized: list[OcrCell] = []
-    filtered_cols: set[int] = set()
 
-    for cell in (cell for cell in extracted_cells if cell.row == 0):
+    for cell in (
+        cell
+        for cell in extracted_cells
+        if cell.row == 0 and cell.col not in filtered_cols
+    ):
         result = ocr_engine.recognize(cell.image)
         if _normalize_column_name(result.text) in normalized_filter:
             filtered_cols.add(cell.col)

@@ -66,6 +66,7 @@ class _FakeStreamlit(types.ModuleType):
         *,
         uploaded_file=None,
         engine: str = "tesseract",
+        template: str = "",
         text_values: list[str] | None = None,
         buttons: list[bool] | None = None,
         session_state: _SessionState | None = None,
@@ -73,6 +74,7 @@ class _FakeStreamlit(types.ModuleType):
         super().__init__("streamlit")
         self.uploaded_file = uploaded_file
         self.engine = engine
+        self.template = template
         self.text_values = list(text_values or [])
         self.buttons = list(buttons or [])
         self.session_state = session_state or _SessionState()
@@ -95,6 +97,8 @@ class _FakeStreamlit(types.ModuleType):
         return self.uploaded_file
 
     def selectbox(self, *args, **kwargs):
+        if args and args[0] == "Template":
+            return self.template
         return self.engine
 
     def text_input(self, *args, **kwargs):
@@ -291,7 +295,8 @@ class TestStreamlitColumnFilter(unittest.TestCase):
         with (
             patch("streamlit_app.load_first_page", return_value=page),
             patch("streamlit_app.build_pipeline", return_value=pipeline),
-            patch("streamlit_app.process_table_image", return_value=table_result),
+            patch("streamlit_app.load_template") as load_template,
+            patch("streamlit_app.process_table_image", return_value=table_result) as process_table,
             patch("streamlit_app.create_ocr_engine", return_value="engine"),
             patch(
                 "streamlit_app.export_table_ocr",
@@ -310,11 +315,14 @@ class TestStreamlitColumnFilter(unittest.TestCase):
                 _UploadedFile(),
                 ocr_engine_name="trocr-handwritten",
                 trocr_model_name="custom/model",
+                template_id=None,
                 filter_out_columns={"Pen"},
             )
 
         self.assertEqual(result.original_df.values.tolist(), [["A1"]])
         self.assertEqual(result.line_preview.shape, (2, 4))
+        load_template.assert_not_called()
+        self.assertIsNone(process_table.call_args.kwargs["template"])
         self.assertEqual(export.call_args.kwargs["filter_out_columns"], {"Pen"})
 
     def test_apply_styles_and_empty_state_render_streamlit_calls(self) -> None:
@@ -353,6 +361,7 @@ class TestStreamlitColumnFilter(unittest.TestCase):
             streamlit_app.main()
 
         self.assertEqual(run.call_args.kwargs["filter_out_columns"], {"Pen", "Date"})
+        self.assertIsNone(run.call_args.kwargs["template_id"])
         self.assertIn("result", fake_st.session_state)
         self.assertTrue(any(call[0] == "download_button" for call in fake_st.calls))
 

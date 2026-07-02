@@ -1,0 +1,98 @@
+{
+  "id": "boar_room",
+  "name": "Boar Room Log",
+  "description": "Template for boar room farm log tables.",
+  "table": {
+    "column_widths": [1.5, 1.5, 1.6, 1.6, 0.4, 1.6, 20, 3,0.4, 2.7],
+    "uniform_row_height": true
+  },
+  "columns": [
+    {
+      "index": 0,
+      "key": "date",
+      "name": "Date",
+      "value_type": "date_dd_mon",
+      "format": "DD-Mon",
+      "filter_out": false
+    },
+    {
+      "index": 1,
+      "key": "current_temperature",
+      "name": "Current Temperature",
+      "value_type": "temperature",
+      "format": "TT.T",
+      "range": {
+        "min": 80.0,
+        "max": 120.0
+      },
+      "filter_out": false
+    },
+    {
+      "index": 2,
+      "key": "hi",
+      "name": "HI",
+      "value_type": "temperature",
+      "format": "TT.T",
+      "range": {
+        "min": 80.0,
+        "max": 120.0
+      },
+      "filter_out": false
+    },
+    {
+      "index": 3,
+      "key": "lo",
+      "name": "LO",
+      "value_type": "temperature",
+      "format": "TT.T",
+      "range": {
+        "min": 80.0,
+        "max": 120.0
+      },
+      "filter_out": false
+    },
+    {
+      "index": 4,
+      "key": "divider1",
+      "name": "EMPTY",
+      "value_type": "empty",
+      "filter_out": true
+    },
+    {
+      "index": 5,
+      "key": "boar_pac",
+      "name": "Boar Pac",
+      "value_type": "short_text",
+      "filter_out": true
+    },
+    {
+      "index": 6,
+      "key": "comments",
+      "name": "Comments",
+      "value_type": "english_text",
+      "common_values": ["All good"],
+      "filter_out": false
+    },
+    {
+      "index": 7,
+      "key": "empty",
+      "name": "EMPTY",
+      "value_type": "empty",
+      "filter_out": true
+    },
+    {
+      "index": 8,
+      "key": "divider2",
+      "name": "EMPTY",
+      "value_type": "empty",
+      "filter_out": true
+    },
+    {
+      "index": 9,
+      "key": "manager_initials",
+      "name": "Mgr. Initials",
+      "value_type": "initials",
+      "filter_out": true
+    }
+  ]
+}

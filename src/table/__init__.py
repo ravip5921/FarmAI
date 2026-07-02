@@ -9,6 +9,7 @@ import numpy as np
 
 from src.core.image import DocumentImage
 from src.core.visualization import save_debug
+from src.templates import FormTemplate
 
 from .cell_extraction import ExtractedCell, crop_cell, extract_cell_images
 from .grid_reconstruction import GridCell, GridStructure, reconstruct_grid
@@ -19,6 +20,7 @@ from .intersections import (
 )
 from .line_detection import LineDetectionResult, LineDetectionStage, detect_lines
 from .line_refinement import GridRefinementResult, refine_grid_with_projection_profiles
+from .template_guidance import TemplateGridResult, apply_template_to_grid
 
 
 @dataclass
@@ -27,6 +29,8 @@ class TablePipelineResult:
     intersections: IntersectionResult
     grid: GridStructure
     grid_refinement: GridRefinementResult | None = None
+    template_id: str | None = None
+    template_grid: TemplateGridResult | None = None
 
 
 def _extract_bitmap(bitmap: Any) -> np.ndarray:
@@ -103,6 +107,7 @@ def process_table_image(
     debug_dir: Path | None = None,
     save_line_detection: bool = False,
     save_intersections: bool = False,
+    template: FormTemplate | None = None,
 ) -> TablePipelineResult:
     """Run table-structure extraction on a binary bitmap image.
 
@@ -146,6 +151,12 @@ def process_table_image(
         intersection_centroids=intersections.centroids,
     )
     grid = grid_refinement.grid if grid_refinement.grid.cells else raw_grid
+    template_grid = None
+    if template is not None:
+        template_grid = apply_template_to_grid(grid, template, image.shape)
+        if template_grid.grid.cells:
+            grid = template_grid.grid
+
     if debug_dir is not None and save_intersections:
         _save_preview(
             debug_dir, "grid_projection", stem, render_grid_structure(grid, image.shape)
@@ -156,6 +167,8 @@ def process_table_image(
         intersections=intersections,
         grid=grid,
         grid_refinement=grid_refinement,
+        template_id=template.id if template is not None else None,
+        template_grid=template_grid,
     )
 
 
@@ -169,6 +182,7 @@ __all__ = [
     "LineDetectionResult",
     "LineDetectionStage",
     "TablePipelineResult",
+    "TemplateGridResult",
     "detect_intersections",
     "detect_lines",
     "crop_cell",
@@ -178,4 +192,5 @@ __all__ = [
     "render_grid_overlay",
     "render_grid_structure",
     "reconstruct_grid",
+    "apply_template_to_grid",
 ]

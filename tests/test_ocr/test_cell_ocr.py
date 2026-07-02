@@ -122,6 +122,69 @@ class TestCellOcr(unittest.TestCase):
         )
         self.assertEqual([cell.col for cell in table.cells], [0, 1, 0, 1])
 
+    def test_recognize_table_cells_filters_known_column_indices_without_header_ocr(
+        self,
+    ) -> None:
+        image = np.zeros((10, 15), dtype=np.uint8)
+        grid = GridStructure(
+            row_coords=[0, 5, 10],
+            col_coords=[0, 5, 10, 15],
+            cells=[
+                GridCell(row=0, col=0, bbox=(0, 0, 5, 5)),
+                GridCell(row=0, col=1, bbox=(5, 0, 5, 5)),
+                GridCell(row=0, col=2, bbox=(10, 0, 5, 5)),
+                GridCell(row=1, col=0, bbox=(0, 5, 5, 5)),
+                GridCell(row=1, col=1, bbox=(5, 5, 5, 5)),
+                GridCell(row=1, col=2, bbox=(10, 5, 5, 5)),
+            ],
+        )
+        engine = FakeEngine()
+
+        table = recognize_table_cells(
+            image,
+            grid,
+            engine=engine,
+            padding=0,
+            filter_out_column_indices={1},
+        )
+
+        self.assertEqual(engine.calls, 4)
+        self.assertEqual(table.col_count, 2)
+        self.assertEqual(table.text_matrix(), [["cell-1", "cell-2"], ["cell-3", "cell-4"]])
+
+    def test_recognize_table_cells_uses_known_template_headers_without_ocr(
+        self,
+    ) -> None:
+        image = np.zeros((10, 15), dtype=np.uint8)
+        grid = GridStructure(
+            row_coords=[0, 5, 10],
+            col_coords=[0, 5, 10, 15],
+            cells=[
+                GridCell(row=0, col=0, bbox=(0, 0, 5, 5)),
+                GridCell(row=0, col=1, bbox=(5, 0, 5, 5)),
+                GridCell(row=0, col=2, bbox=(10, 0, 5, 5)),
+                GridCell(row=1, col=0, bbox=(0, 5, 5, 5)),
+                GridCell(row=1, col=1, bbox=(5, 5, 5, 5)),
+                GridCell(row=1, col=2, bbox=(10, 5, 5, 5)),
+            ],
+        )
+        engine = FakeEngine()
+
+        table = recognize_table_cells(
+            image,
+            grid,
+            engine=engine,
+            padding=0,
+            filter_out_column_indices={1},
+            column_names=["Date", "Skip", "Comments"],
+        )
+
+        self.assertEqual(engine.calls, 2)
+        self.assertEqual(
+            table.text_matrix(),
+            [["Date", "Comments"], ["cell-1", "cell-2"]],
+        )
+
     def test_tesseract_config_builds_config_string(self) -> None:
         config = TesseractConfig(
             psm=7, oem=1, extra_config="-c preserve_interword_spaces=1"

@@ -28,6 +28,7 @@ from src.preprocessing.denoise import MorphologicalDenoiseStage
 from src.preprocessing.grayscale import GrayscaleStage
 from src.preprocessing.sauvola import SauvolaBinarizationStage
 from src.preprocessing.skew import SkewCorrectionStage
+from src.templates import FormTemplate, get_template_ids, load_template
 from src.table import (
     TablePipelineResult,
     process_table_image,
@@ -53,6 +54,7 @@ class AppResult:
     line_preview: np.ndarray
     original_df: pd.DataFrame
     ocr_engine_name: str
+    template_id: str | None = None
 
 
 def build_pipeline(
@@ -118,6 +120,17 @@ def resolve_filter_out_columns(ui_columns: Collection[str] | None) -> Collection
     return FILTER_OUT_COLUMNS
 
 
+def resolve_template_filter_indices(
+    template: FormTemplate | None,
+    ui_columns: Collection[str] | None,
+) -> set[int] | None:
+    if template is None:
+        return None
+    return template.filtered_column_indices | template.indices_for_column_names(
+        set(ui_columns or ())
+    )
+
+
 def summarize_ocr(table: OcrTable) -> tuple[int, int, int]:
     confidences = [
         float(cell.confidence)
@@ -152,12 +165,18 @@ def run_farmai(
     *,
     ocr_engine_name: str = DEFAULT_OCR_ENGINE,
     trocr_model_name: str = "microsoft/trocr-base-handwritten",
+    template_id: str | None = None,
     filter_out_columns: Collection[str] | None = None,
 ) -> AppResult:
     page = load_first_page(uploaded_file)
     pipeline = build_pipeline()
     processed = pipeline.run(page)
-    table_result = process_table_image(processed.image, image_name=uploaded_file.name)
+    template = load_template(template_id) if template_id else None
+    table_result = process_table_image(
+        processed.image,
+        image_name=uploaded_file.name,
+        template=template,
+    )
     ocr_engine = create_ocr_engine(
         ocr_engine_name,
         model_name=trocr_model_name,
@@ -167,7 +186,16 @@ def run_farmai(
         table_result.grid,
         engine=ocr_engine,
         padding=2,
-        filter_out_columns=resolve_filter_out_columns(filter_out_columns),
+        filter_out_columns=(
+            set()
+            if template is not None
+            else resolve_filter_out_columns(filter_out_columns)
+        ),
+        filter_out_column_indices=resolve_template_filter_indices(
+            template,
+            filter_out_columns,
+        ),
+        column_names=template.column_names if template is not None else None,
     )
 
     overlay = render_grid_overlay(page.image, table_result.grid)
@@ -192,6 +220,7 @@ def run_farmai(
         line_preview=line_preview,
         original_df=df,
         ocr_engine_name=ocr_engine_name,
+        template_id=template.id if template is not None else None,
     )
 
 
@@ -254,6 +283,13 @@ def main() -> None:
             index=engine_names.index(DEFAULT_OCR_ENGINE),
             format_func=lambda name: engine_labels[name],
         )
+        template_ids = get_template_ids()
+        template_options = [""] + template_ids
+        template_id = st.selectbox(
+            "Template",
+            options=template_options,
+            format_func=lambda value: "None" if not value else value,
+        )
         trocr_model_name = "microsoft/trocr-base-handwritten"
         if ocr_engine_name == "trocr-handwritten":
             trocr_model_name = st.text_input(
@@ -287,6 +323,7 @@ def main() -> None:
                     uploaded_file,
                     ocr_engine_name=ocr_engine_name,
                     trocr_model_name=trocr_model_name,
+                    template_id=template_id or None,
                     filter_out_columns=parse_filter_out_columns(
                         filter_out_columns_text
                     ),
@@ -323,6 +360,8 @@ def main() -> None:
     with right:
         st.subheader("Editable Table Output")
         st.caption(f"OCR engine: {result.ocr_engine_name}")
+        if result.template_id:
+            st.caption(f"Template: {result.template_id}")
         cells, average, flagged = summarize_ocr(result.ocr_table)
         metric_cols = st.columns(3)
         metric_cols[0].metric("Cells detected", cells)
