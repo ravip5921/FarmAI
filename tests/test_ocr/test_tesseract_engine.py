@@ -73,12 +73,14 @@ class TestTesseractOcrEngine(unittest.TestCase):
         self.assertGreater(prepared.shape[0], 4)
         self.assertTrue(np.all(prepared[[0, -1], :] == 255))
 
+    @patch("src.ocr.tesseract_engine.shutil.which", return_value="tesseract")
     @patch("src.ocr.tesseract_engine.pytesseract.image_to_data")
     @patch("src.ocr.tesseract_engine.pytesseract.image_to_string")
     def test_recognize_returns_trimmed_text_and_mean_confidence(
         self,
         image_to_string,
         image_to_data,
+        which,
     ) -> None:
         image_to_string.return_value = "  total  \n"
         image_to_data.return_value = {
@@ -91,6 +93,7 @@ class TestTesseractOcrEngine(unittest.TestCase):
         self.assertEqual(result, OcrText(text="total", confidence=85.25))
         image_to_string.assert_called_once()
         image_to_data.assert_called_once()
+        which.assert_called_once_with("tesseract")
         self.assertEqual(image_to_string.call_args.kwargs["lang"], "eng")
         self.assertEqual(image_to_string.call_args.kwargs["config"], "--oem 3 --psm 6")
 
