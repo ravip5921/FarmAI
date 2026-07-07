@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-
 DEFAULT_TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates"
 
 
@@ -37,7 +36,9 @@ class FormTemplate:
 
     @property
     def column_names(self) -> list[str]:
-        return [column.name for column in sorted(self.columns, key=lambda item: item.index)]
+        return [
+            column.name for column in sorted(self.columns, key=lambda item: item.index)
+        ]
 
     def indices_for_column_names(self, names: set[str]) -> set[int]:
         normalized = {_normalize_name(name) for name in names if _normalize_name(name)}
@@ -62,12 +63,8 @@ def _column_from_dict(data: dict[str, Any]) -> TemplateColumn:
         value_type=str(data.get("value_type", "text")),
         filter_out=bool(data.get("filter_out", False)),
         format=data.get("format"),
-        range_min=(
-            float(value_range["min"]) if "min" in value_range else None
-        ),
-        range_max=(
-            float(value_range["max"]) if "max" in value_range else None
-        ),
+        range_min=(float(value_range["min"]) if "min" in value_range else None),
+        range_max=(float(value_range["max"]) if "max" in value_range else None),
         common_values=tuple(str(value) for value in data.get("common_values", [])),
     )
 

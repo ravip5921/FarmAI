@@ -10,10 +10,13 @@ class TestTemplates(unittest.TestCase):
         template = load_template("boar_room")
 
         self.assertEqual(template.id, "boar_room")
-        self.assertEqual(template.column_widths, (2, 2, 2, 2, 2, 20, 3, 3))
+        self.assertEqual(
+            template.column_widths,
+            (1.5, 1.5, 1.6, 1.6, 0.4, 1.6, 20.0, 3.0, 0.4, 2.7),
+        )
         self.assertEqual(
             template.filtered_column_indices,
-            {4, 6, 7},
+            {4, 5, 7, 8, 9},
         )
         self.assertEqual(template.indices_for_column_names({"HI"}), {2})
         self.assertIn("boar_room", get_template_ids())

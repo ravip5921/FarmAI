@@ -4,7 +4,7 @@
   "description": "Template for boar room farm log tables.",
   "table": {
     "column_widths": [1.5, 1.5, 1.6, 1.6, 0.4, 1.6, 20, 3,0.4, 2.7],
-    "uniform_row_height": true
+    "uniform_row_height": false
   },
   "columns": [
     {

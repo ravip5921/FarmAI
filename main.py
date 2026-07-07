@@ -26,9 +26,12 @@ from src.preprocessing.sauvola import SauvolaBinarizationStage
 from src.preprocessing.skew import SkewCorrectionStage
 from src.table import (
     TablePipelineResult,
+    correct_table_perspective,
     process_table_image,
     render_grid_overlay,
     render_grid_structure,
+    render_perspective_corners,
+    warp_image_to_corners,
 )
 
 
@@ -111,6 +114,17 @@ def parse_args() -> argparse.Namespace:
         choices=get_template_ids(),
         default=None,
         help="Known form template used to repair the detected table grid",
+    )
+    parser.add_argument(
+        "--perspective-correct",
+        action="store_true",
+        help="Warp the detected table to a rectangle before final table OCR",
+    )
+    parser.add_argument(
+        "--perspective-padding",
+        type=int,
+        default=24,
+        help="Pixels to expand detected table corners before perspective warp",
     )
     parser.add_argument(
         "--trocr-model",
@@ -210,6 +224,7 @@ def _run_page(
     source_path: Path | None = None,
 ) -> None:
     result = process_image(page, pipeline, debug_dir=debug_dir, image_name=image_name)
+    ocr_image = page.image
     table_result = process_table(
         result.image,
         image_name=image_name,
@@ -218,8 +233,57 @@ def _run_page(
         save_intersections=args.save_intersections or args.save_all,
         template=template,
     )
+    if args.perspective_correct:
+        correction = correct_table_perspective(
+            result.image,
+            table_result.line_detection.horizontal_mask,
+            table_result.line_detection.vertical_mask,
+            padding=args.perspective_padding,
+        )
+        if debug_dir is not None and args.save_all:
+            debug_dir.mkdir(parents=True, exist_ok=True)
+            save_debug(
+                debug_dir / f"perspective_corners_{image_name}.png",
+                "Perspective Corners",
+                render_perspective_corners(
+                    result.image,
+                    correction.corners,
+                    padded_corners=correction.padded_corners,
+                ),
+            )
+        if correction.corrected:
+            ocr_correction = warp_image_to_corners(
+                page.image,
+                correction.corners,
+                padding=args.perspective_padding,
+                output_size=correction.output_size,
+            )
+            ocr_image = ocr_correction.image
+            result = DocumentImage(
+                correction.image,
+                {
+                    **result.metadata,
+                    "perspective_corrected": True,
+                    "perspective_padding": args.perspective_padding,
+                    "perspective_output_size": correction.output_size,
+                },
+            )
+            if debug_dir is not None and args.save_all:
+                save_debug(
+                    debug_dir / f"perspective_corrected_{image_name}.png",
+                    "Perspective Corrected Table",
+                    result.image,
+                )
+            table_result = process_table(
+                result.image,
+                image_name=f"{image_name}_perspective",
+                debug_dir=debug_dir,
+                save_line_detection=args.save_line_detection or args.save_all,
+                save_intersections=args.save_intersections or args.save_all,
+                template=template,
+            )
     ocr_result = process_ocr(
-        result.image,
+        ocr_image,
         table_result,
         image_name=image_name,
         debug_dir=debug_dir,
@@ -244,7 +308,7 @@ def _run_page(
             table_image,
         )
     if debug_dir is not None and (args.save_overlay or args.save_all):
-        overlay = render_grid_overlay(page.image, table_result.grid)
+        overlay = render_grid_overlay(ocr_image, table_result.grid)
         print(
             f"Saving table overlay image to: {debug_dir / f'table_overlay_{image_name}.png'}"
         )

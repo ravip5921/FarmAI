@@ -182,7 +182,7 @@ def run_farmai(
         model_name=trocr_model_name,
     )
     ocr_result = export_table_ocr(
-        processed.image,
+        page.image,
         table_result.grid,
         engine=ocr_engine,
         padding=2,

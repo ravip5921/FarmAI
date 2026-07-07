@@ -52,6 +52,8 @@ def _args(**overrides):
         "no_print_csv": False,
         "ocr_padding": 4,
         "ocr_context_padding": 0,
+        "perspective_correct": False,
+        "perspective_padding": 24,
     }
     values.update(overrides)
     return argparse.Namespace(**values)
@@ -73,6 +75,9 @@ class TestMainPipeline(unittest.TestCase):
             "tesseract",
             "--template",
             "boar_room",
+            "--perspective-correct",
+            "--perspective-padding",
+            "36",
         ]
 
         with patch.object(sys, "argv", argv):
@@ -85,6 +90,8 @@ class TestMainPipeline(unittest.TestCase):
         self.assertEqual(args.ocr_padding, 9)
         self.assertEqual(args.ocr_context_padding, 11)
         self.assertEqual(args.template, "boar_room")
+        self.assertTrue(args.perspective_correct)
+        self.assertEqual(args.perspective_padding, 36)
 
     def test_build_pipeline_uses_requested_parameters(self) -> None:
         pipeline = main.build_pipeline(window_size=31, k=0.2, denoise_kernel=5)
@@ -189,7 +196,7 @@ class TestMainPipeline(unittest.TestCase):
         self.assertIsNone(export.call_args.kwargs["cell_image_dir"])
 
     def test_run_page_saves_outputs_and_prints_csv(self) -> None:
-        page = DocumentImage(np.zeros((2, 2), dtype=np.uint8))
+        page = DocumentImage(np.full((2, 2), 9, dtype=np.uint8))
         processed = DocumentImage(np.ones((2, 2), dtype=np.uint8))
         table_result = Mock()
         table_result.grid = "grid"
@@ -205,9 +212,11 @@ class TestMainPipeline(unittest.TestCase):
             with (
                 patch("main.process_image", return_value=processed),
                 patch("main.process_table", return_value=table_result),
-                patch("main.process_ocr", return_value=ocr_result),
+                patch("main.process_ocr", return_value=ocr_result) as process_ocr,
                 patch("main.render_grid_structure", return_value=np.zeros((2, 2))),
-                patch("main.render_grid_overlay", return_value=np.zeros((2, 2, 3))),
+                patch(
+                    "main.render_grid_overlay", return_value=np.zeros((2, 2, 3))
+                ) as overlay,
                 patch("main.save_debug") as save_debug,
                 patch("main.show") as show,
             ):
@@ -223,9 +232,76 @@ class TestMainPipeline(unittest.TestCase):
                     )
 
         self.assertEqual(save_debug.call_count, 2)
+        self.assertEqual(int(process_ocr.call_args.args[0][0, 0]), 9)
+        self.assertEqual(int(overlay.call_args.args[0][0, 0]), 9)
         self.assertEqual(show.call_count, 2)
         self.assertIn("Saved OCR CSV to: out.csv", output.getvalue())
         self.assertIn("--- OCR CSV: record ---", output.getvalue())
+
+    def test_run_page_applies_optional_perspective_correction_with_padding(
+        self,
+    ) -> None:
+        page = DocumentImage(np.full((2, 2), 6, dtype=np.uint8))
+        processed = DocumentImage(np.ones((2, 2), dtype=np.uint8))
+        first_table_result = Mock()
+        first_table_result.grid = "first-grid"
+        first_table_result.line_detection.horizontal_mask = np.zeros(
+            (2, 2), dtype=np.uint8
+        )
+        first_table_result.line_detection.vertical_mask = np.zeros(
+            (2, 2), dtype=np.uint8
+        )
+        second_table_result = Mock()
+        second_table_result.grid = "second-grid"
+        ocr_result = Mock(csv_path=None, json_path=None)
+        ocr_result.table = OcrTable(cells=[], row_count=0, col_count=0)
+        correction = Mock(
+            corrected=True,
+            image=np.full((3, 4), 255, dtype=np.uint8),
+            corners=np.array([[0, 0], [3, 0], [3, 2], [0, 2]], dtype=np.float32),
+            padded_corners=np.array([[0, 0], [3, 0], [3, 2], [0, 2]], dtype=np.float32),
+            output_size=(4, 3),
+        )
+
+        with TemporaryDirectory() as tmpdir:
+            with (
+                patch("main.process_image", return_value=processed),
+                patch(
+                    "main.process_table",
+                    side_effect=[first_table_result, second_table_result],
+                ) as process_table,
+                patch(
+                    "main.correct_table_perspective", return_value=correction
+                ) as correct,
+                patch(
+                    "main.warp_image_to_corners",
+                    return_value=Mock(image=np.full((3, 4), 8, dtype=np.uint8)),
+                ) as warp,
+                patch("main.process_ocr", return_value=ocr_result) as process_ocr,
+                patch("main.render_grid_structure", return_value=np.zeros((3, 4))),
+                patch("main.render_grid_overlay", return_value=np.zeros((3, 4, 3))),
+                patch("main.save_debug"),
+                patch("main.show"),
+            ):
+                main._run_page(
+                    page,
+                    pipeline=_Pipeline(),
+                    debug_dir=Path(tmpdir),
+                    image_name="record",
+                    args=_args(perspective_correct=True, perspective_padding=32),
+                    ocr_engine="engine",
+                )
+
+        correct.assert_called_once()
+        self.assertEqual(correct.call_args.kwargs["padding"], 32)
+        warp.assert_called_once()
+        self.assertEqual(int(warp.call_args.args[0][0, 0]), 6)
+        self.assertEqual(process_table.call_count, 2)
+        self.assertEqual(
+            process_table.call_args_list[1].kwargs["image_name"],
+            "record_perspective",
+        )
+        self.assertEqual(int(process_ocr.call_args.args[0][0, 0]), 8)
 
     def test_main_processes_loaded_document_pages(self) -> None:
         args = argparse.Namespace(

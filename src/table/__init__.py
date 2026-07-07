@@ -20,6 +20,14 @@ from .intersections import (
 )
 from .line_detection import LineDetectionResult, LineDetectionStage, detect_lines
 from .line_refinement import GridRefinementResult, refine_grid_with_projection_profiles
+from .perspective_correction import (
+    PerspectiveCorrectionResult,
+    correct_table_perspective,
+    expand_corners,
+    find_table_corners,
+    render_perspective_corners,
+    warp_image_to_corners,
+)
 from .template_guidance import TemplateGridResult, apply_template_to_grid
 
 
@@ -181,16 +189,22 @@ __all__ = [
     "IntersectionResult",
     "LineDetectionResult",
     "LineDetectionStage",
+    "PerspectiveCorrectionResult",
     "TablePipelineResult",
     "TemplateGridResult",
     "detect_intersections",
     "detect_lines",
+    "expand_corners",
+    "find_table_corners",
     "crop_cell",
+    "correct_table_perspective",
     "extract_cell_images",
     "refine_grid_with_projection_profiles",
     "process_table_image",
     "render_grid_overlay",
     "render_grid_structure",
+    "render_perspective_corners",
     "reconstruct_grid",
+    "warp_image_to_corners",
     "apply_template_to_grid",
 ]

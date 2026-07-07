@@ -275,7 +275,7 @@ class TestStreamlitColumnFilter(unittest.TestCase):
             self.assertIs(load_first_page(_UploadedFile()), image)
 
     def test_run_farmai_builds_previews_and_dataframe(self) -> None:
-        page = DocumentImage(np.zeros((2, 2, 3), dtype=np.uint8))
+        page = DocumentImage(np.full((2, 2, 3), 9, dtype=np.uint8))
         processed = DocumentImage(np.ones((2, 2), dtype=np.uint8))
         table = OcrTable(
             cells=[
@@ -296,7 +296,9 @@ class TestStreamlitColumnFilter(unittest.TestCase):
             patch("streamlit_app.load_first_page", return_value=page),
             patch("streamlit_app.build_pipeline", return_value=pipeline),
             patch("streamlit_app.load_template") as load_template,
-            patch("streamlit_app.process_table_image", return_value=table_result) as process_table,
+            patch(
+                "streamlit_app.process_table_image", return_value=table_result
+            ) as process_table,
             patch("streamlit_app.create_ocr_engine", return_value="engine"),
             patch(
                 "streamlit_app.export_table_ocr",
@@ -323,6 +325,7 @@ class TestStreamlitColumnFilter(unittest.TestCase):
         self.assertEqual(result.line_preview.shape, (2, 4))
         load_template.assert_not_called()
         self.assertIsNone(process_table.call_args.kwargs["template"])
+        self.assertEqual(int(export.call_args.args[0][0, 0, 0]), 9)
         self.assertEqual(export.call_args.kwargs["filter_out_columns"], {"Pen"})
 
     def test_apply_styles_and_empty_state_render_streamlit_calls(self) -> None:

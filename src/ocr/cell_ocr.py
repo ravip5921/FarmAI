@@ -232,7 +232,7 @@ def recognize_table_cells(
         return table
 
     ocr_engine = _get_ocr_engine(engine)
-    recognized: list[OcrCell] = []
+    recognized = []
 
     for cell in (
         cell

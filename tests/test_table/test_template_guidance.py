@@ -19,12 +19,12 @@ class TestTemplateGuidance(unittest.TestCase):
         result = apply_template_to_grid(grid, template, (50, 85))
 
         self.assertTrue(result.repaired_columns)
-        self.assertTrue(result.repaired_rows)
-        self.assertEqual(len(result.grid.col_coords), 9)
+        self.assertFalse(result.repaired_rows)
+        self.assertEqual(len(result.grid.col_coords), 11)
         self.assertEqual(result.grid.col_coords[0], 5)
         self.assertEqual(result.grid.col_coords[-1], 80)
         self.assertEqual(result.grid.row_coords, [10, 24, 39])
-        self.assertEqual(len(result.grid.cells), 16)
+        self.assertEqual(len(result.grid.cells), 20)
 
 
 if __name__ == "__main__":

@@ -150,7 +150,9 @@ class TestCellOcr(unittest.TestCase):
 
         self.assertEqual(engine.calls, 4)
         self.assertEqual(table.col_count, 2)
-        self.assertEqual(table.text_matrix(), [["cell-1", "cell-2"], ["cell-3", "cell-4"]])
+        self.assertEqual(
+            table.text_matrix(), [["cell-1", "cell-2"], ["cell-3", "cell-4"]]
+        )
 
     def test_recognize_table_cells_uses_known_template_headers_without_ocr(
         self,
