@@ -196,6 +196,7 @@ def run_farmai(
             filter_out_columns,
         ),
         column_names=template.column_names if template is not None else None,
+        column_keys=template.column_keys if template is not None else None,
     )
 
     overlay = render_grid_overlay(page.image, table_result.grid)

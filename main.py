@@ -223,12 +223,22 @@ def _run_page(
     template: FormTemplate | None = None,
     source_path: Path | None = None,
 ) -> None:
-    result = process_image(page, pipeline, debug_dir=debug_dir, image_name=image_name)
+    file_debug_dir = (
+        debug_dir / (Path(str(image_name)).stem or "table")
+        if debug_dir is not None
+        else None
+    )
+    result = process_image(
+        page,
+        pipeline,
+        debug_dir=file_debug_dir,
+        image_name=image_name,
+    )
     ocr_image = page.image
     table_result = process_table(
         result.image,
         image_name=image_name,
-        debug_dir=debug_dir,
+        debug_dir=file_debug_dir,
         save_line_detection=args.save_line_detection or args.save_all,
         save_intersections=args.save_intersections or args.save_all,
         template=template,
@@ -240,10 +250,10 @@ def _run_page(
             table_result.line_detection.vertical_mask,
             padding=args.perspective_padding,
         )
-        if debug_dir is not None and args.save_all:
-            debug_dir.mkdir(parents=True, exist_ok=True)
+        if file_debug_dir is not None and args.save_all:
+            file_debug_dir.mkdir(parents=True, exist_ok=True)
             save_debug(
-                debug_dir / f"perspective_corners_{image_name}.png",
+                file_debug_dir / f"perspective_corners_{image_name}.png",
                 "Perspective Corners",
                 render_perspective_corners(
                     result.image,
@@ -268,16 +278,16 @@ def _run_page(
                     "perspective_output_size": correction.output_size,
                 },
             )
-            if debug_dir is not None and args.save_all:
+            if file_debug_dir is not None and args.save_all:
                 save_debug(
-                    debug_dir / f"perspective_corrected_{image_name}.png",
+                    file_debug_dir / f"perspective_corrected_{image_name}.png",
                     "Perspective Corrected Table",
                     result.image,
                 )
             table_result = process_table(
                 result.image,
                 image_name=f"{image_name}_perspective",
-                debug_dir=debug_dir,
+                debug_dir=file_debug_dir,
                 save_line_detection=args.save_line_detection or args.save_all,
                 save_intersections=args.save_intersections or args.save_all,
                 template=template,
@@ -286,7 +296,7 @@ def _run_page(
         ocr_image,
         table_result,
         image_name=image_name,
-        debug_dir=debug_dir,
+        debug_dir=file_debug_dir,
         save_csv=args.save_csv or args.save_all,
         save_json=args.save_json or args.save_all,
         save_cells=args.save_cells or args.save_all,
@@ -297,23 +307,27 @@ def _run_page(
     )
     table_image = render_grid_structure(table_result.grid, result.image.shape)
 
-    if debug_dir is not None and (args.save_image or args.save_all):
-        debug_dir.mkdir(parents=True, exist_ok=True)
+    if file_debug_dir is not None and (args.save_image or args.save_all):
+        file_debug_dir.mkdir(parents=True, exist_ok=True)
         print(
-            f"Saving final detected table image to: {debug_dir / f'final_table_{image_name}.png'}"
+            "Saving final detected table image to: "
+            f"{file_debug_dir / f'final_table_{image_name}.png'}"
         )
         save_debug(
-            debug_dir / f"final_table_{image_name}.png",
+            file_debug_dir / f"final_table_{image_name}.png",
             "Final Detected Table",
             table_image,
         )
-    if debug_dir is not None and (args.save_overlay or args.save_all):
+    if file_debug_dir is not None and (args.save_overlay or args.save_all):
         overlay = render_grid_overlay(ocr_image, table_result.grid)
         print(
-            f"Saving table overlay image to: {debug_dir / f'table_overlay_{image_name}.png'}"
+            "Saving table overlay image to: "
+            f"{file_debug_dir / f'table_overlay_{image_name}.png'}"
         )
         save_debug(
-            debug_dir / f"table_overlay_{image_name}.png", "Table Overlay", overlay
+            file_debug_dir / f"table_overlay_{image_name}.png",
+            "Table Overlay",
+            overlay,
         )
     if ocr_result.csv_path is not None:
         print(f"Saved OCR CSV to: {ocr_result.csv_path}")
@@ -363,6 +377,7 @@ def process_ocr(
         filter_out_columns = FILTER_OUT_COLUMNS
         filter_out_column_indices = None
         column_names = None
+        column_keys = None
     else:
         filter_out_columns = set()
         filter_out_column_indices = (
@@ -370,6 +385,7 @@ def process_ocr(
             | template.indices_for_column_names(set(FILTER_OUT_COLUMNS))
         )
         column_names = template.column_names
+        column_keys = template.column_keys
     return export_table_ocr(
         image,
         table_result.grid,
@@ -381,6 +397,7 @@ def process_ocr(
         filter_out_columns=filter_out_columns,
         filter_out_column_indices=filter_out_column_indices,
         column_names=column_names,
+        column_keys=column_keys,
         cell_image_dir=cell_image_dir,
     )
 

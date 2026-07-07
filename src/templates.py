@@ -40,6 +40,12 @@ class FormTemplate:
             column.name for column in sorted(self.columns, key=lambda item: item.index)
         ]
 
+    @property
+    def column_keys(self) -> list[str]:
+        return [
+            column.key for column in sorted(self.columns, key=lambda item: item.index)
+        ]
+
     def indices_for_column_names(self, names: set[str]) -> set[int]:
         normalized = {_normalize_name(name) for name in names if _normalize_name(name)}
         return {

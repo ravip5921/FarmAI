@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Collection
 from dataclasses import dataclass
 from pathlib import Path
@@ -81,17 +82,35 @@ def _get_ocr_engine(engine: CellOcrEngine | None) -> CellOcrEngine:
     return engine
 
 
-def _cell_image_filename(cell: ExtractedCell) -> str:
+def _safe_filename_token(value: str, *, fallback: str) -> str:
+    token = re.sub(r"[^A-Za-z0-9_-]+", "_", value.strip()).strip("_")
+    return token or fallback
+
+
+def _cell_image_filename(
+    cell: ExtractedCell,
+    *,
+    column_keys: Collection[str] | None = None,
+) -> str:
     x, y, width, height = cell.bbox
+    keys = list(column_keys or [])
+    fallback = f"col_{cell.col:03d}"
+    column_key = (
+        _safe_filename_token(keys[cell.col], fallback=fallback)
+        if 0 <= cell.col < len(keys)
+        else fallback
+    )
     return (
-        f"row_{cell.row:03d}_col_{cell.col:03d}"
-        f"_x{x:04d}_y{y:04d}_w{width:04d}_h{height:04d}.png"
+        f"{column_key}_row_{cell.row:03d}"
+        f"_coords_x{x:04d}_y{y:04d}_w{width:04d}_h{height:04d}.png"
     )
 
 
 def save_extracted_cell_images(
     cells: list[ExtractedCell],
     directory: str | Path,
+    *,
+    column_keys: Collection[str] | None = None,
 ) -> list[Path]:
     """Save cropped cell images with row/column and bbox coordinates."""
     output_dir = Path(directory)
@@ -99,7 +118,7 @@ def save_extracted_cell_images(
 
     written: list[Path] = []
     for cell in cells:
-        path = output_dir / _cell_image_filename(cell)
+        path = output_dir / _cell_image_filename(cell, column_keys=column_keys)
         if not cv2.imwrite(str(path), cell.image):
             raise RuntimeError(f"Could not write cell image: {path}")
         written.append(path)
@@ -150,6 +169,7 @@ def recognize_table_cells(
     filter_out_columns: Collection[str] | None = None,
     filter_out_column_indices: Collection[int] | None = None,
     column_names: Collection[str] | None = None,
+    column_keys: Collection[str] | None = None,
     cell_image_dir: str | Path | None = None,
 ) -> OcrTable:
     extracted_cells = extract_cell_images(
@@ -158,8 +178,6 @@ def recognize_table_cells(
         padding=padding,
         context_padding=context_padding,
     )
-    if cell_image_dir is not None:
-        save_extracted_cell_images(extracted_cells, cell_image_dir)
 
     row_count = max(0, len(grid.row_coords) - 1)
     col_count = max(0, len(grid.col_coords) - 1)
@@ -175,11 +193,21 @@ def recognize_table_cells(
     }
     known_column_names = list(column_names or [])
     if known_column_names and len(known_column_names) == col_count:
+        cells_to_save_or_ocr = [
+            cell for cell in extracted_cells if cell.col not in filtered_cols
+        ]
+        if cell_image_dir is not None:
+            save_extracted_cell_images(
+                cells_to_save_or_ocr,
+                cell_image_dir,
+                column_keys=column_keys,
+            )
+
         ocr_engine = _get_ocr_engine(engine)
         header_cells = {
             cell.col: cell
-            for cell in extracted_cells
-            if cell.row == 0 and cell.col not in filtered_cols
+            for cell in cells_to_save_or_ocr
+            if cell.row == 0
         }
         recognized = [
             OcrCell(
@@ -194,8 +222,8 @@ def recognize_table_cells(
         ]
         for cell in (
             cell
-            for cell in extracted_cells
-            if cell.row != 0 and cell.col not in filtered_cols
+            for cell in cells_to_save_or_ocr
+            if cell.row != 0
         ):
             result = ocr_engine.recognize(cell.image)
             recognized.append(
@@ -216,8 +244,18 @@ def recognize_table_cells(
         )
 
     if not normalized_filter:
+        cells_to_save_or_ocr = [
+            cell for cell in extracted_cells if cell.col not in filtered_cols
+        ]
+        if cell_image_dir is not None:
+            save_extracted_cell_images(
+                cells_to_save_or_ocr,
+                cell_image_dir,
+                column_keys=column_keys,
+            )
+
         table = recognize_extracted_cells(
-            [cell for cell in extracted_cells if cell.col not in filtered_cols],
+            cells_to_save_or_ocr,
             engine=engine,
             row_count=row_count,
             col_count=col_count if not filtered_cols else None,
@@ -250,6 +288,13 @@ def recognize_table_cells(
                 text=result.text,
                 confidence=result.confidence,
             )
+        )
+
+    if cell_image_dir is not None:
+        save_extracted_cell_images(
+            [cell for cell in extracted_cells if cell.col not in filtered_cols],
+            cell_image_dir,
+            column_keys=column_keys,
         )
 
     for cell in (

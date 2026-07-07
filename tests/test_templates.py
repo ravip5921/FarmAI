@@ -18,6 +18,7 @@ class TestTemplates(unittest.TestCase):
             template.filtered_column_indices,
             {4, 5, 7, 8, 9},
         )
+        self.assertEqual(template.column_keys[0], "date")
         self.assertEqual(template.indices_for_column_names({"HI"}), {2})
         self.assertIn("boar_room", get_template_ids())
 

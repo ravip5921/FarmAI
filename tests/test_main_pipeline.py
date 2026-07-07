@@ -210,7 +210,7 @@ class TestMainPipeline(unittest.TestCase):
 
         with TemporaryDirectory() as tmpdir:
             with (
-                patch("main.process_image", return_value=processed),
+                patch("main.process_image", return_value=processed) as process_image,
                 patch("main.process_table", return_value=table_result),
                 patch("main.process_ocr", return_value=ocr_result) as process_ocr,
                 patch("main.render_grid_structure", return_value=np.zeros((2, 2))),
@@ -231,7 +231,19 @@ class TestMainPipeline(unittest.TestCase):
                         ocr_engine="engine",
                     )
 
+        expected_debug_dir = Path(tmpdir) / "record"
+        self.assertEqual(
+            process_image.call_args.kwargs["debug_dir"],
+            expected_debug_dir,
+        )
+        self.assertEqual(process_ocr.call_args.kwargs["debug_dir"], expected_debug_dir)
         self.assertEqual(save_debug.call_count, 2)
+        self.assertTrue(
+            all(
+                call.args[0].parent == expected_debug_dir
+                for call in save_debug.call_args_list
+            )
+        )
         self.assertEqual(int(process_ocr.call_args.args[0][0, 0]), 9)
         self.assertEqual(int(overlay.call_args.args[0][0, 0]), 9)
         self.assertEqual(show.call_count, 2)
@@ -298,8 +310,20 @@ class TestMainPipeline(unittest.TestCase):
         self.assertEqual(int(warp.call_args.args[0][0, 0]), 6)
         self.assertEqual(process_table.call_count, 2)
         self.assertEqual(
+            process_table.call_args_list[0].kwargs["debug_dir"],
+            Path(tmpdir) / "record",
+        )
+        self.assertEqual(
+            process_table.call_args_list[1].kwargs["debug_dir"],
+            Path(tmpdir) / "record",
+        )
+        self.assertEqual(
             process_table.call_args_list[1].kwargs["image_name"],
             "record_perspective",
+        )
+        self.assertEqual(
+            process_ocr.call_args.kwargs["debug_dir"],
+            Path(tmpdir) / "record",
         )
         self.assertEqual(int(process_ocr.call_args.args[0][0, 0]), 8)
 

@@ -29,6 +29,7 @@ def run_table_ocr(
     filter_out_columns: Collection[str] | None = None,
     filter_out_column_indices: Collection[int] | None = None,
     column_names: Collection[str] | None = None,
+    column_keys: Collection[str] | None = None,
     cell_image_dir: str | Path | None = None,
 ) -> OcrTable:
     return recognize_table_cells(
@@ -40,6 +41,7 @@ def run_table_ocr(
         filter_out_columns=filter_out_columns,
         filter_out_column_indices=filter_out_column_indices,
         column_names=column_names,
+        column_keys=column_keys,
         cell_image_dir=cell_image_dir,
     )
 
@@ -56,6 +58,7 @@ def export_table_ocr(
     filter_out_columns: Collection[str] | None = None,
     filter_out_column_indices: Collection[int] | None = None,
     column_names: Collection[str] | None = None,
+    column_keys: Collection[str] | None = None,
     cell_image_dir: str | Path | None = None,
 ) -> TableOcrExportResult:
 
@@ -71,6 +74,7 @@ def export_table_ocr(
         filter_out_columns=filter_out_columns,
         filter_out_column_indices=filter_out_column_indices,
         column_names=column_names,
+        column_keys=column_keys,
         cell_image_dir=cell_image_dir,
     )
     written_csv = write_table_csv(table, csv_path) if csv_path is not None else None
