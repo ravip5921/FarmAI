@@ -22,8 +22,8 @@
       "value_type": "temperature",
       "format": "TT.T",
       "range": {
-        "min": 80.0,
-        "max": 120.0
+        "min": 50.0,
+        "max": 110.0
       },
       "filter_out": false
     },
@@ -34,8 +34,8 @@
       "value_type": "temperature",
       "format": "TT.T",
       "range": {
-        "min": 80.0,
-        "max": 120.0
+        "min": 50.0,
+        "max": 110.0
       },
       "filter_out": false
     },
@@ -46,8 +46,8 @@
       "value_type": "temperature",
       "format": "TT.T",
       "range": {
-        "min": 80.0,
-        "max": 120.0
+        "min": 50.0,
+        "max": 110.0
       },
       "filter_out": false
     },

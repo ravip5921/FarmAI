@@ -13,6 +13,7 @@ from src.ocr.cell_ocr import (
     recognize_extracted_cells,
     recognize_table_cells,
 )
+from src.ocr.column_rules import TEMPERATURE_PATTERN, ColumnOcrRule
 from src.ocr.table_ocr import export_table_ocr
 from src.ocr.tesseract_engine import OcrText, TesseractConfig
 from src.table.cell_extraction import ExtractedCell
@@ -186,6 +187,47 @@ class TestCellOcr(unittest.TestCase):
             table.text_matrix(),
             [["Date", "Comments"], ["cell-1", "cell-2"]],
         )
+
+    def test_recognize_table_cells_applies_column_ocr_rules_to_data_rows(
+        self,
+    ) -> None:
+        image = np.zeros((10, 10), dtype=np.uint8)
+        grid = GridStructure(
+            row_coords=[0, 5, 10],
+            col_coords=[0, 5, 10],
+            cells=[
+                GridCell(row=0, col=0, bbox=(0, 0, 5, 5)),
+                GridCell(row=0, col=1, bbox=(5, 0, 5, 5)),
+                GridCell(row=1, col=0, bbox=(0, 5, 5, 5)),
+                GridCell(row=1, col=1, bbox=(5, 5, 5, 5)),
+            ],
+        )
+        engine = SequenceEngine(["12-Jul", "8A.1"])
+
+        table = recognize_table_cells(
+            image,
+            grid,
+            engine=engine,
+            padding=0,
+            column_names=["Date", "Current Temperature"],
+            column_ocr_rules=[
+                ColumnOcrRule(
+                    index=1,
+                    key="current_temperature",
+                    value_type="temperature",
+                    pattern=TEMPERATURE_PATTERN,
+                )
+            ],
+        )
+
+        self.assertEqual(engine.calls, 2)
+        self.assertEqual(
+            table.text_matrix(),
+            [["Date", "Current Temperature"], ["12-Jul", ""]],
+        )
+        rejected_cell = table.cells[-1]
+        self.assertEqual(rejected_cell.raw_text, "8A.1")
+        self.assertIn("temperature", rejected_cell.validation_error or "")
 
     def test_tesseract_config_builds_config_string(self) -> None:
         config = TesseractConfig(

@@ -10,6 +10,7 @@ from src.table.grid_reconstruction import GridStructure
 
 from .base import CellOcrEngine
 from .cell_ocr import OcrTable, recognize_table_cells
+from .column_rules import ColumnOcrRule
 
 
 @dataclass(frozen=True)
@@ -30,6 +31,7 @@ def run_table_ocr(
     filter_out_column_indices: Collection[int] | None = None,
     column_names: Collection[str] | None = None,
     column_keys: Collection[str] | None = None,
+    column_ocr_rules: Collection[ColumnOcrRule] | None = None,
     cell_image_dir: str | Path | None = None,
 ) -> OcrTable:
     return recognize_table_cells(
@@ -42,6 +44,7 @@ def run_table_ocr(
         filter_out_column_indices=filter_out_column_indices,
         column_names=column_names,
         column_keys=column_keys,
+        column_ocr_rules=column_ocr_rules,
         cell_image_dir=cell_image_dir,
     )
 
@@ -59,6 +62,7 @@ def export_table_ocr(
     filter_out_column_indices: Collection[int] | None = None,
     column_names: Collection[str] | None = None,
     column_keys: Collection[str] | None = None,
+    column_ocr_rules: Collection[ColumnOcrRule] | None = None,
     cell_image_dir: str | Path | None = None,
 ) -> TableOcrExportResult:
 
@@ -75,6 +79,7 @@ def export_table_ocr(
         filter_out_column_indices=filter_out_column_indices,
         column_names=column_names,
         column_keys=column_keys,
+        column_ocr_rules=column_ocr_rules,
         cell_image_dir=cell_image_dir,
     )
     written_csv = write_table_csv(table, csv_path) if csv_path is not None else None

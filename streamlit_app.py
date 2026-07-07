@@ -20,6 +20,7 @@ from src.ocr import (
     DEFAULT_OCR_ENGINE,
     FILTER_OUT_COLUMNS,
     OcrTable,
+    build_column_ocr_rules,
     create_ocr_engine,
     export_table_ocr,
     get_ocr_engine_specs,
@@ -197,6 +198,9 @@ def run_farmai(
         ),
         column_names=template.column_names if template is not None else None,
         column_keys=template.column_keys if template is not None else None,
+        column_ocr_rules=(
+            build_column_ocr_rules(template.columns) if template is not None else None
+        ),
     )
 
     overlay = render_grid_overlay(page.image, table_result.grid)

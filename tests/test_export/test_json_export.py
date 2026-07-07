@@ -53,6 +53,38 @@ class TestJsonExport(unittest.TestCase):
             json.loads(table_to_json_string(table)), table_to_json_dict(table)
         )
 
+    def test_table_to_json_dict_includes_validation_metadata_when_present(
+        self,
+    ) -> None:
+        table = OcrTable(
+            cells=[
+                OcrCell(
+                    row=0,
+                    col=1,
+                    bbox=(0, 0, 5, 5),
+                    text="",
+                    confidence=12.0,
+                    raw_text="8A.1",
+                    validation_error="expected temperature pattern",
+                )
+            ],
+            row_count=1,
+            col_count=2,
+        )
+
+        self.assertEqual(
+            table_to_json_dict(table)["cells"][0],
+            {
+                "row": 0,
+                "col": 1,
+                "bbox": [0, 0, 5, 5],
+                "text": "",
+                "confidence": 12.0,
+                "raw_text": "8A.1",
+                "validation_error": "expected temperature pattern",
+            },
+        )
+
     def test_write_table_json_creates_parent_directory(self) -> None:
         table = OcrTable(cells=[], row_count=0, col_count=0)
 

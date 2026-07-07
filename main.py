@@ -15,6 +15,7 @@ from src.ocr import (
     CellOcrEngine,
     DEFAULT_OCR_ENGINE,
     FILTER_OUT_COLUMNS,
+    build_column_ocr_rules,
     create_ocr_engine,
     export_table_ocr,
     get_ocr_engine_names,
@@ -378,6 +379,7 @@ def process_ocr(
         filter_out_column_indices = None
         column_names = None
         column_keys = None
+        column_ocr_rules = None
     else:
         filter_out_columns = set()
         filter_out_column_indices = (
@@ -386,6 +388,7 @@ def process_ocr(
         )
         column_names = template.column_names
         column_keys = template.column_keys
+        column_ocr_rules = build_column_ocr_rules(template.columns)
     return export_table_ocr(
         image,
         table_result.grid,
@@ -398,6 +401,7 @@ def process_ocr(
         filter_out_column_indices=filter_out_column_indices,
         column_names=column_names,
         column_keys=column_keys,
+        column_ocr_rules=column_ocr_rules,
         cell_image_dir=cell_image_dir,
     )
 

@@ -10,6 +10,8 @@ import numpy as np
 class OcrText:
     text: str
     confidence: float | None = None
+    raw_text: str | None = None
+    validation_error: str | None = None
 
 
 class CellOcrEngine(Protocol):

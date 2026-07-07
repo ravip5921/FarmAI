@@ -12,6 +12,7 @@ from src.table.cell_extraction import ExtractedCell, extract_cell_images
 from src.table.grid_reconstruction import GridStructure
 
 from .base import CellOcrEngine
+from .column_rules import ColumnOcrRule, recognize_with_column_rule
 
 
 @dataclass(frozen=True)
@@ -21,6 +22,8 @@ class OcrCell:
     bbox: tuple[int, int, int, int]
     text: str
     confidence: float | None = None
+    raw_text: str | None = None
+    validation_error: str | None = None
 
 
 @dataclass(frozen=True)
@@ -62,6 +65,45 @@ def recognize_extracted_cells(
                 bbox=cell.bbox,
                 text=result.text,
                 confidence=result.confidence,
+                raw_text=result.raw_text,
+                validation_error=result.validation_error,
+            )
+        )
+
+    inferred_rows = max((cell.row for cell in recognized), default=-1) + 1
+    inferred_cols = max((cell.col for cell in recognized), default=-1) + 1
+    return OcrTable(
+        cells=recognized,
+        row_count=row_count if row_count is not None else inferred_rows,
+        col_count=col_count if col_count is not None else inferred_cols,
+    )
+
+
+def _recognize_extracted_cells_with_rules(
+    cells: list[ExtractedCell],
+    *,
+    engine: CellOcrEngine | None = None,
+    rules_by_col: dict[int, ColumnOcrRule],
+    row_count: int | None = None,
+    col_count: int | None = None,
+) -> OcrTable:
+    ocr_engine = _get_ocr_engine(engine)
+    recognized: list[OcrCell] = []
+    for cell in cells:
+        result = recognize_with_column_rule(
+            ocr_engine,
+            cell.image,
+            rules_by_col.get(cell.col),
+        )
+        recognized.append(
+            OcrCell(
+                row=cell.row,
+                col=cell.col,
+                bbox=cell.bbox,
+                text=result.text,
+                confidence=result.confidence,
+                raw_text=result.raw_text,
+                validation_error=result.validation_error,
             )
         )
 
@@ -147,6 +189,8 @@ def _compact_columns(
             bbox=cell.bbox,
             text=cell.text,
             confidence=cell.confidence,
+            raw_text=cell.raw_text,
+            validation_error=cell.validation_error,
         )
         for cell in cells
         if cell.col in col_map
@@ -170,6 +214,7 @@ def recognize_table_cells(
     filter_out_column_indices: Collection[int] | None = None,
     column_names: Collection[str] | None = None,
     column_keys: Collection[str] | None = None,
+    column_ocr_rules: Collection[ColumnOcrRule] | None = None,
     cell_image_dir: str | Path | None = None,
 ) -> OcrTable:
     extracted_cells = extract_cell_images(
@@ -190,6 +235,11 @@ def recognize_table_cells(
         _normalize_column_name(name)
         for name in (filter_out_columns or ())
         if _normalize_column_name(name)
+    }
+    rules_by_col = {
+        int(rule.index): rule
+        for rule in (column_ocr_rules or ())
+        if 0 <= int(rule.index) < col_count
     }
     known_column_names = list(column_names or [])
     if known_column_names and len(known_column_names) == col_count:
@@ -225,7 +275,11 @@ def recognize_table_cells(
             for cell in cells_to_save_or_ocr
             if cell.row != 0
         ):
-            result = ocr_engine.recognize(cell.image)
+            result = recognize_with_column_rule(
+                ocr_engine,
+                cell.image,
+                rules_by_col.get(cell.col),
+            )
             recognized.append(
                 OcrCell(
                     row=cell.row,
@@ -233,6 +287,8 @@ def recognize_table_cells(
                     bbox=cell.bbox,
                     text=result.text,
                     confidence=result.confidence,
+                    raw_text=result.raw_text,
+                    validation_error=result.validation_error,
                 )
             )
 
@@ -254,12 +310,21 @@ def recognize_table_cells(
                 column_keys=column_keys,
             )
 
-        table = recognize_extracted_cells(
-            cells_to_save_or_ocr,
-            engine=engine,
-            row_count=row_count,
-            col_count=col_count if not filtered_cols else None,
-        )
+        if rules_by_col:
+            table = _recognize_extracted_cells_with_rules(
+                cells_to_save_or_ocr,
+                engine=engine,
+                rules_by_col=rules_by_col,
+                row_count=row_count,
+                col_count=col_count if not filtered_cols else None,
+            )
+        else:
+            table = recognize_extracted_cells(
+                cells_to_save_or_ocr,
+                engine=engine,
+                row_count=row_count,
+                col_count=col_count if not filtered_cols else None,
+            )
         if filtered_cols:
             return _compact_columns(
                 table.cells,
@@ -287,6 +352,8 @@ def recognize_table_cells(
                 bbox=cell.bbox,
                 text=result.text,
                 confidence=result.confidence,
+                raw_text=result.raw_text,
+                validation_error=result.validation_error,
             )
         )
 
@@ -302,7 +369,11 @@ def recognize_table_cells(
         for cell in extracted_cells
         if cell.row != 0 and cell.col not in filtered_cols
     ):
-        result = ocr_engine.recognize(cell.image)
+        result = recognize_with_column_rule(
+            ocr_engine,
+            cell.image,
+            rules_by_col.get(cell.col),
+        )
         recognized.append(
             OcrCell(
                 row=cell.row,
@@ -310,6 +381,8 @@ def recognize_table_cells(
                 bbox=cell.bbox,
                 text=result.text,
                 confidence=result.confidence,
+                raw_text=result.raw_text,
+                validation_error=result.validation_error,
             )
         )
 

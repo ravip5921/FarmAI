@@ -6,6 +6,7 @@ from .cell_ocr import (
     recognize_table_cells,
     save_extracted_cell_images,
 )
+from .column_rules import ColumnOcrRule, build_column_ocr_rules
 from .column_filter import FILTER_OUT_COLUMNS
 from .image_preprocessing import CellImagePreprocessConfig, prepare_cell_image_for_ocr
 from .registry import (
@@ -22,6 +23,7 @@ from .trocr_engine import TrOcrConfig, TrOcrHandwrittenEngine
 __all__ = [
     "CellOcrEngine",
     "CellImagePreprocessConfig",
+    "ColumnOcrRule",
     "DEFAULT_OCR_ENGINE",
     "FILTER_OUT_COLUMNS",
     "OcrCell",
@@ -33,6 +35,7 @@ __all__ = [
     "TesseractOcrEngine",
     "TrOcrConfig",
     "TrOcrHandwrittenEngine",
+    "build_column_ocr_rules",
     "create_ocr_engine",
     "export_table_ocr",
     "get_ocr_engine_names",
