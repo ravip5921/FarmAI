@@ -18,6 +18,9 @@ class ColumnOcrRule:
     index: int
     key: str
     value_type: str
+    name: str = ""
+    format: str | None = None
+    common_values: tuple[str, ...] = ()
     pattern: str | None = None
     range_min: float | None = None
     range_max: float | None = None
@@ -25,7 +28,9 @@ class ColumnOcrRule:
     tesseract_retry_psms: tuple[int, ...] = ()
 
     def normalize_text(self, text: str) -> str:
-        return "".join(text.strip().split())
+        if self.value_type == "temperature":
+            return "".join(text.strip().split())
+        return text.strip()
 
     def validate(self, text: str) -> tuple[bool, str, str | None]:
         candidate = self.normalize_text(text)
@@ -60,18 +65,22 @@ def build_column_ocr_rules(columns: Iterable[Any]) -> list[ColumnOcrRule]:
     rules: list[ColumnOcrRule] = []
     for column in columns:
         value_type = str(getattr(column, "value_type", "text"))
-        if value_type != "temperature":
-            continue
+        is_temperature = value_type == "temperature"
         rules.append(
             ColumnOcrRule(
                 index=int(getattr(column, "index")),
                 key=str(getattr(column, "key", "")),
+                name=str(getattr(column, "name", "")),
                 value_type=value_type,
-                pattern=TEMPERATURE_PATTERN,
+                format=getattr(column, "format", None),
+                common_values=tuple(
+                    str(value) for value in getattr(column, "common_values", ())
+                ),
+                pattern=TEMPERATURE_PATTERN if is_temperature else None,
                 range_min=getattr(column, "range_min", None),
                 range_max=getattr(column, "range_max", None),
-                tesseract_whitelist="0123456789.",
-                tesseract_retry_psms=(7, 8, 13),
+                tesseract_whitelist="0123456789." if is_temperature else None,
+                tesseract_retry_psms=(7, 8, 13) if is_temperature else (),
             )
         )
     return rules
@@ -81,30 +90,93 @@ def recognize_with_column_rule(
     engine: CellOcrEngine,
     image: np.ndarray,
     rule: ColumnOcrRule | None,
+    *,
+    llm_verifier: Any | None = None,
 ) -> OcrText:
     if rule is None:
-        return engine.recognize(image)
+        result = engine.recognize(image)
+        return _maybe_verify_with_llm(
+            result,
+            image=image,
+            rule=None,
+            llm_verifier=llm_verifier,
+        )
+    recognize_with_rule = getattr(engine, "recognize_with_rule", None)
+    if callable(recognize_with_rule):
+        result = recognize_with_rule(image, rule=rule)
+        if result.validation_error and not result.text.strip():
+            return result
+        valid, text, error = rule.validate(result.text)
+        if valid:
+            result = OcrText(
+                text=text,
+                confidence=result.confidence,
+                raw_text=result.raw_text,
+                validation_error=result.validation_error,
+            )
+            return _maybe_verify_with_llm(
+                result,
+                image=image,
+                rule=rule,
+                llm_verifier=llm_verifier,
+            )
+        result = OcrText(
+            text="",
+            confidence=result.confidence,
+            raw_text=result.text if result.raw_text is None else result.raw_text,
+            validation_error=error,
+        )
+        return _maybe_verify_with_llm(
+            result,
+            image=image,
+            rule=rule,
+            llm_verifier=llm_verifier,
+        )
 
     results: list[OcrText] = []
     for result in _iter_recognize_candidates(engine, image, rule):
         results.append(result)
         valid, text, _error = rule.validate(result.text)
         if valid:
-            return OcrText(
+            result = OcrText(
                 text=text,
                 confidence=result.confidence,
                 raw_text=result.text if text != result.text else result.raw_text,
                 validation_error=None,
             )
+            return _maybe_verify_with_llm(
+                result,
+                image=image,
+                rule=rule,
+                llm_verifier=llm_verifier,
+            )
 
     best = _best_result(results)
     _valid, _text, error = rule.validate(best.text)
-    return OcrText(
+    result = OcrText(
         text="",
         confidence=best.confidence,
         raw_text=best.text if best.raw_text is None else best.raw_text,
         validation_error=error or f"invalid {rule.value_type}",
     )
+    return _maybe_verify_with_llm(
+        result,
+        image=image,
+        rule=rule,
+        llm_verifier=llm_verifier,
+    )
+
+
+def _maybe_verify_with_llm(
+    result: OcrText,
+    *,
+    image: np.ndarray,
+    rule: ColumnOcrRule | None,
+    llm_verifier: Any | None,
+) -> OcrText:
+    if llm_verifier is None or not llm_verifier.should_verify(result, rule):
+        return result
+    return llm_verifier.verify(image=image, rule=rule, ocr_text=result)
 
 
 def _iter_recognize_candidates(

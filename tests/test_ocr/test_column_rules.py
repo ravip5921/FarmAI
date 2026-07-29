@@ -127,7 +127,7 @@ class TestColumnOcrRules(unittest.TestCase):
             self.assertIn("tessedit_char_whitelist=0123456789.", config.extra_config)
             self.assertIn("classify_bln_numeric_mode=1", config.extra_config)
 
-    def test_build_column_ocr_rules_uses_temperature_template_columns(self) -> None:
+    def test_build_column_ocr_rules_uses_template_column_context(self) -> None:
         rules = build_column_ocr_rules(
             [
                 TemplateColumn(index=0, key="date", name="Date"),
@@ -142,10 +142,14 @@ class TestColumnOcrRules(unittest.TestCase):
             ]
         )
 
-        self.assertEqual(len(rules), 1)
-        self.assertEqual(rules[0].index, 1)
-        self.assertEqual(rules[0].range_min, 80.0)
-        self.assertEqual(rules[0].tesseract_whitelist, "0123456789.")
+        self.assertEqual(len(rules), 2)
+        self.assertEqual(rules[0].index, 0)
+        self.assertEqual(rules[0].name, "Date")
+        self.assertIsNone(rules[0].tesseract_whitelist)
+        self.assertEqual(rules[1].index, 1)
+        self.assertEqual(rules[1].name, "Current Temperature")
+        self.assertEqual(rules[1].range_min, 80.0)
+        self.assertEqual(rules[1].tesseract_whitelist, "0123456789.")
 
 
 if __name__ == "__main__":

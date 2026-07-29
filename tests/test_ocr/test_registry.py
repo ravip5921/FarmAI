@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 from unittest.mock import patch
 
+from src.ocr.llm_client import LlmVisionOcrEngine
 from src.ocr.registry import (
     DEFAULT_OCR_ENGINE,
     create_ocr_engine,
@@ -20,6 +21,7 @@ class TestOcrRegistry(unittest.TestCase):
         self.assertEqual(DEFAULT_OCR_ENGINE, "tesseract")
         self.assertIn("tesseract", names)
         self.assertIn("trocr-handwritten", names)
+        self.assertIn("llm-vision", names)
         self.assertEqual(names, [spec.name for spec in specs])
 
     def test_create_tesseract_engine(self) -> None:
@@ -52,6 +54,19 @@ class TestOcrRegistry(unittest.TestCase):
     def test_unknown_engine_raises_useful_error(self) -> None:
         with self.assertRaisesRegex(ValueError, "Unknown OCR engine"):
             create_ocr_engine("nope")
+
+    def test_create_llm_vision_engine(self) -> None:
+        engine = create_ocr_engine(
+            "llm-vision",
+            api_url="http://example.test/api/chat",
+            model="model",
+            timeout_seconds=3,
+        )
+
+        self.assertIsInstance(engine, LlmVisionOcrEngine)
+        self.assertEqual(engine.config.api_url, "http://example.test/api/chat")
+        self.assertEqual(engine.config.model, "model")
+        self.assertEqual(engine.config.timeout_seconds, 3)
 
 
 if __name__ == "__main__":

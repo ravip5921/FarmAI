@@ -6,9 +6,10 @@ from .cell_ocr import (
     recognize_table_cells,
     save_extracted_cell_images,
 )
-from .column_rules import ColumnOcrRule, build_column_ocr_rules
 from .column_filter import FILTER_OUT_COLUMNS
+from .column_rules import ColumnOcrRule, build_column_ocr_rules
 from .image_preprocessing import CellImagePreprocessConfig, prepare_cell_image_for_ocr
+from .llm_client import LlmOcrVerifier, LlmVisionConfig, LlmVisionOcrEngine
 from .registry import (
     DEFAULT_OCR_ENGINE,
     OcrEngineSpec,
@@ -26,6 +27,9 @@ __all__ = [
     "ColumnOcrRule",
     "DEFAULT_OCR_ENGINE",
     "FILTER_OUT_COLUMNS",
+    "LlmOcrVerifier",
+    "LlmVisionConfig",
+    "LlmVisionOcrEngine",
     "OcrCell",
     "OcrEngineSpec",
     "OcrTable",

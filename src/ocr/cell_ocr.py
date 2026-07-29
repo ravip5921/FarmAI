@@ -4,6 +4,7 @@ import re
 from collections.abc import Collection
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import cv2
 import numpy as np
@@ -84,6 +85,7 @@ def _recognize_extracted_cells_with_rules(
     *,
     engine: CellOcrEngine | None = None,
     rules_by_col: dict[int, ColumnOcrRule],
+    llm_verifier: Any | None = None,
     row_count: int | None = None,
     col_count: int | None = None,
 ) -> OcrTable:
@@ -94,6 +96,7 @@ def _recognize_extracted_cells_with_rules(
             ocr_engine,
             cell.image,
             rules_by_col.get(cell.col),
+            llm_verifier=llm_verifier,
         )
         recognized.append(
             OcrCell(
@@ -215,6 +218,7 @@ def recognize_table_cells(
     column_names: Collection[str] | None = None,
     column_keys: Collection[str] | None = None,
     column_ocr_rules: Collection[ColumnOcrRule] | None = None,
+    llm_verifier: Any | None = None,
     cell_image_dir: str | Path | None = None,
 ) -> OcrTable:
     extracted_cells = extract_cell_images(
@@ -255,9 +259,7 @@ def recognize_table_cells(
 
         ocr_engine = _get_ocr_engine(engine)
         header_cells = {
-            cell.col: cell
-            for cell in cells_to_save_or_ocr
-            if cell.row == 0
+            cell.col: cell for cell in cells_to_save_or_ocr if cell.row == 0
         }
         recognized = [
             OcrCell(
@@ -270,15 +272,12 @@ def recognize_table_cells(
             for col in range(col_count)
             if col not in filtered_cols
         ]
-        for cell in (
-            cell
-            for cell in cells_to_save_or_ocr
-            if cell.row != 0
-        ):
+        for cell in (cell for cell in cells_to_save_or_ocr if cell.row != 0):
             result = recognize_with_column_rule(
                 ocr_engine,
                 cell.image,
                 rules_by_col.get(cell.col),
+                llm_verifier=llm_verifier,
             )
             recognized.append(
                 OcrCell(
@@ -310,11 +309,12 @@ def recognize_table_cells(
                 column_keys=column_keys,
             )
 
-        if rules_by_col:
+        if rules_by_col or llm_verifier is not None:
             table = _recognize_extracted_cells_with_rules(
                 cells_to_save_or_ocr,
                 engine=engine,
                 rules_by_col=rules_by_col,
+                llm_verifier=llm_verifier,
                 row_count=row_count,
                 col_count=col_count if not filtered_cols else None,
             )
@@ -373,6 +373,7 @@ def recognize_table_cells(
             ocr_engine,
             cell.image,
             rules_by_col.get(cell.col),
+            llm_verifier=llm_verifier,
         )
         recognized.append(
             OcrCell(

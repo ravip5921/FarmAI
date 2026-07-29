@@ -4,6 +4,13 @@ from dataclasses import dataclass
 
 from .base import CellOcrEngine
 from .image_preprocessing import CellImagePreprocessConfig
+from .llm_client import (
+    DEFAULT_LLM_API_URL,
+    DEFAULT_LLM_MODEL,
+    DEFAULT_LLM_TIMEOUT_SECONDS,
+    LlmVisionConfig,
+    LlmVisionOcrEngine,
+)
 from .tesseract_engine import TesseractConfig, TesseractOcrEngine
 from .trocr_engine import TrOcrConfig, TrOcrHandwrittenEngine
 
@@ -27,6 +34,11 @@ _OCR_ENGINE_SPECS = [
         name="trocr-handwritten",
         label="TrOCR handwritten",
         description="Transformer OCR model for cropped handwritten text images.",
+    ),
+    OcrEngineSpec(
+        name="llm-vision",
+        label="LLM vision OCR",
+        description="Vision LLM OCR backend for cropped cell images.",
     ),
 ]
 
@@ -67,6 +79,16 @@ def create_ocr_engine(
                 device=kwargs.get("device"),
                 max_new_tokens=int(kwargs.get("max_new_tokens", 64)),
                 preprocess=preprocess,
+            )
+        )
+    if normalized in {"llm", "llm-vision"}:
+        return LlmVisionOcrEngine(
+            LlmVisionConfig(
+                api_url=kwargs.get("api_url", DEFAULT_LLM_API_URL),
+                model=kwargs.get("model", DEFAULT_LLM_MODEL),
+                timeout_seconds=float(
+                    kwargs.get("timeout_seconds", DEFAULT_LLM_TIMEOUT_SECONDS)
+                ),
             )
         )
 

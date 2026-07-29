@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import cv2
 import numpy as np
-from typing import Any
+
 
 @dataclass(frozen=True)
 class PerspectiveCorrectionResult:

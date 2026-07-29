@@ -15,6 +15,7 @@ from src.ocr import (
     CellOcrEngine,
     DEFAULT_OCR_ENGINE,
     FILTER_OUT_COLUMNS,
+    LlmOcrVerifier,
     build_column_ocr_rules,
     create_ocr_engine,
     export_table_ocr,
@@ -131,6 +132,15 @@ def parse_args() -> argparse.Namespace:
         "--trocr-model",
         default="microsoft/trocr-base-handwritten",
         help="Hugging Face model name used when --ocr-engine=trocr-handwritten",
+    )
+    parser.add_argument(
+        "--llm-verify",
+        choices=("off", "invalid", "always"),
+        default="off",
+        help=(
+            "Use the configured vision LLM to verify OCR output: off, invalid, "
+            "or always"
+        ),
     )
     parser.add_argument(
         "--save-all",
@@ -305,6 +315,7 @@ def _run_page(
         context_padding=args.ocr_context_padding,
         engine=ocr_engine,
         template=template,
+        llm_verify_mode=args.llm_verify,
     )
     table_image = render_grid_structure(table_result.grid, result.image.shape)
 
@@ -361,6 +372,7 @@ def process_ocr(
     context_padding: int = 0,
     engine: CellOcrEngine | None = None,
     template: FormTemplate | None = None,
+    llm_verify_mode: str = "off",
 ):
     """Run OCR for the detected grid and optionally save CSV/JSON exports."""
     stem = Path(str(image_name or "table")).stem or "table"
@@ -389,6 +401,11 @@ def process_ocr(
         column_names = template.column_names
         column_keys = template.column_keys
         column_ocr_rules = build_column_ocr_rules(template.columns)
+    llm_verifier = (
+        None
+        if llm_verify_mode == "off"
+        else LlmOcrVerifier(mode=llm_verify_mode)
+    )
     return export_table_ocr(
         image,
         table_result.grid,
@@ -402,6 +419,7 @@ def process_ocr(
         column_names=column_names,
         column_keys=column_keys,
         column_ocr_rules=column_ocr_rules,
+        llm_verifier=llm_verifier,
         cell_image_dir=cell_image_dir,
     )
 

@@ -29,6 +29,7 @@ def _args(**overrides):
         "ocr_context_padding": 0,
         "perspective_correct": False,
         "perspective_padding": 24,
+        "llm_verify": "off",
     }
     values.update(overrides)
     return argparse.Namespace(**values)
@@ -126,7 +127,22 @@ class TestMainPipelineCoverage(unittest.TestCase):
         self.assertEqual(export.call_args.kwargs["filter_out_column_indices"], {0})
         self.assertEqual(export.call_args.kwargs["column_names"], ["Pen", "HI"])
         self.assertEqual(export.call_args.kwargs["column_keys"], ["pen", "hi"])
-        self.assertEqual(len(export.call_args.kwargs["column_ocr_rules"]), 1)
+        self.assertEqual(len(export.call_args.kwargs["column_ocr_rules"]), 2)
+        self.assertIsNone(export.call_args.kwargs["llm_verifier"])
+
+    def test_process_ocr_creates_llm_verifier_when_requested(self) -> None:
+        table_result = Mock()
+        table_result.grid = "grid"
+
+        with patch("main.export_table_ocr", return_value="ocr") as export:
+            result = main.process_ocr(
+                np.zeros((1, 1), dtype=np.uint8),
+                table_result,
+                llm_verify_mode="invalid",
+            )
+
+        self.assertEqual(result, "ocr")
+        self.assertEqual(export.call_args.kwargs["llm_verifier"].mode, "invalid")
 
 
 if __name__ == "__main__":

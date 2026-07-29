@@ -73,8 +73,9 @@ Thumbs.db
 debug_outputs/
 
 # Local env files
+.env
 .env.local
 .env.*.local
 **/chats.txt
 **/__pycache__/**
-demo/*.mp4
+demo/*

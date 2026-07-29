@@ -13,6 +13,7 @@
       "name": "Date",
       "value_type": "date_dd_mon",
       "format": "DD-Mon",
+      "common_values": [],
       "filter_out": false
     },
     {
@@ -25,6 +26,7 @@
         "min": 50.0,
         "max": 110.0
       },
+      "common_values": [],
       "filter_out": false
     },
     {
@@ -37,6 +39,7 @@
         "min": 50.0,
         "max": 110.0
       },
+      "common_values": [],
       "filter_out": false
     },
     {
@@ -49,6 +52,7 @@
         "min": 50.0,
         "max": 110.0
       },
+      "common_values": [],
       "filter_out": false
     },
     {
@@ -56,6 +60,7 @@
       "key": "divider1",
       "name": "EMPTY",
       "value_type": "empty",
+      "common_values": [],
       "filter_out": true
     },
     {
@@ -63,6 +68,7 @@
       "key": "boar_pac",
       "name": "Boar Pac",
       "value_type": "short_text",
+      "common_values": [],
       "filter_out": true
     },
     {
@@ -78,6 +84,7 @@
       "key": "empty",
       "name": "EMPTY",
       "value_type": "empty",
+      "common_values": [],
       "filter_out": true
     },
     {
@@ -85,6 +92,7 @@
       "key": "divider2",
       "name": "EMPTY",
       "value_type": "empty",
+      "common_values": [],
       "filter_out": true
     },
     {
@@ -92,6 +100,7 @@
       "key": "manager_initials",
       "name": "Mgr. Initials",
       "value_type": "initials",
+      "common_values": [],
       "filter_out": true
     }
   ]

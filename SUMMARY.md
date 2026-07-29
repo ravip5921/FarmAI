@@ -104,6 +104,7 @@ OCR abstractions, engines, table recognition, and export orchestration.
 - `src/ocr/registry.py`: Lists supported OCR engines and creates engine instances. Default engine is `tesseract`; optional handwritten engine is `trocr-handwritten`.
 - `src/ocr/tesseract_engine.py`: Tesseract backend. Prepares cell images, checks that the Tesseract executable is on `PATH`, runs `pytesseract`, and computes mean word confidence.
 - `src/ocr/trocr_engine.py`: Optional Microsoft TrOCR handwritten backend. Loads Hugging Face processor/model, chooses CPU or CUDA, prepares images as RGB PIL images, and decodes generated text.
+- `src/ocr/llm_client.py`: Vision-LLM OCR backend and verifier. Uses the configured chat/image endpoint, encodes cropped cell images as base64, prompts with template context when available, parses JSON responses, and can verify/correct baseline OCR output.
 - `src/ocr/cell_ocr.py`: Defines `OcrCell` and `OcrTable`, recognizes cropped cells, builds row/column matrices, saves optional cropped-cell debug images, applies template/header-based column filtering before compacting output columns, and applies column-specific OCR rules to data cells.
 - `src/ocr/column_rules.py`: Template-driven OCR rule layer. Builds rules from template columns, currently for `temperature` columns. Temperature values accept `N`, `NN`, `NN.N`, `NN.NN`, `NNN`, `NNN.N`, and `NNN.NN`; Tesseract receives a numeric whitelist (`0123456789.`) and numeric mode; invalid values are blanked while raw rejected text and validation errors are retained.
 - `src/ocr/table_ocr.py`: Higher-level table OCR helpers. Runs cell OCR for a `GridStructure`, passes template column rules through to the cell OCR layer, and optionally writes CSV/JSON exports.
@@ -172,6 +173,8 @@ farm-ai ./examples/sample_01.jpg
 farm-ai ./examples/sample_01.jpg --save-all
 farm-ai ./examples/sample_01.jpg --ocr-engine tesseract
 farm-ai ./examples/sample_01.jpg --ocr-engine trocr-handwritten
+farm-ai ./examples/sample_01.jpg --template boar_room --ocr-engine llm-vision
+farm-ai ./examples/sample_01.jpg --template boar_room --ocr-engine tesseract --llm-verify invalid
 farm-ai ./examples/sample_01.jpg --template boar_room --save-cells --ocr-context-padding 8
 farm-ai ./examples/sample_01.jpg --template boar_room --save-all --perspective-correct
 ```
@@ -198,6 +201,7 @@ nox -s format
 - Change template-guided grid repair in `src/table/template_guidance.py`.
 - Change optional table-corner perspective correction in `src/table/perspective_correction.py`.
 - Add a new OCR backend by implementing `CellOcrEngine` from `src/ocr/base.py` and registering it in `src/ocr/registry.py`.
+- Change the vision LLM endpoint/model defaults or prompt handling in `src/ocr/llm_client.py`.
 - Change template-driven OCR validation, Tesseract whitelists, regexes, or retry behavior in `src/ocr/column_rules.py`.
 - Change CSV/JSON output shape in `src/export/`.
 - Change CLI options or saved artifacts in `main.py`.

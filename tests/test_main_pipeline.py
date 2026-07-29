@@ -54,6 +54,7 @@ def _args(**overrides):
         "ocr_context_padding": 0,
         "perspective_correct": False,
         "perspective_padding": 24,
+        "llm_verify": "off",
     }
     values.update(overrides)
     return argparse.Namespace(**values)
@@ -78,6 +79,8 @@ class TestMainPipeline(unittest.TestCase):
             "--perspective-correct",
             "--perspective-padding",
             "36",
+            "--llm-verify",
+            "invalid",
         ]
 
         with patch.object(sys, "argv", argv):
@@ -92,6 +95,7 @@ class TestMainPipeline(unittest.TestCase):
         self.assertEqual(args.template, "boar_room")
         self.assertTrue(args.perspective_correct)
         self.assertEqual(args.perspective_padding, 36)
+        self.assertEqual(args.llm_verify, "invalid")
 
     def test_build_pipeline_uses_requested_parameters(self) -> None:
         pipeline = main.build_pipeline(window_size=31, k=0.2, denoise_kernel=5)
@@ -334,6 +338,7 @@ class TestMainPipeline(unittest.TestCase):
             debug_dir=Path("debug"),
             ocr_engine="tesseract",
             trocr_model="model",
+            llm_verify="off",
             save_cells=False,
             template=None,
         )
@@ -360,6 +365,7 @@ class TestMainPipeline(unittest.TestCase):
             debug_dir=Path("debug"),
             ocr_engine="tesseract",
             trocr_model="model",
+            llm_verify="off",
             save_cells=False,
             template=None,
         )
