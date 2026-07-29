@@ -4,7 +4,7 @@ import re
 from collections.abc import Collection
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import cv2
 import numpy as np
@@ -14,6 +14,8 @@ from src.table.grid_reconstruction import GridStructure
 
 from .base import CellOcrEngine
 from .column_rules import ColumnOcrRule, recognize_with_column_rule
+
+CellProgressCallback = Callable[[int, int], None]
 
 
 @dataclass(frozen=True)
@@ -49,6 +51,7 @@ def recognize_extracted_cells(
     engine: CellOcrEngine | None = None,
     row_count: int | None = None,
     col_count: int | None = None,
+    progress_callback: CellProgressCallback | None = None,
 ) -> OcrTable:
     if engine is None:
         from .registry import create_ocr_engine
@@ -57,7 +60,8 @@ def recognize_extracted_cells(
     else:
         ocr_engine = engine
     recognized: list[OcrCell] = []
-    for cell in cells:
+    total = len(cells)
+    for completed, cell in enumerate(cells, start=1):
         result = ocr_engine.recognize(cell.image)
         recognized.append(
             OcrCell(
@@ -70,6 +74,8 @@ def recognize_extracted_cells(
                 validation_error=result.validation_error,
             )
         )
+        if progress_callback is not None:
+            progress_callback(completed, total)
 
     inferred_rows = max((cell.row for cell in recognized), default=-1) + 1
     inferred_cols = max((cell.col for cell in recognized), default=-1) + 1
@@ -88,10 +94,12 @@ def _recognize_extracted_cells_with_rules(
     llm_verifier: Any | None = None,
     row_count: int | None = None,
     col_count: int | None = None,
+    progress_callback: CellProgressCallback | None = None,
 ) -> OcrTable:
     ocr_engine = _get_ocr_engine(engine)
     recognized: list[OcrCell] = []
-    for cell in cells:
+    total = len(cells)
+    for completed, cell in enumerate(cells, start=1):
         result = recognize_with_column_rule(
             ocr_engine,
             cell.image,
@@ -109,6 +117,8 @@ def _recognize_extracted_cells_with_rules(
                 validation_error=result.validation_error,
             )
         )
+        if progress_callback is not None:
+            progress_callback(completed, total)
 
     inferred_rows = max((cell.row for cell in recognized), default=-1) + 1
     inferred_cols = max((cell.col for cell in recognized), default=-1) + 1
@@ -220,6 +230,7 @@ def recognize_table_cells(
     column_ocr_rules: Collection[ColumnOcrRule] | None = None,
     llm_verifier: Any | None = None,
     cell_image_dir: str | Path | None = None,
+    progress_callback: CellProgressCallback | None = None,
 ) -> OcrTable:
     extracted_cells = extract_cell_images(
         image,
@@ -258,21 +269,27 @@ def recognize_table_cells(
             )
 
         ocr_engine = _get_ocr_engine(engine)
-        header_cells = {
+        header_cells_by_col = {
             cell.col: cell for cell in cells_to_save_or_ocr if cell.row == 0
         }
         recognized = [
             OcrCell(
                 row=0,
                 col=col,
-                bbox=header_cells[col].bbox if col in header_cells else (0, 0, 1, 1),
+                bbox=(
+                    header_cells_by_col[col].bbox
+                    if col in header_cells_by_col
+                    else (0, 0, 1, 1)
+                ),
                 text=known_column_names[col],
                 confidence=None,
             )
             for col in range(col_count)
             if col not in filtered_cols
         ]
-        for cell in (cell for cell in cells_to_save_or_ocr if cell.row != 0):
+        data_cells = [cell for cell in cells_to_save_or_ocr if cell.row != 0]
+        total = len(data_cells)
+        for completed, cell in enumerate(data_cells, start=1):
             result = recognize_with_column_rule(
                 ocr_engine,
                 cell.image,
@@ -290,6 +307,8 @@ def recognize_table_cells(
                     validation_error=result.validation_error,
                 )
             )
+            if progress_callback is not None:
+                progress_callback(completed, total)
 
         return _compact_columns(
             recognized,
@@ -317,6 +336,7 @@ def recognize_table_cells(
                 llm_verifier=llm_verifier,
                 row_count=row_count,
                 col_count=col_count if not filtered_cols else None,
+                progress_callback=progress_callback,
             )
         else:
             table = recognize_extracted_cells(
@@ -324,6 +344,7 @@ def recognize_table_cells(
                 engine=engine,
                 row_count=row_count,
                 col_count=col_count if not filtered_cols else None,
+                progress_callback=progress_callback,
             )
         if filtered_cols:
             return _compact_columns(
@@ -337,11 +358,12 @@ def recognize_table_cells(
     ocr_engine = _get_ocr_engine(engine)
     recognized = []
 
-    for cell in (
+    header_cells_to_ocr = [
         cell
         for cell in extracted_cells
         if cell.row == 0 and cell.col not in filtered_cols
-    ):
+    ]
+    for cell in header_cells_to_ocr:
         result = ocr_engine.recognize(cell.image)
         if _normalize_column_name(result.text) in normalized_filter:
             filtered_cols.add(cell.col)
@@ -364,11 +386,17 @@ def recognize_table_cells(
             column_keys=column_keys,
         )
 
-    for cell in (
+    data_cells = [
         cell
         for cell in extracted_cells
         if cell.row != 0 and cell.col not in filtered_cols
-    ):
+    ]
+    total = len(header_cells_to_ocr) + len(data_cells)
+    completed = len(header_cells_to_ocr)
+    if progress_callback is not None and completed:
+        progress_callback(completed, total)
+
+    for cell in data_cells:
         result = recognize_with_column_rule(
             ocr_engine,
             cell.image,
@@ -386,6 +414,9 @@ def recognize_table_cells(
                 validation_error=result.validation_error,
             )
         )
+        completed += 1
+        if progress_callback is not None:
+            progress_callback(completed, total)
 
     return _compact_columns(
         recognized,

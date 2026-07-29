@@ -10,7 +10,7 @@ import numpy as np
 from src.table.grid_reconstruction import GridStructure
 
 from .base import CellOcrEngine
-from .cell_ocr import OcrTable, recognize_table_cells
+from .cell_ocr import CellProgressCallback, OcrTable, recognize_table_cells
 from .column_rules import ColumnOcrRule
 
 
@@ -35,6 +35,7 @@ def run_table_ocr(
     column_ocr_rules: Collection[ColumnOcrRule] | None = None,
     llm_verifier: Any | None = None,
     cell_image_dir: str | Path | None = None,
+    progress_callback: CellProgressCallback | None = None,
 ) -> OcrTable:
     return recognize_table_cells(
         image,
@@ -49,6 +50,7 @@ def run_table_ocr(
         column_ocr_rules=column_ocr_rules,
         llm_verifier=llm_verifier,
         cell_image_dir=cell_image_dir,
+        progress_callback=progress_callback,
     )
 
 
@@ -68,6 +70,7 @@ def export_table_ocr(
     column_ocr_rules: Collection[ColumnOcrRule] | None = None,
     llm_verifier: Any | None = None,
     cell_image_dir: str | Path | None = None,
+    progress_callback: CellProgressCallback | None = None,
 ) -> TableOcrExportResult:
 
     from src.export.csv_export import write_table_csv
@@ -86,6 +89,7 @@ def export_table_ocr(
         column_ocr_rules=column_ocr_rules,
         llm_verifier=llm_verifier,
         cell_image_dir=cell_image_dir,
+        progress_callback=progress_callback,
     )
     written_csv = write_table_csv(table, csv_path) if csv_path is not None else None
     written_json = write_table_json(table, json_path) if json_path is not None else None

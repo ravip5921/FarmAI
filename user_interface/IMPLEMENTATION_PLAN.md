@@ -5,6 +5,25 @@ FarmAI user interface. Read `SUMMARY.md` and this file before changing code.
 The existing `streamlit_app.py` remains a developer/debugging tool. The new
 interface is a separate, task-focused application for farm workers.
 
+## Implementation Status
+
+The first vertical implementation is now present on the `interface` branch:
+
+- shared document processing service with coordinate-aligned deskewed previews,
+  overlays, template column identities, and cell-level progress
+- persistent FastAPI job API backed by SQLite
+- separate single-concurrency Python worker
+- React upload, settings, progress, and two-pane result review screens
+- editable table cells and reviewed CSV/JSON downloads
+- template validation states and optional ground-truth CSV scoring
+- cell selection linked to the detected overlay
+- recent SQLite-backed jobs on the main screen with direct links
+- confirmed deletion of queued/completed/failed jobs and their artifacts;
+  actively running jobs are protected
+
+The next priority is a pilot run with real `llm-vision` records, followed by
+bounded LLM retries, richer worker recovery, and the multi-file batch workflow.
+
 ## 1. Product Goal
 
 Build a simple review application that lets a user:
@@ -583,10 +602,13 @@ GET /api/jobs/{job_id}/download.json
 PATCH /api/jobs/{job_id}/cells
 POST  /api/jobs/{job_id}/ground-truth
 DELETE /api/jobs/{job_id}/ground-truth
+DELETE /api/jobs/{job_id}
 ```
 
 The cell edit payload uses page, row, and stable column key. Use optimistic
 concurrency or an `updated_at` value to avoid silently overwriting newer edits.
+Job deletion removes the validated `runtime/jobs/<job_id>` artifact directory
+and then its SQLite row. It returns HTTP 409 while a job is actively running.
 
 ### Future batch endpoint
 
@@ -605,12 +627,14 @@ Use routes:
 ```text
 /                    upload screen
 /jobs/:jobId         status or review screen
-/jobs                recent jobs, added in the batching phase
 ```
 
 The job page should fetch current state from the backend. Poll every two to five
 seconds while queued/running and stop polling at a terminal state. A page
 refresh must restore progress or completed results by URL.
+
+The upload screen now includes the recent-jobs table. A dedicated `/jobs`
+dashboard remains optional for the later batch phase.
 
 Do not store images, OCR results, or ground truth only in React state. The
 backend is the source of truth.

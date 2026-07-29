@@ -18,6 +18,9 @@ dependencies = [
     "pytesseract",
     "pypdfium2",
     "streamlit",
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
 ]
 
 [[project.authors]]

@@ -1,5 +1,32 @@
 # FarmAI OCR Improvement Ideas
 
+## Current Implementation Status
+
+The strongest prototype direction from this document is now implemented:
+
+- `boar_room` template-guided column reconstruction and template-level filters
+- column value types, temperature ranges, and common values
+- direct `llm-vision` cell OCR with template context
+- optional `llm-verify` for baseline OCR
+- coordinate-aligned deskewed source crops and overlays
+- a persistent React/FastAPI review UI with background jobs
+- optional exact ground-truth CSV scoring and editable reviewed output
+
+The worker-facing UI also supports a `Detected table (no template)` option for
+comparison runs. Its main screen lists SQLite-backed queued/running/previous
+jobs and supports confirmed deletion of eligible jobs and artifacts.
+
+The next experiments should measure a fixed evaluation set across:
+
+1. detected grid plus Tesseract
+2. template grid plus Tesseract
+3. template grid plus direct `llm-vision`
+4. a future locally trained OCR model
+5. local OCR plus selective `llm-verify`
+
+The main remaining engineering priorities are bounded LLM retries, stronger
+worker recovery, reviewed-cell dataset export, and multi-file batches.
+
 ## Current Diagnosis
 
 The OCR problem is probably not only an OCR-engine problem. On real farm logs,

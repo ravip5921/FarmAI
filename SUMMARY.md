@@ -7,6 +7,12 @@ FarmAI is a Python 3.11 project for layout-aware OCR of bordered farm record tab
 - `README.md` explains the project goal, install steps, CLI usage, Streamlit usage, and OCR engine choices.
 - `main.py` is the command-line entry point used by the installed `farm-ai` console script.
 - `streamlit_app.py` is the local review UI for uploading a record, previewing table detection, editing OCR output, and downloading CSV.
+- `user_interface/` is the worker-facing React/FastAPI application. It stores
+  persistent background jobs in SQLite, runs OCR in a separate worker, and
+  provides upload, progress, overlay/table review, ground-truth scoring,
+  downloads, recent-job links, and confirmed job deletion.
+- `src/application/` is the UI-neutral document-processing and ground-truth
+  service layer shared by the new backend.
 - `templates/` contains known farm form layouts, including the Boar Room log template.
 - `src/templates.py` loads and validates template metadata used by table repair, column filtering, and column-aware OCR.
 - `src/` contains the reusable pipeline code.
@@ -27,11 +33,16 @@ The main pipeline is:
 9. Crop cells from the detected or template-repaired grid.
 10. Run OCR on each cropped cell, optionally using template-driven column rules.
 11. Export or display the result as CSV/JSON/editable table data.
+12. In the worker-facing UI, persist job progress/results and optionally compare
+    output against a ground-truth CSV.
 
 ## Top-Level Files
 
 - `main.py`: CLI orchestration. Parses command-line options, builds the preprocessing pipeline, loads images/PDFs, runs table detection, applies optional templates/perspective correction, runs OCR, prints CSV, and optionally saves debug images, overlays, cropped cells, CSV, and JSON files.
 - `streamlit_app.py`: Streamlit app for manual review. Handles file upload, OCR engine selection, optional template selection, optional column filtering, document/grid/line previews, editable dataframe output, confidence summaries, reset, and CSV download.
+- `user_interface/`: React/TypeScript frontend plus FastAPI API and persistent
+  worker. The main screen defaults to Boar Room plus `llm-vision`, while
+  Advanced settings include a detected-table/no-template option.
 - `pyproject.toml`: Package metadata, dependencies, optional extras, setuptools package discovery, and the `farm-ai = main:main` console script.
 - `requirements.txt`: Runtime and developer dependencies used by local setup and CI.
 - `noxfile.py`: Automation sessions for type checking, tests with coverage, and formatting. Uses external tools from the active environment.
@@ -41,6 +52,20 @@ The main pipeline is:
 - `templates/boar_room.json`: Known Boar Room table layout. Stores proportional column widths, uniform-row hint, column keys/names, template-level filter flags, value types, allowed ranges, and common values.
 
 ## Source Package
+
+### `src/application`
+
+UI-neutral orchestration for the persistent web application.
+
+- `src/application/processing.py`: Loads all document pages, prepares the
+  binary detection image, applies the same deskew transform to the source image,
+  detects the grid, runs OCR with cell progress callbacks, and maps compacted
+  output columns to stable template keys.
+- `src/application/result_models.py`: Typed settings, progress, page, column,
+  cell, and document result models used by the backend.
+- `src/application/ground_truth.py`: Parses conventional table CSV ground
+  truth, validates visible headers/row counts, scores exact and normalized cell
+  matches, and assigns UI review states.
 
 ### `src/core`
 
@@ -71,6 +96,9 @@ Image cleanup stages that prepare a page for table detection.
 - `src/preprocessing/sauvola.py`: `SauvolaBinarizationStage` applies Sauvola adaptive thresholding and outputs a 0/255 binary image.
 - `src/preprocessing/denoise.py`: `MorphologicalDenoiseStage` removes small binary foreground components or applies median blur to non-binary images.
 - `src/preprocessing/skew.py`: `SkewCorrectionStage` estimates page skew from Hough line angles and rotates the image when the angle is meaningful.
+- The public rotation helper in `src/preprocessing/skew.py` lets the application
+  service apply one estimated transform to both the binary detection image and
+  the source image, keeping overlays and OCR crops in one coordinate system.
 - `src/preprocessing/perspective.py`: Reserved preprocessing placeholder. The active table-corner perspective correction currently lives under `src/table/perspective_correction.py` because it depends on detected table masks/corners.
 - `src/preprocessing/__init__.py`: Package marker.
 
@@ -134,6 +162,10 @@ Tests use `unittest` and mostly small synthetic images/mocks. The suite is organ
 - `tests/test_ocr/`: OCR registry, Tesseract wrapper behavior, TrOCR wrapper behavior with fake modules, column OCR rules, and cell/table OCR logic.
 - `tests/test_export/`: CSV and JSON serialization, validation metadata, and file writing.
 - `tests/test_templates.py` and `tests/test_templates_coverage.py`: Template loading, validation, column keys/names, template IDs, and error handling.
+- `tests/test_application/`: Shared processing result mapping, progress events,
+  and ground-truth parsing/scoring.
+- `tests/test_ui_backend/`: FastAPI job creation/listing/deletion, running-job
+  deletion protection, persistent storage, and worker artifact behavior.
 
 Run tests through:
 
@@ -154,6 +186,9 @@ python -m unittest discover -s tests
 - `references/`: Research PDFs and bibliography entries that informed the table-recognition approach.
 - `notebooks/`: Reserved for notebooks; currently only contains `.gitkeep`.
 - `debug_outputs/`: Generated debug images and OCR exports from previous runs. CLI output is organized by input name, for example `debug_outputs/<image_name>/`. Cropped cells are saved under `debug_outputs/<image_name>/<image_name>_cells/` when `--save-cells` or `--save-all` is used, and filenames include the template column key, row number, and crop coordinates.
+- `user_interface/runtime/`: Ignored SQLite database, uploaded inputs, page
+  previews, overlays, and reviewed result artifacts. A confirmed job deletion
+  removes both the runtime directory for that job and its database row.
 - `farm_ai.egg-info/`: Generated packaging metadata from editable/install builds.
 - `.github/workflows/ci.yml`: CI workflow. Runs on Ubuntu, Windows, and macOS, creates a Python 3.11 conda environment, installs dependencies and the editable package, then runs `nox`.
 
@@ -185,6 +220,15 @@ Run the review UI:
 streamlit run streamlit_app.py
 ```
 
+Run the worker-facing UI in three terminals:
+
+```powershell
+python -m uvicorn user_interface.backend.app:app --reload --port 8000
+python -m user_interface.backend.worker
+cd user_interface\frontend
+npm run dev
+```
+
 Run automation:
 
 ```bash
@@ -206,3 +250,8 @@ nox -s format
 - Change CSV/JSON output shape in `src/export/`.
 - Change CLI options or saved artifacts in `main.py`.
 - Change the review workflow, editable table UI, or upload behavior in `streamlit_app.py`.
+- Change shared web processing/result mapping in `src/application/`.
+- Change persistent jobs, artifacts, or API behavior in
+  `user_interface/backend/`.
+- Change the worker-facing upload, recent jobs, progress, and result review
+  screens in `user_interface/frontend/src/`.

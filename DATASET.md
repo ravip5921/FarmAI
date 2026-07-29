@@ -2,6 +2,62 @@
 
 This document is a prompt/playbook for an agent building a labeled OCR dataset from FarmAI table-cell crops.
 
+## Current Project Integration
+
+The persistent web interface under `user_interface/` now accepts an optional
+ground-truth CSV before processing or after a job completes. That CSV is for
+evaluation of a complete extracted table and has visible template columns as
+headers, for example:
+
+```csv
+Date,Current Temperature,HI,LO,Comments
+01-May,67.8,95,,All good
+```
+
+This table-level CSV is different from the cell-image training manifest
+described below:
+
+- UI ground truth scores a completed OCR job by row and visible column.
+- The dataset manifest links one cropped image to one training label and keeps
+  crop/template metadata.
+
+Attaching UI ground truth after OCR does not rerun the LLM. The result page
+colors exact mismatches and reports cell accuracy. Reviewed UI edits are stored
+separately from immutable `ocr_text`, so corrected exports can later provide
+feedback data without overwriting the original model output.
+
+For future dataset collection, add an explicit export step that converts
+reviewed job cells and their saved crops into the manifest schema below. That
+export is not implemented yet.
+
+## Current Project Integration
+
+The persistent web interface under `user_interface/` now accepts an optional
+ground-truth CSV before processing or after a job completes. That CSV is for
+evaluation of a complete extracted table and has visible template columns as
+headers, for example:
+
+```csv
+Date,Current Temperature,HI,LO,Comments
+01-May,67.8,95,,All good
+```
+
+This table-level CSV is different from the cell-image training manifest
+described below:
+
+- UI ground truth scores a completed OCR job by row and visible column.
+- The dataset manifest links one cropped image to one training label and keeps
+  crop/template metadata.
+
+Attaching UI ground truth after OCR does not rerun the LLM. The result page
+colors exact mismatches and reports cell accuracy. Reviewed UI edits are stored
+separately from immutable `ocr_text`, so corrected exports can later provide
+feedback data without overwriting the original model output.
+
+For future dataset collection, add an explicit export step that converts
+reviewed job cells and their saved crops into the manifest schema below. That
+export is not implemented yet.
+
 ## Goal
 
 Build a ground-truth dataset of individual cropped farm-record cell images. Each dataset row should connect one saved cell image to one manually entered label so the OCR engine can later be fine-tuned or evaluated on the same kind of crops FarmAI sees at runtime.

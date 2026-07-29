@@ -71,6 +71,7 @@ Thumbs.db
 
 # Project-specific debug / outputs
 debug_outputs/
+user_interface/runtime/
 
 # Local env files
 .env
