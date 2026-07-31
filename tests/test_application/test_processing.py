@@ -68,7 +68,7 @@ class TestApplicationProcessing(unittest.TestCase):
         ):
             result = process_document(
                 "record.png",
-                settings=ProcessingSettings(),
+                settings=ProcessingSettings(template_id="boar_room"),
                 progress_callback=progress.append,
                 engine=engine,
             )

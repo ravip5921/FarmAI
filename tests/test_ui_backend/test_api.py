@@ -27,6 +27,7 @@ class TestUiApi(unittest.TestCase):
                 self.assertEqual(
                     settings.json()["defaults"]["ocr_engine"], "llm-vision"
                 )
+                self.assertIsNone(settings.json()["defaults"]["template_id"])
                 created = client.post(
                     "/api/jobs",
                     data={

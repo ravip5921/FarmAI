@@ -41,8 +41,8 @@ The main pipeline is:
 - `main.py`: CLI orchestration. Parses command-line options, builds the preprocessing pipeline, loads images/PDFs, runs table detection, applies optional templates/perspective correction, runs OCR, prints CSV, and optionally saves debug images, overlays, cropped cells, CSV, and JSON files.
 - `streamlit_app.py`: Streamlit app for manual review. Handles file upload, OCR engine selection, optional template selection, optional column filtering, document/grid/line previews, editable dataframe output, confidence summaries, reset, and CSV download.
 - `user_interface/`: React/TypeScript frontend plus FastAPI API and persistent
-  worker. The main screen defaults to Boar Room plus `llm-vision`, while
-  Advanced settings include a detected-table/no-template option.
+  worker. The main screen defaults to detected-table/no-template plus
+  `llm-vision`, while Advanced settings provide the named form templates.
 - `pyproject.toml`: Package metadata, dependencies, optional extras, setuptools package discovery, and the `farm-ai = main:main` console script.
 - `requirements.txt`: Runtime and developer dependencies used by local setup and CI.
 - `noxfile.py`: Automation sessions for type checking, tests with coverage, and formatting. Uses external tools from the active environment.

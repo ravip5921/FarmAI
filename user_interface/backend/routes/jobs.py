@@ -104,7 +104,7 @@ async def create_job(
     request: Request,
     record: UploadFile = File(...),
     settings: str = Form(
-        '{"template_id":"boar_room","ocr_engine":"llm-vision",'
+        '{"template_id":null,"ocr_engine":"llm-vision",'
         '"extra_filtered_columns":[]}'
     ),
     ground_truth: UploadFile | None = File(default=None),

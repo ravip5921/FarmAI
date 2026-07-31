@@ -19,7 +19,7 @@ import { SettingsDrawer } from '../components/SettingsDrawer'
 import type { JobSettings } from '../types/api'
 
 const defaultSettings: JobSettings = {
-  template_id: 'boar_room',
+  template_id: null,
   ocr_engine: 'llm-vision',
   extra_filtered_columns: [],
 }

@@ -42,7 +42,7 @@ def get_settings() -> dict:
     ]
     return {
         "defaults": {
-            "template_id": "boar_room",
+            "template_id": None,
             "ocr_engine": "llm-vision",
             "extra_filtered_columns": [],
         },

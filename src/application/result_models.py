@@ -8,7 +8,7 @@ import numpy as np
 
 @dataclass(frozen=True)
 class ProcessingSettings:
-    template_id: str | None = "boar_room"
+    template_id: str | None = None
     ocr_engine: str = "llm-vision"
     extra_filtered_columns: tuple[str, ...] = ()
     ocr_padding: int = 2

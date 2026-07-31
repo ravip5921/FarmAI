@@ -42,13 +42,13 @@ Open `http://localhost:5173`.
 
 The upload screen defaults to:
 
-- Boar Room template
+- Detected table (no template)
 - LLM vision handwriting recognition
 - no additional filtered columns
 - no ground-truth CSV
 
-The settings button exposes those options when they need to be changed.
-Choose "Detected table (no template)" to use FarmAI's detected grid as-is.
+The settings button exposes template and recognition options when they need to
+be changed. Choose a named template to apply its known column proportions.
 
 Jobs and generated artifacts persist under `user_interface/runtime/`, so
 refreshing or closing the browser does not stop processing. The main screen
