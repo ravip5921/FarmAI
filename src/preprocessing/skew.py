@@ -39,11 +39,16 @@ def rotate_image(
 
 class SkewCorrectionStage(PipelineStage):
     def __init__(
-        self, canny_low: int = 50, canny_high: int = 150, hough_threshold: int = 80
+        self,
+        canny_low: int = 50,
+        canny_high: int = 150,
+        hough_threshold: int = 80,
+        max_skew_angle: float = 15.0,
     ):
         self.canny_low = canny_low
         self.canny_high = canny_high
         self.hough_threshold = hough_threshold
+        self.max_skew_angle = max_skew_angle
 
     def _estimate_angle(self, image: np.ndarray) -> float:
         if image.ndim == 3:
@@ -73,7 +78,10 @@ class SkewCorrectionStage(PipelineStage):
             if dx == 0:
                 continue
             angle = math.degrees(math.atan2(dy, dx))
-            if abs(angle) <= 45:
+            # A document needing more than a modest deskew is probably rotated,
+            # not skewed. Excluding steep strokes also prevents handwriting and
+            # diagonal marks inside form cells from outvoting horizontal rules.
+            if abs(angle) <= self.max_skew_angle:
                 angles.append(angle)
 
         if not angles:

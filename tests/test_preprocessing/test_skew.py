@@ -89,6 +89,24 @@ class TestSkewStage(unittest.TestCase):
         self.assertFalse(result.metadata.get("deskewed"))
         self.assertEqual(result.metadata.get("skew_angle"), 0.0)
 
+    def test_steep_cell_marks_do_not_outvote_horizontal_table_lines(self) -> None:
+        img = np.full((500, 800), 255, dtype=np.uint8)
+        for y in range(50, 451, 50):
+            cv2.line(img, (25, y), (775, y), color=0, thickness=2)
+        for offset in range(20):
+            start_x = 50 + offset * 20
+            cv2.line(
+                img,
+                (start_x, 400),
+                (start_x + 300, 100),
+                color=0,
+                thickness=2,
+            )
+
+        stage = SkewCorrectionStage(hough_threshold=20)
+
+        self.assertAlmostEqual(stage.estimate_angle(img), 0.0, delta=0.5)
+
 
 if __name__ == "__main__":
     unittest.main()
