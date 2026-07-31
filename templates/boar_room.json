@@ -1,6 +1,6 @@
 {
   "id": "boar_room",
-  "name": "Boar Room Log",
+  "name": "Boar Room",
   "description": "Template for boar room farm log tables.",
   "table": {
     "column_widths": [1.5, 1.5, 1.6, 1.6, 0.4, 1.6, 20, 3,0.4, 2.7],

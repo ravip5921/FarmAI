@@ -100,7 +100,7 @@ Use these defaults:
 
 | Setting | Default | UI behavior |
 | --- | --- | --- |
-| Template | `boar_room` | Display as "Boar Room Log" |
+| Template | `boar_room` | Display as "Boar Room" |
 | OCR engine | `llm-vision` | Display as "Best handwriting recognition" |
 | Extra filtered columns | none | Template-level filters still apply |
 | Ground-truth CSV | none | Optional upload |

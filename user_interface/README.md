@@ -42,7 +42,7 @@ Open `http://localhost:5173`.
 
 The upload screen defaults to:
 
-- Boar Room Log template
+- Boar Room template
 - LLM vision handwriting recognition
 - no additional filtered columns
 - no ground-truth CSV

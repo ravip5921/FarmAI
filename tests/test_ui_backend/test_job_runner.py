@@ -21,7 +21,7 @@ class TestJobRunner(unittest.TestCase):
         process_document.return_value = DocumentProcessingResult(
             filename="record.jpg",
             template_id="boar_room",
-            template_name="Boar Room Log",
+            template_name="Boar Room",
             ocr_engine="tesseract",
             pages=[
                 PageProcessingResult(

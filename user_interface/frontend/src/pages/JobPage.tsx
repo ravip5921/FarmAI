@@ -102,7 +102,7 @@ export function JobPage() {
   if (job.isLoading) {
     return (
       <div className="app-shell">
-        <AppHeader />
+        <AppHeader backTo="/" />
         <main className="page">
           <div className="empty-message">Loading job...</div>
         </main>
@@ -113,7 +113,7 @@ export function JobPage() {
   if (job.error || !job.data) {
     return (
       <div className="app-shell">
-        <AppHeader />
+        <AppHeader backTo="/" />
         <main className="page">
           <div className="error-panel">
             <h2>Job unavailable</h2>
@@ -130,7 +130,7 @@ export function JobPage() {
   if (job.data.status === 'failed') {
     return (
       <div className="app-shell">
-        <AppHeader />
+        <AppHeader backTo="/" />
         <main className="page">
           <div className="error-panel">
             <h2>Record could not be read</h2>
@@ -147,7 +147,7 @@ export function JobPage() {
   if (!complete) {
     return (
       <div className="app-shell">
-        <AppHeader />
+        <AppHeader backTo="/" />
         <main className="page">
           <JobProgress job={job.data} />
         </main>
@@ -158,7 +158,7 @@ export function JobPage() {
   if (result.isLoading || !result.data || !page) {
     return (
       <div className="app-shell">
-        <AppHeader />
+        <AppHeader backTo="/" />
         <main className="page">
           <div className="empty-message">Preparing the review...</div>
         </main>
@@ -169,7 +169,7 @@ export function JobPage() {
   const data: JobResult = result.data
   return (
     <div className="app-shell">
-      <AppHeader />
+      <AppHeader backTo="/" />
       <main className="page review-page">
         <div className="review-topbar">
           <div className="review-title">

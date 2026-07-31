@@ -1,6 +1,7 @@
 import {
   Alert,
   Button,
+  Checkbox,
   Chip,
   Dialog,
   DialogActions,
@@ -19,7 +20,7 @@ import {
 } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, Clock3, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { deleteJob } from '../api/jobs'
 import type { JobStatus, JobSummary } from '../types/api'
@@ -50,14 +51,41 @@ function formatDate(value: string) {
 
 export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
   const queryClient = useQueryClient()
-  const [selectedJob, setSelectedJob] = useState<JobSummary | null>(null)
+  const [checkedJobIds, setCheckedJobIds] = useState<Set<string>>(new Set())
+  const [jobsToDelete, setJobsToDelete] = useState<JobSummary[]>([])
+  const deletableJobs = useMemo(
+    () => jobs.filter((job) => job.status !== 'running'),
+    [jobs],
+  )
+  const selectedJobs = deletableJobs.filter((job) =>
+    checkedJobIds.has(job.job_id),
+  )
+  const allSelected =
+    deletableJobs.length > 0 &&
+    deletableJobs.every((job) => checkedJobIds.has(job.job_id))
+  const someSelected = selectedJobs.length > 0 && !allSelected
+
   const remove = useMutation({
-    mutationFn: (jobId: string) => deleteJob(jobId),
+    mutationFn: (targets: JobSummary[]) =>
+      Promise.all(targets.map((job) => deleteJob(job.job_id))),
     onSuccess: async () => {
-      setSelectedJob(null)
+      setCheckedJobIds(new Set())
+      setJobsToDelete([])
+      await queryClient.invalidateQueries({ queryKey: ['jobs'] })
+    },
+    onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: ['jobs'] })
     },
   })
+
+  const toggleJob = (jobId: string) => {
+    setCheckedJobIds((current) => {
+      const next = new Set(current)
+      if (next.has(jobId)) next.delete(jobId)
+      else next.add(jobId)
+      return next
+    })
+  }
 
   if (!jobs.length) return null
 
@@ -69,7 +97,22 @@ export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
             <h2 id="recent-jobs-heading">Recent jobs</h2>
             <p>Open a running job or return to a previous result.</p>
           </div>
-          <Clock3 size={19} aria-hidden="true" />
+          <span className="recent-jobs__heading-actions">
+            <Button
+              color="error"
+              variant="outlined"
+              size="small"
+              startIcon={<Trash2 size={17} />}
+              disabled={!selectedJobs.length || remove.isPending}
+              onClick={() => {
+                remove.reset()
+                setJobsToDelete(selectedJobs)
+              }}
+            >
+              Delete selected
+            </Button>
+            <Clock3 size={19} aria-hidden="true" />
+          </span>
         </div>
         <TableContainer
           component={Paper}
@@ -79,6 +122,24 @@ export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
           <Table size="small" aria-label="Running and previous FarmAI jobs">
             <TableHead>
               <TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    size="small"
+                    checked={allSelected}
+                    indeterminate={someSelected}
+                    disabled={!deletableJobs.length || remove.isPending}
+                    slotProps={{
+                      input: { 'aria-label': 'Select all deletable jobs' },
+                    }}
+                    onChange={() =>
+                      setCheckedJobIds(
+                        allSelected
+                          ? new Set()
+                          : new Set(deletableJobs.map((job) => job.job_id)),
+                      )
+                    }
+                  />
+                </TableCell>
                 <TableCell>Record</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell className="recent-jobs__date">Started</TableCell>
@@ -88,6 +149,29 @@ export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
             <TableBody>
               {jobs.map((job) => (
                 <TableRow hover key={job.job_id}>
+                  <TableCell padding="checkbox">
+                    <Tooltip
+                      title={
+                        job.status === 'running'
+                          ? 'Running jobs cannot be deleted'
+                          : 'Select job'
+                      }
+                    >
+                      <span>
+                        <Checkbox
+                          size="small"
+                          checked={checkedJobIds.has(job.job_id)}
+                          disabled={job.status === 'running' || remove.isPending}
+                          slotProps={{
+                            input: {
+                              'aria-label': `Select ${job.filename}`,
+                            },
+                          }}
+                          onChange={() => toggleJob(job.job_id)}
+                        />
+                      </span>
+                    </Tooltip>
+                  </TableCell>
                   <TableCell>
                     <Link className="job-link" to={`/jobs/${job.job_id}`}>
                       {job.filename}
@@ -131,7 +215,7 @@ export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
                             disabled={job.status === 'running'}
                             onClick={() => {
                               remove.reset()
-                              setSelectedJob(job)
+                              setJobsToDelete([job])
                             }}
                             size="small"
                             sx={{ width: 36, height: 36 }}
@@ -150,15 +234,20 @@ export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
       </section>
 
       <Dialog
-        open={selectedJob !== null}
-        onClose={() => !remove.isPending && setSelectedJob(null)}
+        open={jobsToDelete.length > 0}
+        onClose={() => !remove.isPending && setJobsToDelete([])}
         aria-labelledby="delete-job-title"
       >
-        <DialogTitle id="delete-job-title">Delete this job?</DialogTitle>
+        <DialogTitle id="delete-job-title">
+          {jobsToDelete.length === 1
+            ? 'Delete this job?'
+            : `Delete ${jobsToDelete.length} jobs?`}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {selectedJob?.filename} and all of its saved results will be
-            permanently removed.
+            {jobsToDelete.length === 1
+              ? `${jobsToDelete[0]?.filename} and all of its saved results will be permanently removed.`
+              : `The selected ${jobsToDelete.length} jobs and all of their saved results will be permanently removed.`}
           </DialogContentText>
           {remove.error && (
             <Alert severity="error" sx={{ mt: 2 }}>
@@ -169,17 +258,21 @@ export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
         <DialogActions>
           <Button
             disabled={remove.isPending}
-            onClick={() => setSelectedJob(null)}
+            onClick={() => setJobsToDelete([])}
           >
             Keep job
           </Button>
           <Button
             color="error"
             variant="contained"
-            disabled={!selectedJob || remove.isPending}
-            onClick={() => selectedJob && remove.mutate(selectedJob.job_id)}
+            disabled={!jobsToDelete.length || remove.isPending}
+            onClick={() => remove.mutate(jobsToDelete)}
           >
-            {remove.isPending ? 'Deleting...' : 'Delete job'}
+            {remove.isPending
+              ? 'Deleting...'
+              : jobsToDelete.length === 1
+                ? 'Delete job'
+                : 'Delete jobs'}
           </Button>
         </DialogActions>
       </Dialog>

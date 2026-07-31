@@ -50,6 +50,12 @@ textarea {
   justify-content: space-between;
 }
 
+.app-header__leading {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .app-brand {
   display: inline-flex;
   align-items: center;
@@ -192,6 +198,7 @@ textarea {
   margin-top: 18px;
   display: flex;
   justify-content: flex-end;
+  gap: 12px;
 }
 
 .settings-summary {
@@ -224,6 +231,12 @@ textarea {
   margin: 3px 0 0;
   color: #68736d;
   font-size: 0.88rem;
+}
+
+.recent-jobs__heading-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .job-link {

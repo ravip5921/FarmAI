@@ -83,19 +83,7 @@ export function UploadPage() {
 
   return (
     <div className="app-shell">
-      <AppHeader
-        action={
-          <Tooltip title="Advanced settings">
-            <IconButton
-              aria-label="Advanced settings"
-              onClick={() => setSettingsOpen(true)}
-              sx={{ width: 44, height: 44 }}
-            >
-              <Settings size={21} />
-            </IconButton>
-          </Tooltip>
-        }
-      />
+      <AppHeader />
       <main className="page upload-page">
         <div className="page-heading">
           <h1>Read a farm record</h1>
@@ -182,6 +170,15 @@ export function UploadPage() {
         </div>
 
         <div className="upload-actions">
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<Settings size={19} />}
+            onClick={() => setSettingsOpen(true)}
+            sx={{ minHeight: 48 }}
+          >
+            Settings
+          </Button>
           <Button
             variant="contained"
             size="large"

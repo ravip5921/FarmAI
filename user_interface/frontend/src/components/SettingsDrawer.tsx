@@ -54,7 +54,7 @@ export function SettingsDrawer({
               Advanced settings
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Defaults work for most Boar Room records.
+              Changes are saved as you make them.
             </Typography>
           </div>
           <Button
