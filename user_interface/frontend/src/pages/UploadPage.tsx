@@ -5,13 +5,13 @@ import {
   Tooltip,
 } from '@mui/material'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { FileText, Settings, Upload, X } from 'lucide-react'
+import { FileText, PlayCircle, Settings, Upload, X } from 'lucide-react'
 import {
   useRef,
   useState,
   type DragEvent,
 } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { createJob, getJobs, getSettings } from '../api/jobs'
 import { AppHeader } from '../components/AppHeader'
 import { RecentJobsTable } from '../components/RecentJobsTable'
@@ -170,6 +170,16 @@ export function UploadPage() {
         </div>
 
         <div className="upload-actions">
+          <Button
+            component={Link}
+            to="/demo"
+            variant="outlined"
+            size="large"
+            startIcon={<PlayCircle size={19} />}
+            sx={{ minHeight: 48 }}
+          >
+            Demo
+          </Button>
           <Button
             variant="outlined"
             size="large"
