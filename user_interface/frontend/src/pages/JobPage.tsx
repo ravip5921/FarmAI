@@ -10,11 +10,12 @@ import {
 } from '@mui/material'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  BarChart3,
   Download,
   FileCheck2,
   RefreshCw,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   attachGroundTruth,
@@ -22,6 +23,7 @@ import {
   getJob,
   getResult,
 } from '../api/jobs'
+import { AnalysisPanel } from '../components/AnalysisPanel'
 import { AppHeader } from '../components/AppHeader'
 import { JobProgress } from '../components/JobProgress'
 import { OcrResultGrid } from '../components/OcrResultGrid'
@@ -49,6 +51,7 @@ export function JobPage() {
   const [pageNumber, setPageNumber] = useState(1)
   const [selectedCell, setSelectedCell] = useState<ResultCell | null>(null)
   const [needsReviewOnly, setNeedsReviewOnly] = useState(false)
+  const analysisRef = useRef<HTMLDivElement>(null)
 
   const job = useQuery({
     queryKey: ['job', jobId],
@@ -228,6 +231,18 @@ export function JobPage() {
             >
               Download CSV
             </Button>
+            <Button
+              variant="outlined"
+              startIcon={<BarChart3 size={17} />}
+              onClick={() =>
+                analysisRef.current?.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'start',
+                })
+              }
+            >
+              Analysis
+            </Button>
             <Tooltip title="Refresh results">
               <IconButton
                 aria-label="Refresh results"
@@ -323,6 +338,9 @@ export function JobPage() {
               onEdit={(cell, value) => edit.mutate({ cell, value })}
             />
           </section>
+        </div>
+        <div ref={analysisRef}>
+          <AnalysisPanel result={data} />
         </div>
       </main>
     </div>

@@ -7,7 +7,15 @@ import {
   LinearProgress,
   Tooltip,
 } from '@mui/material'
-import { Download, FileText, Home, RotateCcw, Upload, X } from 'lucide-react'
+import {
+  BarChart3,
+  Download,
+  FileText,
+  Home,
+  RotateCcw,
+  Upload,
+  X,
+} from 'lucide-react'
 import {
   useMemo,
   useRef,
@@ -15,6 +23,7 @@ import {
   type DragEvent,
 } from 'react'
 import { Link } from 'react-router-dom'
+import { AnalysisPanel } from '../components/AnalysisPanel'
 import { AppHeader } from '../components/AppHeader'
 import { OcrResultGrid } from '../components/OcrResultGrid'
 import { OverlayViewer } from '../components/OverlayViewer'
@@ -103,6 +112,7 @@ export function DemoPage() {
   const [demoError, setDemoError] = useState<string | null>(null)
   const [selectedCell, setSelectedCell] = useState<ResultCell | null>(null)
   const [needsReviewOnly, setNeedsReviewOnly] = useState(false)
+  const analysisRef = useRef<HTMLDivElement>(null)
 
   const acceptFile = (file?: File) => {
     if (file) setRecord(file)
@@ -229,6 +239,18 @@ export function DemoPage() {
               >
                 Download CSV
               </Button>
+              <Button
+                variant="outlined"
+                startIcon={<BarChart3 size={17} />}
+                onClick={() =>
+                  analysisRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  })
+                }
+              >
+                Analysis
+              </Button>
             </div>
           </div>
 
@@ -299,6 +321,9 @@ export function DemoPage() {
                 }}
               />
             </section>
+          </div>
+          <div ref={analysisRef}>
+            <AnalysisPanel result={result} />
           </div>
         </main>
       </div>
