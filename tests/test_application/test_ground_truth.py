@@ -79,6 +79,55 @@ class TestGroundTruthScoring(unittest.TestCase):
         self.assertEqual(cells[2]["state"], "mismatch_and_warning")
         self.assertEqual(cells[3]["state"], "correct")
 
+    def test_uses_field_aware_normalized_matches_for_review_state(self) -> None:
+        result = {
+            "metrics": None,
+            "pages": [
+                {
+                    "page_number": 1,
+                    "data_row_count": 1,
+                    "metrics": None,
+                    "columns": [
+                        {
+                            "key": "date",
+                            "name": "Date",
+                            "value_type": "date_dd_mon",
+                        },
+                        {
+                            "key": "comments",
+                            "name": "Comments",
+                            "value_type": "english_text",
+                        },
+                    ],
+                    "cells": [
+                        {
+                            "row": 1,
+                            "column_key": "date",
+                            "ocr_text": "02 May",
+                            "validation_error": None,
+                            "state": "unscored",
+                        },
+                        {
+                            "row": 1,
+                            "column_key": "comments",
+                            "ocr_text": "Allgood.",
+                            "validation_error": None,
+                            "state": "unscored",
+                        },
+                    ],
+                }
+            ],
+        }
+
+        scored = score_result(result, "Date,Comments\n02-May,ALL GOOD\n")
+
+        self.assertEqual(scored["metrics"]["correct_cells"], 2)
+        self.assertEqual(scored["metrics"]["exact_accuracy"], 0.0)
+        self.assertEqual(scored["metrics"]["normalized_accuracy"], 1.0)
+        cells = scored["pages"][0]["cells"]
+        self.assertEqual(cells[0]["state"], "correct")
+        self.assertEqual(cells[1]["state"], "correct")
+
     def test_rejects_unknown_missing_and_wrong_row_count(self) -> None:
         with self.assertRaisesRegex(GroundTruthError, "Unknown"):
             score_result(

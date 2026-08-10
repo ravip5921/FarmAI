@@ -119,8 +119,24 @@ function exact(value: string) {
   return value.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n')
 }
 
-function normalized(value: string) {
+function normalized(value: string, valueType: string) {
   const trimmed = exact(value)
+  if (valueType === 'temperature') {
+    const number = Number(trimmed)
+    if (trimmed !== '' && Number.isFinite(number)) {
+      return String(number)
+    }
+    return trimmed
+  }
+  if (valueType === 'date_dd_mon') {
+    const compact = trimmed.toLocaleLowerCase().replace(/[^a-z0-9]/g, '')
+    const match = compact.match(/^(\d{1,2})([a-z]{3,})$/)
+    if (match) return `${match[1].padStart(2, '0')}${match[2].slice(0, 3)}`
+    return compact
+  }
+  if (valueType === 'english_text') {
+    return trimmed.toLocaleLowerCase().replace(/[^a-z0-9]/g, '')
+  }
   const number = Number(trimmed)
   if (trimmed !== '' && Number.isFinite(number)) {
     return String(number)
@@ -132,8 +148,11 @@ function cellState(
   ocrText: string,
   truthText: string | null,
   validationError: string | null,
+  valueType: string,
 ): CellState {
-  const mismatch = truthText != null && exact(ocrText) !== exact(truthText)
+  const mismatch =
+    truthText != null &&
+    normalized(ocrText, valueType) !== normalized(truthText, valueType)
   if (mismatch && validationError) return 'mismatch_and_warning'
   if (mismatch) return 'ground_truth_mismatch'
   if (validationError) return 'validation_warning'
@@ -141,14 +160,28 @@ function cellState(
   return 'unscored'
 }
 
+function valueTypeForCell(cell: ResultCell) {
+  if (cell.column_key === 'comments') return 'english_text'
+  if (cell.column_key === 'date') return 'date_dd_mon'
+  if (['current_temperature', 'hi', 'lo'].includes(cell.column_key)) {
+    return 'temperature'
+  }
+  return 'text'
+}
+
 function score(cells: ResultCell[], rowCount: number): AccuracyMetrics {
   const scored = cells.filter((cell) => cell.ground_truth_text != null)
-  const correct = scored.filter(
+  const exactCorrect = scored.filter(
     (cell) => exact(cell.ocr_text) === exact(cell.ground_truth_text ?? ''),
   )
   const normalizedCorrect = scored.filter(
-    (cell) =>
-      normalized(cell.ocr_text) === normalized(cell.ground_truth_text ?? ''),
+    (cell) => {
+      const valueType = valueTypeForCell(cell)
+      return (
+        normalized(cell.ocr_text, valueType) ===
+        normalized(cell.ground_truth_text ?? '', valueType)
+      )
+    },
   )
   let correctRows = 0
   for (let row = 1; row <= rowCount; row += 1) {
@@ -156,17 +189,17 @@ function score(cells: ResultCell[], rowCount: number): AccuracyMetrics {
     if (
       rowCells.length > 0 &&
       rowCells.every(
-        (cell) => exact(cell.ocr_text) === exact(cell.ground_truth_text ?? ''),
+        (cell) => cell.ground_truth_match === true,
       )
     ) {
       correctRows += 1
     }
   }
   return {
-    correct_cells: correct.length,
-    incorrect_cells: scored.length - correct.length,
+    correct_cells: normalizedCorrect.length,
+    incorrect_cells: scored.length - normalizedCorrect.length,
     scored_cells: scored.length,
-    exact_accuracy: scored.length ? correct.length / scored.length : null,
+    exact_accuracy: scored.length ? exactCorrect.length / scored.length : null,
     normalized_accuracy: scored.length
       ? normalizedCorrect.length / scored.length
       : null,
@@ -196,6 +229,11 @@ export async function createDemoResult(filename: string): Promise<JobResult> {
       const column = columns[cell.col]
       const truthText = truthRows[cell.row - 1]?.[cell.col] ?? null
       const validationError = cell.validation_error ?? null
+      const groundTruthMatch =
+        truthText == null
+          ? null
+          : normalized(cell.text, column.value_type) ===
+            normalized(truthText, column.value_type)
       return {
         row: cell.row,
         column_index: cell.col,
@@ -210,9 +248,8 @@ export async function createDemoResult(filename: string): Promise<JobResult> {
         raw_text: cell.raw_text ?? null,
         validation_error: validationError,
         ground_truth_text: truthText,
-        ground_truth_match:
-          truthText == null ? null : exact(cell.text) === exact(truthText),
-        state: cellState(cell.text, truthText, validationError),
+        ground_truth_match: groundTruthMatch,
+        state: cellState(cell.text, truthText, validationError, column.value_type),
       }
     })
 

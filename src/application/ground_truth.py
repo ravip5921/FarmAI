@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 from collections import defaultdict
 from typing import Any
 
@@ -25,6 +26,15 @@ def _normalized_value(value: str, value_type: str) -> str:
             return str(float(stripped))
         except ValueError:
             return stripped
+    if value_type == "date_dd_mon":
+        normalized = re.sub(r"[^a-z0-9]", "", stripped.casefold())
+        match = re.fullmatch(r"(\d{1,2})([a-z]{3,})", normalized)
+        if match:
+            day, month = match.groups()
+            return f"{int(day):02d}{month[:3]}"
+        return normalized
+    if value_type == "english_text":
+        return re.sub(r"[^a-z0-9]", "", stripped.casefold())
     return " ".join(stripped.casefold().split())
 
 
@@ -152,9 +162,9 @@ def score_result(
                 actual, str(column.get("value_type", "text"))
             ) == _normalized_value(expected, str(column.get("value_type", "text")))
             cell["ground_truth_text"] = expected
-            cell["ground_truth_match"] = is_match
+            cell["ground_truth_match"] = is_normalized_match
             validation_warning = bool(cell.get("validation_error"))
-            if is_match:
+            if is_normalized_match:
                 cell["state"] = (
                     "validation_warning" if validation_warning else "correct"
                 )
@@ -167,10 +177,10 @@ def score_result(
             scored += 1
             correct += int(is_match)
             normalized_correct += int(is_normalized_match)
-            incorrect += int(not is_match)
+            incorrect += int(not is_normalized_match)
             column_counts[key]["scored"] += 1
-            column_counts[key]["correct"] += int(is_match)
-            matches_by_row[int(cell["row"])].append(is_match)
+            column_counts[key]["correct"] += int(is_normalized_match)
+            matches_by_row[int(cell["row"])].append(is_normalized_match)
 
         correct_rows += sum(
             1 for matches in matches_by_row.values() if matches and all(matches)
@@ -178,7 +188,7 @@ def score_result(
         page["metrics"] = _metrics_for_cells(page.get("cells", []), columns)
 
     result["metrics"] = {
-        "correct_cells": correct,
+        "correct_cells": normalized_correct,
         "incorrect_cells": incorrect,
         "scored_cells": scored,
         "exact_accuracy": (correct / scored if scored else None),
@@ -229,10 +239,17 @@ def _metrics_for_cells(
 ) -> dict[str, Any]:
     scored = [cell for cell in cells if cell.get("ground_truth_match") is not None]
     correct = sum(1 for cell in scored if cell["ground_truth_match"])
+    exact = sum(
+        1
+        for cell in scored
+        if _exact_value(str(cell.get("ocr_text", "")))
+        == _exact_value(str(cell.get("ground_truth_text", "")))
+    )
     return {
         "correct_cells": correct,
         "incorrect_cells": len(scored) - correct,
         "scored_cells": len(scored),
-        "exact_accuracy": correct / len(scored) if scored else None,
+        "exact_accuracy": exact / len(scored) if scored else None,
+        "normalized_accuracy": correct / len(scored) if scored else None,
         "column_count": len(columns),
     }

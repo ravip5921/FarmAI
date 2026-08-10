@@ -29,7 +29,11 @@ function formatSize(bytes: number) {
 }
 
 function percent(value: number | null | undefined) {
-  return value == null ? 'Not scored' : `${(value * 100).toFixed(1)}%`
+  return value == null ? 'No accuracy CSV provided' : `${(value * 100).toFixed(1)}%`
+}
+
+function hasAccuracy(value: number | null | undefined) {
+  return value != null
 }
 
 function updateCell(
@@ -242,9 +246,22 @@ export function DemoPage() {
               <span className="metric__value">{reviewCount}</span>
             </div>
             <div className="metric">
-              <span className="metric__label">Exact accuracy</span>
-              <span className="metric__value">
-                {percent(result.metrics?.exact_accuracy)}
+              <span className="metric__label">OCR accuracy</span>
+              <span
+                className={[
+                  'metric__value',
+                  hasAccuracy(
+                    result.metrics?.normalized_accuracy ??
+                      result.metrics?.exact_accuracy,
+                  )
+                    ? ''
+                    : 'metric__value--message',
+                ].join(' ')}
+              >
+                {percent(
+                  result.metrics?.normalized_accuracy ??
+                    result.metrics?.exact_accuracy,
+                )}
               </span>
             </div>
           </section>

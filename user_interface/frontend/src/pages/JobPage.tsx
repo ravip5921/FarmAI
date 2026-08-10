@@ -36,7 +36,11 @@ const terminalStatuses = new Set([
 ])
 
 function percent(value: number | null | undefined) {
-  return value == null ? 'Not scored' : `${(value * 100).toFixed(1)}%`
+  return value == null ? 'No accuracy CSV provided' : `${(value * 100).toFixed(1)}%`
+}
+
+function hasAccuracy(value: number | null | undefined) {
+  return value != null
 }
 
 export function JobPage() {
@@ -270,9 +274,22 @@ export function JobPage() {
             <span className="metric__value">{reviewCount}</span>
           </div>
           <div className="metric">
-            <span className="metric__label">Exact accuracy</span>
-            <span className="metric__value">
-              {percent(data.metrics?.exact_accuracy)}
+            <span className="metric__label">OCR accuracy</span>
+            <span
+              className={[
+                'metric__value',
+                hasAccuracy(
+                  data.metrics?.normalized_accuracy ??
+                    data.metrics?.exact_accuracy,
+                )
+                  ? ''
+                  : 'metric__value--message',
+              ].join(' ')}
+            >
+              {percent(
+                data.metrics?.normalized_accuracy ??
+                  data.metrics?.exact_accuracy,
+              )}
             </span>
           </div>
         </section>

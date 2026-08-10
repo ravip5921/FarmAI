@@ -390,6 +390,12 @@ textarea {
   font-weight: 750;
 }
 
+.metric__value--message {
+  max-width: 190px;
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
 .review-workspace {
   display: grid;
   grid-template-columns: minmax(360px, 0.9fr) minmax(540px, 1.1fr);

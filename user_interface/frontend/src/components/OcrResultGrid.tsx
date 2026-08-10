@@ -10,7 +10,7 @@ import {
 } from 'ag-grid-community'
 import { AgGridReact } from 'ag-grid-react'
 import { useMemo } from 'react'
-import type { ResultCell, ResultPage } from '../types/api'
+import type { ResultCell, ResultColumn, ResultPage } from '../types/api'
 
 ModuleRegistry.registerModules([AllCommunityModule])
 
@@ -42,28 +42,104 @@ const gridTheme = themeQuartz.withParams({
   spacing: 7,
 })
 
-function cellTooltip(cell: ResultCell | undefined) {
+function cellTooltip(
+  cell: ResultCell | undefined,
+  column: ResultColumn,
+) {
   if (!cell) return ''
   const details: string[] = []
-  if (cell.validation_error) details.push(cell.validation_error)
-  if (cell.ground_truth_match === false) {
-    details.push(`Expected: ${cell.ground_truth_text ?? 'blank'}`)
-    details.push(`OCR: ${cell.ocr_text || 'blank'}`)
+  if (cell.validation_error) {
+    details.push(`Needs review: ${friendlyValidation(cell.validation_error)}`)
   }
-  if (cell.raw_text && cell.raw_text !== cell.ocr_text) {
-    details.push(`Raw response: ${cell.raw_text}`)
+  if (isDisplayMismatch(cell, column)) {
+    details.push(`Expected value: ${displayValue(cell.ground_truth_text)}`)
+    details.push(`FarmAI read: ${displayValue(cell.ocr_text)}`)
   }
-  if (cell.was_edited) details.push(`Original OCR: ${cell.ocr_text || 'blank'}`)
+  const rawNote = friendlyRawNote(cell.raw_text)
+  if (rawNote) {
+    details.push(rawNote)
+  }
+  if (cell.was_edited) {
+    details.push(`Original reading: ${displayValue(cell.ocr_text)}`)
+  }
   return details.join('\n')
 }
 
-function ReviewCellRenderer(params: ICellRendererParams<ReviewRow>) {
+function displayValue(value: string | null | undefined) {
+  return value ? value : 'blank'
+}
+
+function friendlyValidation(value: string) {
+  if (value.includes('expected temperature pattern')) {
+    return 'This should look like a temperature.'
+  }
+  return value
+}
+
+function friendlyRawNote(value: string | null) {
+  if (!value) return ''
+  const jsonText = value
+    .replace(/^```json\s*/i, '')
+    .replace(/```$/i, '')
+    .trim()
+  try {
+    const parsed = JSON.parse(jsonText) as {
+      status?: string
+      text?: string
+      reason?: string
+    }
+    if (parsed.status && parsed.status !== 'ok') {
+      return `Recognizer marked this as ${parsed.status}.`
+    }
+    if (parsed.reason) {
+      return `Recognizer note: ${parsed.reason}`
+    }
+  } catch {
+    if (/timed out/i.test(value)) return 'Recognizer timed out on this cell.'
+  }
+  return ''
+}
+
+function exact(value: string | null | undefined) {
+  return (value ?? '').trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+}
+
+function normalized(value: string | null | undefined, valueType: string) {
+  const trimmed = exact(value)
+  if (valueType === 'temperature') {
+    const number = Number(trimmed)
+    return trimmed !== '' && Number.isFinite(number) ? String(number) : trimmed
+  }
+  if (valueType === 'date_dd_mon') {
+    const compact = trimmed.toLocaleLowerCase().replace(/[^a-z0-9]/g, '')
+    const match = compact.match(/^(\d{1,2})([a-z]{3,})$/)
+    return match ? `${match[1].padStart(2, '0')}${match[2].slice(0, 3)}` : compact
+  }
+  if (valueType === 'english_text') {
+    return trimmed.toLocaleLowerCase().replace(/[^a-z0-9]/g, '')
+  }
+  return trimmed.replace(/\s+/g, ' ').toLocaleLowerCase()
+}
+
+function isDisplayMismatch(cell: ResultCell | undefined, column: ResultColumn) {
+  if (!cell || cell.ground_truth_text == null) return false
+  return (
+    cell.ground_truth_match === false &&
+    normalized(cell.ocr_text, column.value_type) !==
+      normalized(cell.ground_truth_text, column.value_type)
+  )
+}
+
+function isFlagged(cell: ResultCell | undefined, column: ResultColumn) {
+  return Boolean(cell?.validation_error) || isDisplayMismatch(cell, column)
+}
+
+function ReviewCellRenderer(
+  params: ICellRendererParams<ReviewRow> & { columnDef?: ResultColumn },
+) {
   const field = params.colDef?.field
   const cell = field ? params.data?._cells[field] : undefined
-  const flagged =
-    cell?.state === 'validation_warning' ||
-    cell?.state === 'ground_truth_mismatch' ||
-    cell?.state === 'mismatch_and_warning'
+  const flagged = params.columnDef ? isFlagged(cell, params.columnDef) : false
   return (
     <span className="review-cell">
       <span className="review-cell__text">{String(params.value ?? '')}</span>
@@ -103,13 +179,12 @@ export function OcrResultGrid({
     () =>
       needsReviewOnly
         ? allRows.filter((row) =>
-            Object.values(row._cells).some(
-              (cell) =>
-                cell.validation_error || cell.ground_truth_match === false,
+            page.columns.some(
+              (column) => isFlagged(row._cells[column.key], column),
             ),
           )
         : allRows,
-    [allRows, needsReviewOnly],
+    [allRows, needsReviewOnly, page.columns],
   )
 
   const columnDefs = useMemo<ColDef<ReviewRow>[]>(
@@ -121,23 +196,22 @@ export function OcrResultGrid({
         editable: true,
         flex: column.key === 'comments' ? 3 : 1,
         minWidth: column.key === 'comments' ? 240 : 105,
-        cellRenderer: ReviewCellRenderer,
+        cellRenderer: (params: ICellRendererParams<ReviewRow>) => (
+          <ReviewCellRenderer {...params} columnDef={column} />
+        ),
         tooltipValueGetter: (params) =>
-          cellTooltip(params.data?._cells[column.key]),
+          cellTooltip(params.data?._cells[column.key], column),
         cellClassRules: {
           'cell-warning': (params) => {
-            const state = params.data?._cells[column.key]?.state
-            return state === 'validation_warning'
+            const cell = params.data?._cells[column.key]
+            return Boolean(cell?.validation_error) && !isDisplayMismatch(cell, column)
           },
           'cell-mismatch': (params) => {
-            const state = params.data?._cells[column.key]?.state
-            return (
-              state === 'ground_truth_mismatch' ||
-              state === 'mismatch_and_warning'
-            )
+            return isDisplayMismatch(params.data?._cells[column.key], column)
           },
           'cell-correct': (params) =>
-            params.data?._cells[column.key]?.state === 'correct',
+            !isFlagged(params.data?._cells[column.key], column) &&
+            params.data?._cells[column.key]?.ground_truth_text != null,
           'cell-edited': (params) =>
             Boolean(params.data?._cells[column.key]?.was_edited),
         },
