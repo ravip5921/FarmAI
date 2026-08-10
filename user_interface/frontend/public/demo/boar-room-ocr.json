@@ -1,0 +1,2157 @@
+{
+  "row_count": 33,
+  "col_count": 5,
+  "cells": [
+    {
+      "row": 0,
+      "col": 0,
+      "bbox": [
+        54,
+        208,
+        45,
+        32
+      ],
+      "text": "Date",
+      "confidence": null
+    },
+    {
+      "row": 0,
+      "col": 1,
+      "bbox": [
+        103,
+        208,
+        44,
+        32
+      ],
+      "text": "Current Temperature",
+      "confidence": null
+    },
+    {
+      "row": 0,
+      "col": 2,
+      "bbox": [
+        151,
+        208,
+        48,
+        32
+      ],
+      "text": "HI",
+      "confidence": null
+    },
+    {
+      "row": 0,
+      "col": 3,
+      "bbox": [
+        203,
+        208,
+        48,
+        32
+      ],
+      "text": "LO",
+      "confidence": null
+    },
+    {
+      "row": 0,
+      "col": 4,
+      "bbox": [
+        319,
+        208,
+        644,
+        32
+      ],
+      "text": "Comments",
+      "confidence": null
+    },
+    {
+      "row": 1,
+      "col": 0,
+      "bbox": [
+        54,
+        244,
+        45,
+        33
+      ],
+      "text": "01-May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"01-May\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 1,
+      "col": 1,
+      "bbox": [
+        103,
+        244,
+        44,
+        33
+      ],
+      "text": "67.8",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"67.8\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 1,
+      "col": 2,
+      "bbox": [
+        151,
+        244,
+        48,
+        33
+      ],
+      "text": "95",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"95\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 1,
+      "col": 3,
+      "bbox": [
+        203,
+        244,
+        48,
+        33
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"\", \"status\": \"uncertain\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 1,
+      "col": 4,
+      "bbox": [
+        319,
+        244,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 2,
+      "col": 0,
+      "bbox": [
+        54,
+        281,
+        45,
+        32
+      ],
+      "text": "02 May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"02 May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 2,
+      "col": 1,
+      "bbox": [
+        103,
+        281,
+        44,
+        32
+      ],
+      "text": "83",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"83\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 2,
+      "col": 2,
+      "bbox": [
+        151,
+        281,
+        48,
+        32
+      ],
+      "text": "73.3",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"73.3\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 2,
+      "col": 3,
+      "bbox": [
+        203,
+        281,
+        48,
+        32
+      ],
+      "text": "68",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"68\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 2,
+      "col": 4,
+      "bbox": [
+        319,
+        281,
+        644,
+        32
+      ],
+      "text": "Alcohol let Dreamboat up everyday",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"Alcohol let Dreamboat up everyday\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 3,
+      "col": 0,
+      "bbox": [
+        54,
+        317,
+        45,
+        34
+      ],
+      "text": "03-May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"03-May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 3,
+      "col": 1,
+      "bbox": [
+        103,
+        317,
+        44,
+        34
+      ],
+      "text": "67",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"67\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 3,
+      "col": 2,
+      "bbox": [
+        151,
+        317,
+        48,
+        34
+      ],
+      "text": "69.5",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.5\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 3,
+      "col": 3,
+      "bbox": [
+        203,
+        317,
+        48,
+        34
+      ],
+      "text": "89.9",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"89.9\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 3,
+      "col": 4,
+      "bbox": [
+        319,
+        317,
+        644,
+        34
+      ],
+      "text": "Allgood heater turned off",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"Allgood heater turned off\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 4,
+      "col": 0,
+      "bbox": [
+        54,
+        355,
+        45,
+        33
+      ],
+      "text": "05 May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"05 May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 4,
+      "col": 1,
+      "bbox": [
+        103,
+        355,
+        44,
+        33
+      ],
+      "text": "66.7",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66.7\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 4,
+      "col": 2,
+      "bbox": [
+        151,
+        355,
+        48,
+        33
+      ],
+      "text": "69.2",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.2\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 4,
+      "col": 3,
+      "bbox": [
+        203,
+        355,
+        48,
+        33
+      ],
+      "text": "63",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"63\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 4,
+      "col": 4,
+      "bbox": [
+        319,
+        355,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 5,
+      "col": 0,
+      "bbox": [
+        54,
+        392,
+        45,
+        33
+      ],
+      "text": "05 May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"05 May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 5,
+      "col": 1,
+      "bbox": [
+        103,
+        392,
+        44,
+        33
+      ],
+      "text": "68.1",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"68.1\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 5,
+      "col": 2,
+      "bbox": [
+        151,
+        392,
+        48,
+        33
+      ],
+      "text": "69.8",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.8\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 5,
+      "col": 3,
+      "bbox": [
+        203,
+        392,
+        48,
+        33
+      ],
+      "text": "68.0",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"68.0\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 5,
+      "col": 4,
+      "bbox": [
+        319,
+        392,
+        644,
+        33
+      ],
+      "text": "All good Dream Boat Not getting UP",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good Dream Boat Not getting UP\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 6,
+      "col": 0,
+      "bbox": [
+        54,
+        429,
+        45,
+        33
+      ],
+      "text": "05 May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"05 May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 6,
+      "col": 1,
+      "bbox": [
+        103,
+        429,
+        44,
+        33
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 6,
+      "col": 2,
+      "bbox": [
+        151,
+        429,
+        48,
+        33
+      ],
+      "text": "74.1",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"74.1\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 6,
+      "col": 3,
+      "bbox": [
+        203,
+        429,
+        48,
+        33
+      ],
+      "text": "62.7",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"62.7\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 6,
+      "col": 4,
+      "bbox": [
+        319,
+        429,
+        644,
+        33
+      ],
+      "text": "All good out of Boar Pen",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good out of Boar Pen\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 7,
+      "col": 0,
+      "bbox": [
+        54,
+        466,
+        45,
+        32
+      ],
+      "text": "07 May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"07 May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 7,
+      "col": 1,
+      "bbox": [
+        103,
+        466,
+        44,
+        32
+      ],
+      "text": "66",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 7,
+      "col": 2,
+      "bbox": [
+        151,
+        466,
+        48,
+        32
+      ],
+      "text": "69.2",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.2\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 7,
+      "col": 3,
+      "bbox": [
+        203,
+        466,
+        48,
+        32
+      ],
+      "text": "66",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 7,
+      "col": 4,
+      "bbox": [
+        319,
+        466,
+        644,
+        32
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 8,
+      "col": 0,
+      "bbox": [
+        54,
+        502,
+        45,
+        32
+      ],
+      "text": "08 Mar",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"08 Mar\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 8,
+      "col": 1,
+      "bbox": [
+        103,
+        502,
+        44,
+        32
+      ],
+      "text": "67.9",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"67.9\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 8,
+      "col": 2,
+      "bbox": [
+        151,
+        502,
+        48,
+        32
+      ],
+      "text": "78.5",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"78.5\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 8,
+      "col": 3,
+      "bbox": [
+        203,
+        502,
+        48,
+        32
+      ],
+      "text": "65.9",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"65.9\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 8,
+      "col": 4,
+      "bbox": [
+        319,
+        502,
+        644,
+        32
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 9,
+      "col": 0,
+      "bbox": [
+        54,
+        538,
+        45,
+        33
+      ],
+      "text": "02 May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"02 May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 9,
+      "col": 1,
+      "bbox": [
+        103,
+        538,
+        44,
+        33
+      ],
+      "text": "68.3",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"68.3\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 9,
+      "col": 2,
+      "bbox": [
+        151,
+        538,
+        48,
+        33
+      ],
+      "text": "69.5",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.5\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 9,
+      "col": 3,
+      "bbox": [
+        203,
+        538,
+        48,
+        33
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"65.\", \"status\": \"ok\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 9,
+      "col": 4,
+      "bbox": [
+        319,
+        538,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 10,
+      "col": 0,
+      "bbox": [
+        54,
+        575,
+        45,
+        32
+      ],
+      "text": "10-Mar",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"10-Mar\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 10,
+      "col": 1,
+      "bbox": [
+        103,
+        575,
+        44,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 10,
+      "col": 2,
+      "bbox": [
+        151,
+        575,
+        48,
+        32
+      ],
+      "text": "69.3",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.3\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 10,
+      "col": 3,
+      "bbox": [
+        203,
+        575,
+        48,
+        32
+      ],
+      "text": "65.8",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"65.8\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 10,
+      "col": 4,
+      "bbox": [
+        319,
+        575,
+        644,
+        32
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 11,
+      "col": 0,
+      "bbox": [
+        54,
+        611,
+        45,
+        33
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```"
+    },
+    {
+      "row": 11,
+      "col": 1,
+      "bbox": [
+        103,
+        611,
+        44,
+        33
+      ],
+      "text": "67",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"67\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 11,
+      "col": 2,
+      "bbox": [
+        151,
+        611,
+        48,
+        33
+      ],
+      "text": "78.4",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"78.4\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 11,
+      "col": 3,
+      "bbox": [
+        203,
+        611,
+        48,
+        33
+      ],
+      "text": "66",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 11,
+      "col": 4,
+      "bbox": [
+        319,
+        611,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 12,
+      "col": 0,
+      "bbox": [
+        54,
+        648,
+        45,
+        33
+      ],
+      "text": "12 May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"12 May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 12,
+      "col": 1,
+      "bbox": [
+        103,
+        648,
+        44,
+        33
+      ],
+      "text": "66.4",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66.4\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 12,
+      "col": 2,
+      "bbox": [
+        151,
+        648,
+        48,
+        33
+      ],
+      "text": "72.0",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"72.0\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 12,
+      "col": 3,
+      "bbox": [
+        203,
+        648,
+        48,
+        33
+      ],
+      "text": "66.0",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66.0\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 12,
+      "col": 4,
+      "bbox": [
+        319,
+        648,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 13,
+      "col": 0,
+      "bbox": [
+        54,
+        685,
+        45,
+        33
+      ],
+      "text": "23 Apr",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"23 Apr\",\"status\":\"uncertain\"}\n```"
+    },
+    {
+      "row": 13,
+      "col": 1,
+      "bbox": [
+        103,
+        685,
+        44,
+        33
+      ],
+      "text": "69.5",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.5\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 13,
+      "col": 2,
+      "bbox": [
+        151,
+        685,
+        48,
+        33
+      ],
+      "text": "80.6",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"80.6\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 13,
+      "col": 3,
+      "bbox": [
+        203,
+        685,
+        48,
+        33
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 13,
+      "col": 4,
+      "bbox": [
+        319,
+        685,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 14,
+      "col": 0,
+      "bbox": [
+        54,
+        722,
+        45,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\", \"status\":\"blank\"}\n```"
+    },
+    {
+      "row": 14,
+      "col": 1,
+      "bbox": [
+        103,
+        722,
+        44,
+        32
+      ],
+      "text": "98.3",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"98.3\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 14,
+      "col": 2,
+      "bbox": [
+        151,
+        722,
+        48,
+        32
+      ],
+      "text": "73",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"73\", \"status\": \"uncertain\"}\n```"
+    },
+    {
+      "row": 14,
+      "col": 3,
+      "bbox": [
+        203,
+        722,
+        48,
+        32
+      ],
+      "text": "67.9",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"67.9\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 14,
+      "col": 4,
+      "bbox": [
+        319,
+        722,
+        644,
+        32
+      ],
+      "text": "All good cardboard box's off",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good cardboard box's off\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 15,
+      "col": 0,
+      "bbox": [
+        54,
+        758,
+        45,
+        33
+      ],
+      "text": "15 May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"15 May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 15,
+      "col": 1,
+      "bbox": [
+        103,
+        758,
+        44,
+        33
+      ],
+      "text": "67.3",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"67.3\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 15,
+      "col": 2,
+      "bbox": [
+        151,
+        758,
+        48,
+        33
+      ],
+      "text": "77.2",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"77.2\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 15,
+      "col": 3,
+      "bbox": [
+        203,
+        758,
+        48,
+        33
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\", \"status\":\"illegible\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 15,
+      "col": 4,
+      "bbox": [
+        319,
+        758,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 16,
+      "col": 0,
+      "bbox": [
+        54,
+        795,
+        45,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\", \"status\":\"blank\"}\n```"
+    },
+    {
+      "row": 16,
+      "col": 1,
+      "bbox": [
+        103,
+        795,
+        44,
+        32
+      ],
+      "text": "90",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"90\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 16,
+      "col": 2,
+      "bbox": [
+        151,
+        795,
+        48,
+        32
+      ],
+      "text": "83.8",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"83.8\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 16,
+      "col": 3,
+      "bbox": [
+        203,
+        795,
+        48,
+        32
+      ],
+      "text": "67.3",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"67.3\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 16,
+      "col": 4,
+      "bbox": [
+        319,
+        795,
+        644,
+        32
+      ],
+      "text": "All passed",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All passed\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 17,
+      "col": 0,
+      "bbox": [
+        54,
+        831,
+        45,
+        33
+      ],
+      "text": "17 May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"17 May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 17,
+      "col": 1,
+      "bbox": [
+        103,
+        831,
+        44,
+        33
+      ],
+      "text": "68",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"68\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 17,
+      "col": 2,
+      "bbox": [
+        151,
+        831,
+        48,
+        33
+      ],
+      "text": "83",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"83\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 17,
+      "col": 3,
+      "bbox": [
+        203,
+        831,
+        48,
+        33
+      ],
+      "text": "68",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"68\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 17,
+      "col": 4,
+      "bbox": [
+        319,
+        831,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 18,
+      "col": 0,
+      "bbox": [
+        54,
+        868,
+        45,
+        32
+      ],
+      "text": "18-Mar",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"18-Mar\",\"status\":\"uncertain\"}\n```"
+    },
+    {
+      "row": 18,
+      "col": 1,
+      "bbox": [
+        103,
+        868,
+        44,
+        32
+      ],
+      "text": "66.5",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66.5\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 18,
+      "col": 2,
+      "bbox": [
+        151,
+        868,
+        48,
+        32
+      ],
+      "text": "69.0",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.0\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 18,
+      "col": 3,
+      "bbox": [
+        203,
+        868,
+        48,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 18,
+      "col": 4,
+      "bbox": [
+        319,
+        868,
+        644,
+        32
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 19,
+      "col": 0,
+      "bbox": [
+        54,
+        904,
+        45,
+        33
+      ],
+      "text": "18-Mar",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"18-Mar\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 19,
+      "col": 1,
+      "bbox": [
+        103,
+        904,
+        44,
+        33
+      ],
+      "text": "68.2",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"68.2\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 19,
+      "col": 2,
+      "bbox": [
+        151,
+        904,
+        48,
+        33
+      ],
+      "text": "69.0",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.0\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 19,
+      "col": 3,
+      "bbox": [
+        203,
+        904,
+        48,
+        33
+      ],
+      "text": "65.9",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"65.9\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 19,
+      "col": 4,
+      "bbox": [
+        319,
+        904,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 20,
+      "col": 0,
+      "bbox": [
+        54,
+        941,
+        45,
+        33
+      ],
+      "text": "20-May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"20-May\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 20,
+      "col": 1,
+      "bbox": [
+        103,
+        941,
+        44,
+        33
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 20,
+      "col": 2,
+      "bbox": [
+        151,
+        941,
+        48,
+        33
+      ],
+      "text": "109.1",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"109.1\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 20,
+      "col": 3,
+      "bbox": [
+        203,
+        941,
+        48,
+        33
+      ],
+      "text": "57",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"57\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 20,
+      "col": 4,
+      "bbox": [
+        319,
+        941,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 21,
+      "col": 0,
+      "bbox": [
+        54,
+        978,
+        45,
+        33
+      ],
+      "text": "24-Mar",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"24-Mar\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 21,
+      "col": 1,
+      "bbox": [
+        103,
+        978,
+        44,
+        33
+      ],
+      "text": "64.1",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"64.1\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 21,
+      "col": 2,
+      "bbox": [
+        151,
+        978,
+        48,
+        33
+      ],
+      "text": "69.1",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.1\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 21,
+      "col": 3,
+      "bbox": [
+        203,
+        978,
+        48,
+        33
+      ],
+      "text": "66.0",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66.0\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 21,
+      "col": 4,
+      "bbox": [
+        319,
+        978,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 22,
+      "col": 0,
+      "bbox": [
+        54,
+        1015,
+        45,
+        30
+      ],
+      "text": "23-Nov",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"23-Nov\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 22,
+      "col": 1,
+      "bbox": [
+        103,
+        1015,
+        44,
+        30
+      ],
+      "text": "68.7",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"68.7\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 22,
+      "col": 2,
+      "bbox": [
+        151,
+        1015,
+        48,
+        30
+      ],
+      "text": "69.2",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.2\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 22,
+      "col": 3,
+      "bbox": [
+        203,
+        1015,
+        48,
+        30
+      ],
+      "text": "60",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"60\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 22,
+      "col": 4,
+      "bbox": [
+        319,
+        1015,
+        644,
+        30
+      ],
+      "text": "All good.",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good.\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 23,
+      "col": 0,
+      "bbox": [
+        54,
+        1049,
+        45,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"blank\"}\n```"
+    },
+    {
+      "row": 23,
+      "col": 1,
+      "bbox": [
+        103,
+        1049,
+        44,
+        32
+      ],
+      "text": "102.3",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"102.3\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 23,
+      "col": 2,
+      "bbox": [
+        151,
+        1049,
+        48,
+        32
+      ],
+      "text": "69.5",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.5\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 23,
+      "col": 3,
+      "bbox": [
+        203,
+        1049,
+        48,
+        32
+      ],
+      "text": "65.0",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"65.0\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 23,
+      "col": 4,
+      "bbox": [
+        319,
+        1049,
+        644,
+        32
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 24,
+      "col": 0,
+      "bbox": [
+        54,
+        1085,
+        45,
+        33
+      ],
+      "text": "26-May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"26-May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 24,
+      "col": 1,
+      "bbox": [
+        103,
+        1085,
+        44,
+        33
+      ],
+      "text": "68.8",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"68.8\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 24,
+      "col": 2,
+      "bbox": [
+        151,
+        1085,
+        48,
+        33
+      ],
+      "text": "69.2",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.2\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 24,
+      "col": 3,
+      "bbox": [
+        203,
+        1085,
+        48,
+        33
+      ],
+      "text": "65.7",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"65.7\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 24,
+      "col": 4,
+      "bbox": [
+        319,
+        1085,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 25,
+      "col": 0,
+      "bbox": [
+        54,
+        1122,
+        45,
+        32
+      ],
+      "text": "25 Jan",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"25 Jan\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 25,
+      "col": 1,
+      "bbox": [
+        103,
+        1122,
+        44,
+        32
+      ],
+      "text": "75",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"75\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 25,
+      "col": 2,
+      "bbox": [
+        151,
+        1122,
+        48,
+        32
+      ],
+      "text": "70",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"70\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 25,
+      "col": 3,
+      "bbox": [
+        203,
+        1122,
+        48,
+        32
+      ],
+      "text": "65.6",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"65.6\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 25,
+      "col": 4,
+      "bbox": [
+        319,
+        1122,
+        644,
+        32
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 26,
+      "col": 0,
+      "bbox": [
+        54,
+        1158,
+        45,
+        34
+      ],
+      "text": "26-May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"26-May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 26,
+      "col": 1,
+      "bbox": [
+        103,
+        1158,
+        44,
+        34
+      ],
+      "text": "67.9",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"67.9\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 26,
+      "col": 2,
+      "bbox": [
+        151,
+        1158,
+        48,
+        34
+      ],
+      "text": "74.0",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"74.0\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 26,
+      "col": 3,
+      "bbox": [
+        203,
+        1158,
+        48,
+        34
+      ],
+      "text": "66.0",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66.0\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 26,
+      "col": 4,
+      "bbox": [
+        319,
+        1158,
+        644,
+        34
+      ],
+      "text": "All goed",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All goed\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 27,
+      "col": 0,
+      "bbox": [
+        54,
+        1196,
+        45,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"\", \"status\": \"illegible\"}\n```"
+    },
+    {
+      "row": 27,
+      "col": 1,
+      "bbox": [
+        103,
+        1196,
+        44,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 27,
+      "col": 2,
+      "bbox": [
+        151,
+        1196,
+        48,
+        32
+      ],
+      "text": "72",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"72\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 27,
+      "col": 3,
+      "bbox": [
+        203,
+        1196,
+        48,
+        32
+      ],
+      "text": "66.3",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66.3\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 27,
+      "col": 4,
+      "bbox": [
+        319,
+        1196,
+        644,
+        32
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 28,
+      "col": 0,
+      "bbox": [
+        54,
+        1232,
+        45,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"\", \"status\": \"illegible\"}\n```"
+    },
+    {
+      "row": 28,
+      "col": 1,
+      "bbox": [
+        103,
+        1232,
+        44,
+        32
+      ],
+      "text": "64.2",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"64.2\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 28,
+      "col": 2,
+      "bbox": [
+        151,
+        1232,
+        48,
+        32
+      ],
+      "text": "73.3",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"73.3\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 28,
+      "col": 3,
+      "bbox": [
+        203,
+        1232,
+        48,
+        32
+      ],
+      "text": "63.8",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"63.8\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 28,
+      "col": 4,
+      "bbox": [
+        319,
+        1232,
+        644,
+        32
+      ],
+      "text": "Absent",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"Absent\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 29,
+      "col": 0,
+      "bbox": [
+        54,
+        1268,
+        45,
+        33
+      ],
+      "text": "20-May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"20-May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 29,
+      "col": 1,
+      "bbox": [
+        103,
+        1268,
+        44,
+        33
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 29,
+      "col": 2,
+      "bbox": [
+        151,
+        1268,
+        48,
+        33
+      ],
+      "text": "89",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"89\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 29,
+      "col": 3,
+      "bbox": [
+        203,
+        1268,
+        48,
+        33
+      ],
+      "text": "64.0",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"64.0\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 29,
+      "col": 4,
+      "bbox": [
+        319,
+        1268,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 30,
+      "col": 0,
+      "bbox": [
+        54,
+        1305,
+        45,
+        33
+      ],
+      "text": "28 May",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"28 May\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 30,
+      "col": 1,
+      "bbox": [
+        103,
+        1305,
+        44,
+        33
+      ],
+      "text": "66.5",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66.5\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 30,
+      "col": 2,
+      "bbox": [
+        151,
+        1305,
+        48,
+        33
+      ],
+      "text": "71.6",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"71.6\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 30,
+      "col": 3,
+      "bbox": [
+        203,
+        1305,
+        48,
+        33
+      ],
+      "text": "63.8",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"63.8\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 30,
+      "col": 4,
+      "bbox": [
+        319,
+        1305,
+        644,
+        33
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    },
+    {
+      "row": 31,
+      "col": 0,
+      "bbox": [
+        54,
+        1342,
+        45,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"blank\"}\n```"
+    },
+    {
+      "row": 31,
+      "col": 1,
+      "bbox": [
+        103,
+        1342,
+        44,
+        32
+      ],
+      "text": "66.7",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"66.7\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 31,
+      "col": 2,
+      "bbox": [
+        151,
+        1342,
+        48,
+        32
+      ],
+      "text": "77.4",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"77.4\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 31,
+      "col": 3,
+      "bbox": [
+        203,
+        1342,
+        48,
+        32
+      ],
+      "text": "63.8",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"63.8\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 31,
+      "col": 4,
+      "bbox": [
+        319,
+        1342,
+        644,
+        32
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"All good\", \"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 32,
+      "col": 0,
+      "bbox": [
+        54,
+        1378,
+        45,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\", \"status\":\"blank\"}\n```"
+    },
+    {
+      "row": 32,
+      "col": 1,
+      "bbox": [
+        103,
+        1378,
+        44,
+        32
+      ],
+      "text": "",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+      "validation_error": "expected temperature pattern"
+    },
+    {
+      "row": 32,
+      "col": 2,
+      "bbox": [
+        151,
+        1378,
+        48,
+        32
+      ],
+      "text": "69.8",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"69.8\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 32,
+      "col": 3,
+      "bbox": [
+        203,
+        1378,
+        48,
+        32
+      ],
+      "text": "68.4",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\":\"68.4\",\"status\":\"ok\"}\n```"
+    },
+    {
+      "row": 32,
+      "col": 4,
+      "bbox": [
+        319,
+        1378,
+        644,
+        32
+      ],
+      "text": "All good",
+      "confidence": null,
+      "raw_text": "```json\n{\"text\": \"All good\", \"status\": \"ok\"}\n```"
+    }
+  ]
+}

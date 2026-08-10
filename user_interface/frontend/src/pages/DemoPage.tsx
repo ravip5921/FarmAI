@@ -96,6 +96,7 @@ export function DemoPage() {
   const [step, setStep] = useState<DemoStep>('upload')
   const [progress, setProgress] = useState(0)
   const [result, setResult] = useState<JobResult | null>(null)
+  const [demoError, setDemoError] = useState<string | null>(null)
   const [selectedCell, setSelectedCell] = useState<ResultCell | null>(null)
   const [needsReviewOnly, setNeedsReviewOnly] = useState(false)
 
@@ -113,14 +114,22 @@ export function DemoPage() {
     if (!record) return
     setStep('processing')
     setProgress(0)
+    setDemoError(null)
     const started = Date.now()
     const id = window.setInterval(() => {
       const next = Math.min(100, Math.round(((Date.now() - started) / 2000) * 100))
       setProgress(next)
       if (next >= 100) {
         window.clearInterval(id)
-        setResult(createDemoResult(record.name || 'boar-room-demo.jpg'))
-        setStep('review')
+        createDemoResult(record.name || 'boar-room-demo.jpg')
+          .then((demoResult) => {
+            setResult(demoResult)
+            setStep('review')
+          })
+          .catch((error: Error) => {
+            setDemoError(error.message)
+            setStep('upload')
+          })
       }
     }, 120)
   }
@@ -290,6 +299,12 @@ export function DemoPage() {
             results without contacting the handwriting service.
           </p>
         </div>
+
+        {demoError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {demoError}
+          </Alert>
+        )}
 
         <div
           className={[

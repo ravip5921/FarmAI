@@ -6,6 +6,22 @@ import type {
   ResultColumn,
 } from '../types/api'
 
+interface DebugOcrCell {
+  row: number
+  col: number
+  bbox: [number, number, number, number]
+  text: string
+  confidence: number | null
+  raw_text?: string
+  validation_error?: string
+}
+
+interface DebugOcrTable {
+  row_count: number
+  col_count: number
+  cells: DebugOcrCell[]
+}
+
 const columns: ResultColumn[] = [
   {
     index: 0,
@@ -59,111 +75,169 @@ const columns: ResultColumn[] = [
   },
 ]
 
-const rows = [
-  ['01-May', '67.8', '95', '61.5', 'All good'],
-  ['02-May', '68.4', '96', '62', 'All good'],
-  ['03-May', '69.1', '190', '63.2', 'Fan checked'],
-  ['04-May', '70', '97.5', '64', 'Water line fixed'],
-  ['05-May', '71.2', '98', '65', 'All good'],
-  ['06-May', '72.0', '99', '66.1', 'OK'],
-  ['07-May', '72.5', '99.4', '66.8', 'Feed adjusted'],
-  ['08-May', '73.1', '100', '67.5', 'All good'],
-]
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = []
+  let row: string[] = []
+  let value = ''
+  let quoted = false
 
-const truthRows = [
-  ['01-May', '67.8', '95', '61.5', 'All good'],
-  ['02-May', '68.4', '96', '62', 'All good'],
-  ['03-May', '69.1', '100', '63.2', 'Fan checked'],
-  ['04-May', '70', '97.5', '64', 'Water line fixed'],
-  ['05-May', '71.2', '98', '65', 'All good'],
-  ['06-May', '72.0', '99', '66.1', 'OK'],
-  ['07-May', '72.5', '99.4', '66.8', 'Feed adjusted'],
-  ['08-May', '73.1', '100', '67.5', 'All good'],
-]
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index]
+    const next = text[index + 1]
+    if (quoted) {
+      if (char === '"' && next === '"') {
+        value += '"'
+        index += 1
+      } else if (char === '"') {
+        quoted = false
+      } else {
+        value += char
+      }
+    } else if (char === '"') {
+      quoted = true
+    } else if (char === ',') {
+      row.push(value)
+      value = ''
+    } else if (char === '\n') {
+      row.push(value)
+      rows.push(row)
+      row = []
+      value = ''
+    } else if (char !== '\r') {
+      value += char
+    }
+  }
 
-const bboxByColumn = [
-  [87, 162, 24, 19],
-  [115, 162, 24, 19],
-  [143, 162, 26, 19],
-  [173, 162, 26, 19],
-  [240, 162, 368, 19],
-] as const
-
-function stateFor(
-  value: string,
-  truth: string,
-  validationError: string | null,
-): CellState {
-  if (validationError && value !== truth) return 'mismatch_and_warning'
-  if (validationError) return 'validation_warning'
-  if (value !== truth) return 'ground_truth_mismatch'
-  return 'correct'
+  if (value || row.length) {
+    row.push(value)
+    rows.push(row)
+  }
+  return rows
 }
 
-function makeCells(): ResultCell[] {
-  return rows.flatMap((row, rowIndex) =>
-    columns.map((column, columnIndex) => {
-      const value = row[columnIndex]
-      const truth = truthRows[rowIndex][columnIndex]
-      const validationError =
-        column.key === 'hi' && value === '190'
-          ? 'Temperature must be between 50 and 110.'
-          : null
-      const [x, baseY, width, height] = bboxByColumn[columnIndex]
+function exact(value: string) {
+  return value.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+}
+
+function normalized(value: string) {
+  const trimmed = exact(value)
+  const number = Number(trimmed)
+  if (trimmed !== '' && Number.isFinite(number)) {
+    return String(number)
+  }
+  return trimmed.replace(/\s+/g, ' ').toLocaleLowerCase()
+}
+
+function cellState(
+  ocrText: string,
+  truthText: string | null,
+  validationError: string | null,
+): CellState {
+  const mismatch = truthText != null && exact(ocrText) !== exact(truthText)
+  if (mismatch && validationError) return 'mismatch_and_warning'
+  if (mismatch) return 'ground_truth_mismatch'
+  if (validationError) return 'validation_warning'
+  if (truthText != null) return 'correct'
+  return 'unscored'
+}
+
+function score(cells: ResultCell[], rowCount: number): AccuracyMetrics {
+  const scored = cells.filter((cell) => cell.ground_truth_text != null)
+  const correct = scored.filter(
+    (cell) => exact(cell.ocr_text) === exact(cell.ground_truth_text ?? ''),
+  )
+  const normalizedCorrect = scored.filter(
+    (cell) =>
+      normalized(cell.ocr_text) === normalized(cell.ground_truth_text ?? ''),
+  )
+  let correctRows = 0
+  for (let row = 1; row <= rowCount; row += 1) {
+    const rowCells = scored.filter((cell) => cell.row === row)
+    if (
+      rowCells.length > 0 &&
+      rowCells.every(
+        (cell) => exact(cell.ocr_text) === exact(cell.ground_truth_text ?? ''),
+      )
+    ) {
+      correctRows += 1
+    }
+  }
+  return {
+    correct_cells: correct.length,
+    incorrect_cells: scored.length - correct.length,
+    scored_cells: scored.length,
+    exact_accuracy: scored.length ? correct.length / scored.length : null,
+    normalized_accuracy: scored.length
+      ? normalizedCorrect.length / scored.length
+      : null,
+    correct_rows: correctRows,
+    scored_rows: rowCount,
+    validation_warning_count: cells.filter((cell) =>
+      Boolean(cell.validation_error),
+    ).length,
+  }
+}
+
+export async function createDemoResult(filename: string): Promise<JobResult> {
+  const [ocrResponse, truthResponse] = await Promise.all([
+    fetch('/demo/boar-room-ocr.json'),
+    fetch('/demo/boar-room-ground-truth.csv'),
+  ])
+  if (!ocrResponse.ok || !truthResponse.ok) {
+    throw new Error('Demo files could not be loaded.')
+  }
+
+  const ocr = (await ocrResponse.json()) as DebugOcrTable
+  const truthRows = parseCsv(await truthResponse.text()).slice(1)
+  const dataRowCount = ocr.row_count - 1
+  const cells: ResultCell[] = ocr.cells
+    .filter((cell) => cell.row > 0)
+    .map((cell) => {
+      const column = columns[cell.col]
+      const truthText = truthRows[cell.row - 1]?.[cell.col] ?? null
+      const validationError = cell.validation_error ?? null
       return {
-        row: rowIndex + 1,
-        column_index: column.index,
+        row: cell.row,
+        column_index: cell.col,
         source_column_index: column.source_index,
         column_key: column.key,
         column_name: column.name,
-        bbox: [x, baseY + rowIndex * 20, width, height],
-        ocr_text: value,
-        reviewed_text: value,
+        bbox: cell.bbox,
+        ocr_text: cell.text,
+        reviewed_text: cell.text,
         was_edited: false,
-        confidence: column.key === 'comments' ? 0.88 : 0.94,
-        raw_text: validationError ? '19O' : null,
+        confidence: cell.confidence,
+        raw_text: cell.raw_text ?? null,
         validation_error: validationError,
-        ground_truth_text: truth,
-        ground_truth_match: value === truth,
-        state: stateFor(value, truth, validationError),
+        ground_truth_text: truthText,
+        ground_truth_match:
+          truthText == null ? null : exact(cell.text) === exact(truthText),
+        state: cellState(cell.text, truthText, validationError),
       }
-    }),
-  )
-}
+    })
 
-export const demoMetrics: AccuracyMetrics = {
-  correct_cells: 39,
-  incorrect_cells: 1,
-  scored_cells: 40,
-  exact_accuracy: 0.975,
-  normalized_accuracy: 0.975,
-  correct_rows: 7,
-  scored_rows: 8,
-  validation_warning_count: 1,
-}
-
-export function createDemoResult(filename: string): JobResult {
+  const metrics = score(cells, dataRowCount)
   return {
-    job_id: 'demo-boar-room',
+    job_id: 'demo-boar-room-p1-good',
     filename,
     template_id: 'boar_room',
     template_name: 'Boar Room',
     ocr_engine: 'llm-vision',
-    warning_count: 1,
-    metrics: demoMetrics,
+    warning_count: metrics.validation_warning_count ?? 0,
+    metrics,
     pages: [
       {
         page_number: 1,
         source_url: '/demo/boar-room-source.png',
         overlay_url: '/demo/boar-room-overlay.png',
-        image_width: 820,
-        image_height: 420,
-        skew_angle: 2.09,
+        image_width: 1190,
+        image_height: 1684,
+        skew_angle: 0,
         columns,
-        cells: makeCells(),
-        data_row_count: rows.length,
-        warning_count: 1,
-        metrics: demoMetrics,
+        cells,
+        data_row_count: dataRowCount,
+        warning_count: metrics.validation_warning_count ?? 0,
+        metrics,
       },
     ],
   }
