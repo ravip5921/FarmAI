@@ -14,11 +14,13 @@ import {
   Download,
   FileCheck2,
   RefreshCw,
+  Square,
 } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   attachGroundTruth,
+  cancelJob,
   editCell,
   getJob,
   getResult,
@@ -94,6 +96,14 @@ export function JobPage() {
     },
   })
 
+  const cancel = useMutation({
+    mutationFn: () => cancelJob(jobId),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['job', jobId], updated)
+      queryClient.invalidateQueries({ queryKey: ['jobs'] })
+    },
+  })
+
   const page = result.data?.pages.find(
     (item) => item.page_number === pageNumber,
   )
@@ -151,12 +161,45 @@ export function JobPage() {
     )
   }
 
+  if (job.data.status === 'cancelled') {
+    return (
+      <div className="app-shell">
+        <AppHeader backTo="/" />
+        <main className="page">
+          <div className="error-panel">
+            <h2>Job cancelled</h2>
+            <p>This record was stopped before processing finished.</p>
+            <Button component={Link} to="/" variant="contained">
+              Upload another record
+            </Button>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
   if (!complete) {
     return (
       <div className="app-shell">
         <AppHeader backTo="/" />
         <main className="page">
+          {cancel.error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {cancel.error.message}
+            </Alert>
+          )}
           <JobProgress job={job.data} />
+          <div className="processing-actions">
+            <Button
+              color="error"
+              variant="outlined"
+              startIcon={<Square size={16} />}
+              disabled={cancel.isPending}
+              onClick={() => cancel.mutate()}
+            >
+              {cancel.isPending ? 'Cancelling...' : 'Cancel job'}
+            </Button>
+          </div>
         </main>
       </div>
     )

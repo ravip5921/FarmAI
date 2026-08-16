@@ -13,6 +13,10 @@ from ..repository import JobRepository
 from .artifact_store import write_csv_artifact, write_result
 
 
+class JobCancelled(RuntimeError):
+    pass
+
+
 def _user_safe_error(exc: Exception) -> tuple[str, str]:
     message = str(exc)
     lowered = message.casefold()
@@ -43,12 +47,16 @@ def run_claimed_job(
     artifact_dir = Path(str(job["artifact_directory"]))
 
     def progress(value: ProcessingProgress) -> None:
+        if repository.is_cancelled(job_id):
+            raise JobCancelled()
         repository.update_progress(
             job_id,
             stage=value.stage,
             current=value.completed,
             total=value.total,
         )
+        if repository.is_cancelled(job_id):
+            raise JobCancelled()
 
     try:
         import json
@@ -112,6 +120,8 @@ def run_claimed_job(
             result_path=result_path,
             with_warnings=processed.warning_count > 0 or ground_truth_error is not None,
         )
+    except JobCancelled:
+        return
     except Exception as exc:
         error_code, user_message = _user_safe_error(exc)
         repository.fail_job(

@@ -51,6 +51,12 @@ export async function deleteJob(jobId: string) {
   }
 }
 
+export function cancelJob(jobId: string) {
+  return apiRequest<JobSummary>(`/api/jobs/${jobId}/cancel`, {
+    method: 'POST',
+  })
+}
+
 export function getResult(jobId: string) {
   return apiRequest<JobResult>(`/api/jobs/${jobId}/result`)
 }

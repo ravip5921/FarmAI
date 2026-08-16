@@ -19,10 +19,10 @@ import {
   Tooltip,
 } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowRight, Clock3, Trash2 } from 'lucide-react'
+import { ArrowRight, Clock3, Square, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { deleteJob } from '../api/jobs'
+import { cancelJob, deleteJob } from '../api/jobs'
 import type { JobStatus, JobSummary } from '../types/api'
 
 const STATUS_LABELS: Record<JobStatus, string> = {
@@ -78,6 +78,16 @@ export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
     },
   })
 
+  const cancel = useMutation({
+    mutationFn: (jobId: string) => cancelJob(jobId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['jobs'] })
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['jobs'] })
+    },
+  })
+
   const toggleJob = (jobId: string) => {
     setCheckedJobIds((current) => {
       const next = new Set(current)
@@ -114,6 +124,11 @@ export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
             <Clock3 size={19} aria-hidden="true" />
           </span>
         </div>
+        {cancel.error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {cancel.error.message}
+          </Alert>
+        )}
         <TableContainer
           component={Paper}
           variant="outlined"
@@ -201,6 +216,22 @@ export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
                           <ArrowRight size={18} aria-hidden="true" />
                         </Link>
                       </Tooltip>
+                      {(job.status === 'queued' || job.status === 'running') && (
+                        <Tooltip title="Cancel job">
+                          <span>
+                            <IconButton
+                              aria-label={`Cancel ${job.filename}`}
+                              color="warning"
+                              disabled={cancel.isPending}
+                              onClick={() => cancel.mutate(job.job_id)}
+                              size="small"
+                              sx={{ width: 36, height: 36 }}
+                            >
+                              <Square size={16} />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
                       <Tooltip
                         title={
                           job.status === 'running'

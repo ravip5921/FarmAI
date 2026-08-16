@@ -27,7 +27,11 @@ from src.application.ground_truth import (
 from src.ocr import get_ocr_engine_names
 from src.templates import get_template_ids
 
-from ..repository import JobIsRunningError, JobRepository
+from ..repository import (
+    JobCannotBeCancelledError,
+    JobIsRunningError,
+    JobRepository,
+)
 from ..schemas import CellEdits, JobSettings
 from ..services.artifact_store import (
     read_result,
@@ -172,6 +176,19 @@ def list_jobs(
 @router.get("/jobs/{job_id}")
 def get_job(request: Request, job_id: str) -> dict:
     return _public_job(_job_or_404(_repository(request), job_id))
+
+
+@router.post("/jobs/{job_id}/cancel")
+def cancel_job(request: Request, job_id: str) -> dict:
+    repository = _repository(request)
+    _job_or_404(repository, job_id)
+    try:
+        job = repository.cancel_job(job_id)
+    except JobCannotBeCancelledError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found.")
+    return _public_job(job)
 
 
 @router.delete("/jobs/{job_id}", status_code=status.HTTP_204_NO_CONTENT)

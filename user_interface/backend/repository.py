@@ -12,6 +12,10 @@ class JobIsRunningError(RuntimeError):
     pass
 
 
+class JobCannotBeCancelledError(RuntimeError):
+    pass
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -106,6 +110,40 @@ class JobRepository:
             result = connection.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
         return result.rowcount == 1
 
+    def cancel_job(self, job_id: str) -> dict[str, Any] | None:
+        now = _now()
+        with connect(self.database_path) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                "SELECT * FROM jobs WHERE id = ?", (job_id,)
+            ).fetchone()
+            if row is None:
+                connection.commit()
+                return None
+            if row["status"] not in {"queued", "running"}:
+                connection.commit()
+                raise JobCannotBeCancelledError(
+                    "Only waiting or processing jobs can be cancelled."
+                )
+            connection.execute(
+                """
+                UPDATE jobs
+                SET status = 'cancelled', stage = 'cancelled',
+                    completed_at = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (now, now, job_id),
+            )
+            connection.commit()
+        return self.get_job(job_id)
+
+    def is_cancelled(self, job_id: str) -> bool:
+        with connect(self.database_path) as connection:
+            row = connection.execute(
+                "SELECT status FROM jobs WHERE id = ?", (job_id,)
+            ).fetchone()
+        return row is not None and row["status"] == "cancelled"
+
     def claim_next_job(self) -> dict[str, Any] | None:
         with connect(self.database_path) as connection:
             connection.execute("BEGIN IMMEDIATE")
@@ -167,7 +205,7 @@ class JobRepository:
                 UPDATE jobs
                 SET status = ?, stage = 'completed', result_path = ?,
                     completed_at = ?, updated_at = ?
-                WHERE id = ?
+                WHERE id = ? AND status = 'running'
                 """,
                 (status, str(result_path), now, now, job_id),
             )
@@ -188,7 +226,7 @@ class JobRepository:
                 SET status = 'failed', stage = 'failed', error_code = ?,
                     user_safe_error = ?, technical_error = ?,
                     completed_at = ?, updated_at = ?
-                WHERE id = ?
+                WHERE id = ? AND status = 'running'
                 """,
                 (
                     error_code,

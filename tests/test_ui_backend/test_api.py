@@ -102,6 +102,56 @@ class TestUiApi(unittest.TestCase):
                 self.assertEqual(response.status_code, 409)
                 self.assertEqual(client.get(f"/api/jobs/{job_id}").status_code, 200)
 
+    def test_queued_job_can_be_cancelled(self) -> None:
+        with (
+            tempfile.TemporaryDirectory() as tmpdir,
+            patch.dict(
+                os.environ,
+                {"FARMAI_UI_RUNTIME_DIR": tmpdir},
+            ),
+        ):
+            with TestClient(app) as client:
+                created = client.post(
+                    "/api/jobs",
+                    files={
+                        "record": ("record.png", b"fake-image", "image/png"),
+                    },
+                )
+                job_id = created.json()["job_id"]
+
+                response = client.post(f"/api/jobs/{job_id}/cancel")
+
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json()["status"], "cancelled")
+                self.assertIsNone(app.state.repository.claim_next_job())
+
+    def test_running_job_can_be_cancelled(self) -> None:
+        with (
+            tempfile.TemporaryDirectory() as tmpdir,
+            patch.dict(
+                os.environ,
+                {"FARMAI_UI_RUNTIME_DIR": tmpdir},
+            ),
+        ):
+            with TestClient(app) as client:
+                created = client.post(
+                    "/api/jobs",
+                    files={
+                        "record": ("record.png", b"fake-image", "image/png"),
+                    },
+                )
+                job_id = created.json()["job_id"]
+                app.state.repository.claim_next_job()
+
+                response = client.post(f"/api/jobs/{job_id}/cancel")
+
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json()["status"], "cancelled")
+                self.assertEqual(
+                    client.get(f"/api/jobs/{job_id}").json()["stage"],
+                    "cancelled",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -317,6 +317,13 @@ textarea {
   color: #5c6962;
 }
 
+.processing-actions {
+  width: min(720px, 100%);
+  margin: 16px auto 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .review-page {
   padding-top: 22px;
 }
