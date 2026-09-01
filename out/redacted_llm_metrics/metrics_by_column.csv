@@ -1,0 +1,36 @@
+result_file,template_id,column_key,column_name,value_type,scored_cells,exact_correct,exact_accuracy,normalized_correct,normalized_accuracy
+Boar - barn - flash_boar_room_llm.csv,boar_room,date,Date,date_dd_mon,1,0,0.0,0,0.0
+Boar - barn - flash_boar_room_llm.csv,boar_room,current_temperature,Current Temperature,temperature,1,0,0.0,0,0.0
+Boar - barn - flash_boar_room_llm.csv,boar_room,hi,HI,temperature,1,0,0.0,0,0.0
+Boar - barn - flash_boar_room_llm.csv,boar_room,lo,LO,temperature,1,0,0.0,0,0.0
+Boar - barn - flash_boar_room_llm.csv,boar_room,comments,Comments,english_text,1,0,0.0,0,0.0
+Boar room_p1_boar_room_llm.csv,boar_room,date,Date,date_dd_mon,32,0,0.0,0,0.0
+Boar room_p1_boar_room_llm.csv,boar_room,current_temperature,Current Temperature,temperature,32,0,0.0,0,0.0
+Boar room_p1_boar_room_llm.csv,boar_room,hi,HI,temperature,32,0,0.0,0,0.0
+Boar room_p1_boar_room_llm.csv,boar_room,lo,LO,temperature,32,0,0.0,0,0.0
+Boar room_p1_boar_room_llm.csv,boar_room,comments,Comments,english_text,32,0,0.0,0,0.0
+Breeding_p1_breeding_llm.csv,breeding,date,Date,date_dd_mon,32,0,0.0,0,0.0
+Breeding_p1_breeding_llm.csv,breeding,current_temperature,Current Temperature,temperature,32,3,0.09375,3,0.09375
+Breeding_p1_breeding_llm.csv,breeding,hi,HI,temperature,32,3,0.09375,3,0.09375
+Breeding_p1_breeding_llm.csv,breeding,lo,LO,temperature,32,3,0.09375,3,0.09375
+Breeding_p1_breeding_llm.csv,breeding,comments,Comments,english_text,32,3,0.09375,3,0.09375
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,date,Date,date_dd_mon,32,0,0.0,0,0.0
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,comments,Comments,english_text,32,32,1.0,32,1.0
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,date,Date,date_dd_mon,1,0,0.0,0,0.0
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,current_temperature,Current Temperature,temperature,1,0,0.0,0,0.0
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,hi,HI,temperature,1,0,0.0,0,0.0
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,lo,LO,temperature,1,0,0.0,0,0.0
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,inventory,Inventory,integer,1,0,0.0,0,0.0
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,alley_scraped,Alley Scraped,yes_no,1,0,0.0,0,0.0
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,scraper_ran,Scraper Ran Y/N,yes_no,1,0,0.0,0,0.0
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,comments,Comments,english_text,1,0,0.0,0,0.0
+Gestation_p1_gestation_llm.csv,gestation,date,Date,date_dd_mon,31,0,0.0,0,0.0
+Gestation_p1_gestation_llm.csv,gestation,current_temperature,Current Temperature,temperature,31,0,0.0,0,0.0
+Gestation_p1_gestation_llm.csv,gestation,comments,Comments,english_text,31,0,0.0,0,0.0
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,date,Date,date_dd_mon,32,0,0.0,0,0.0
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,current_temperature,Current Temperature,temperature,32,0,0.0,0,0.0
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,hi,HI,temperature,32,0,0.0,0,0.0
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,lo,LO,temperature,32,0,0.0,0,0.0
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,comments,Comments,english_text,32,0,0.0,0,0.0
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,date,Date,date_dd_mon,31,0,0.0,0,0.0
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,comments,Comments,english_text,31,29,0.9354838709677419,29,0.9354838709677419

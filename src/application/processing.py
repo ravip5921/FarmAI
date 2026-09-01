@@ -12,6 +12,7 @@ from src.preprocessing.denoise import MorphologicalDenoiseStage
 from src.preprocessing.grayscale import GrayscaleStage
 from src.preprocessing.sauvola import SauvolaBinarizationStage
 from src.preprocessing.skew import SkewCorrectionStage, rotate_image
+from src.privacy import redact_filtered_template_columns
 from src.table import process_table_image, render_grid_overlay
 from src.templates import FormTemplate, TemplateColumn, load_template
 
@@ -199,6 +200,16 @@ def process_document(
         )
         if not table_result.grid.cells:
             raise ValueError("FarmAI could not find the table in this record.")
+        review_source = (
+            redact_filtered_template_columns(
+                deskewed_source,
+                table_result.grid,
+                template,
+                extra_filtered_columns=set(resolved_settings.extra_filtered_columns),
+            )
+            if template is not None
+            else deskewed_source
+        )
 
         def on_cell_progress(completed: int, total: int) -> None:
             _notify(
@@ -212,7 +223,7 @@ def process_document(
             )
 
         table = run_table_ocr(
-            deskewed_source,
+            review_source,
             table_result.grid,
             engine=ocr_engine,
             padding=resolved_settings.ocr_padding,
@@ -235,12 +246,12 @@ def process_document(
             if template
             else _generic_columns(table)
         )
-        overlay = render_grid_overlay(deskewed_source, table_result.grid)
-        height, width = deskewed_source.shape[:2]
+        overlay = render_grid_overlay(review_source, table_result.grid)
+        height, width = review_source.shape[:2]
         result.pages.append(
             PageProcessingResult(
                 page_number=page_number,
-                source_image=deskewed_source,
+                source_image=review_source,
                 overlay_image=overlay,
                 image_width=width,
                 image_height=height,
