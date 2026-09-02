@@ -1,0 +1,61 @@
+name: Deploy FarmAI UI
+
+on:
+  push:
+    branches: [interface]
+  workflow_dispatch:
+
+concurrency:
+  group: farmai-ui-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Ubuntu server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.FARMAI_DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.FARMAI_DEPLOY_PORT }}
+          DEPLOY_KEY: ${{ secrets.FARMAI_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/farmai_deploy_key
+          chmod 600 ~/.ssh/farmai_deploy_key
+          ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy application
+        env:
+          DEPLOY_HOST: ${{ secrets.FARMAI_DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.FARMAI_DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.FARMAI_DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/farmai_deploy_key -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" <<'EOF'
+          set -euo pipefail
+
+          cd /home/ravi/apps/FarmAI
+          git fetch origin interface
+          git checkout interface
+          git reset --hard origin/interface
+
+          .venv/bin/python -m pip install -r requirements.txt
+          .venv/bin/python -m pip install -e .
+
+          export NVM_DIR="$HOME/.nvm"
+          . "$NVM_DIR/nvm.sh"
+          nvm use 22
+
+          cd user_interface/frontend
+          npm ci
+          npm run build
+          rsync -a --delete dist/ /var/www/farmai/
+
+          sudo -n systemctl restart farmai-api.service
+          sudo -n systemctl restart farmai-worker.service
+          curl -fsS http://127.0.0.1:8000/api/health
+          EOF
