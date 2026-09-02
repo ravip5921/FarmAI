@@ -35,7 +35,7 @@ jobs:
           DEPLOY_USER: ${{ secrets.FARMAI_DEPLOY_USER }}
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/farmai_deploy_key -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" <<'EOF'
+          ssh -i ~/.ssh/farmai_deploy_key -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" 'bash -se' <<'EOF'
           set -euo pipefail
 
           cd /home/ravi/apps/FarmAI
@@ -57,14 +57,19 @@ jobs:
 
           sudo -n systemctl restart farmai-api.service
           sudo -n systemctl restart farmai-worker.service
+          api_ready=0
           for attempt in {1..20}; do
-            if curl -fsS http://127.0.0.1:8000/api/health; then
-              exit 0
+            if curl -fsS http://127.0.0.1:8000/api/health > /tmp/farmai-api-health.json; then
+              cat /tmp/farmai-api-health.json
+              api_ready=1
+              break
             fi
             sleep 2
           done
 
-          sudo -n systemctl status farmai-api.service --no-pager
-          sudo -n systemctl status farmai-worker.service --no-pager
-          exit 1
+          if [ "$api_ready" -ne 1 ]; then
+            sudo -n systemctl status farmai-api.service --no-pager
+            sudo -n systemctl status farmai-worker.service --no-pager
+            exit 1
+          fi
           EOF
