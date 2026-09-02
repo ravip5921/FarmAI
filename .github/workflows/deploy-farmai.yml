@@ -57,5 +57,14 @@ jobs:
 
           sudo -n systemctl restart farmai-api.service
           sudo -n systemctl restart farmai-worker.service
-          curl -fsS http://127.0.0.1:8000/api/health
+          for attempt in {1..20}; do
+            if curl -fsS http://127.0.0.1:8000/api/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+
+          sudo -n systemctl status farmai-api.service --no-pager
+          sudo -n systemctl status farmai-worker.service --no-pager
+          exit 1
           EOF
