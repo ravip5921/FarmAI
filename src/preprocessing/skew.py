@@ -70,8 +70,9 @@ class SkewCorrectionStage(PipelineStage):
             print("[SkewCorrectionStage] No lines detected by Hough transform.")
             return 0.0
 
+        line_segments = np.asarray(lines).reshape(-1, 4)
         angles: list[float] = []
-        for line in lines[:, 0]:
+        for line in line_segments:
             x1, y1, x2, y2 = line
             dx = x2 - x1
             dy = y2 - y1

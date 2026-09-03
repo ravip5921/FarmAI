@@ -5,6 +5,7 @@ import unittest
 
 import cv2
 import numpy as np
+from unittest.mock import patch
 
 from src.core.image import DocumentImage
 from src.preprocessing.skew import SkewCorrectionStage
@@ -106,6 +107,15 @@ class TestSkewStage(unittest.TestCase):
         stage = SkewCorrectionStage(hough_threshold=20)
 
         self.assertAlmostEqual(stage.estimate_angle(img), 0.0, delta=0.5)
+
+    def test_estimate_angle_accepts_flat_hough_line_array(self) -> None:
+        img = np.full((100, 200), 255, dtype=np.uint8)
+        lines = np.array([[10, 20, 190, 29], [10, 50, 190, 59]], dtype=np.int32)
+
+        with patch("src.preprocessing.skew.cv2.HoughLinesP", return_value=lines):
+            detected = self.stage.estimate_angle(img)
+
+        self.assertAlmostEqual(detected, 2.86, delta=0.1)
 
 
 if __name__ == "__main__":
