@@ -33,8 +33,9 @@ export function getJob(jobId: string) {
   return apiRequest<JobSummary>(`/api/jobs/${jobId}`)
 }
 
-export function getJobs() {
-  return apiRequest<JobsResponse>('/api/jobs')
+export function getJobs(limit = 50) {
+  const query = new URLSearchParams({ limit: String(limit) })
+  return apiRequest<JobsResponse>(`/api/jobs?${query}`)
 }
 
 export async function deleteJob(jobId: string) {

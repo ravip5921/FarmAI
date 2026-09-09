@@ -21,9 +21,10 @@ interface SettingsDrawerProps {
   open: boolean
   options?: AppSettingsResponse
   value: JobSettings
-  groundTruth: File | null
+  groundTruth?: File | null
+  showGroundTruth?: boolean
   onChange: (settings: JobSettings) => void
-  onGroundTruthChange: (file: File | null) => void
+  onGroundTruthChange?: (file: File | null) => void
   onClose: () => void
 }
 
@@ -32,6 +33,7 @@ export function SettingsDrawer({
   options,
   value,
   groundTruth,
+  showGroundTruth = true,
   onChange,
   onGroundTruthChange,
   onClose,
@@ -54,7 +56,7 @@ export function SettingsDrawer({
               Advanced settings
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Changes are saved as you make them.
+              These settings are applied when analysis starts.
             </Typography>
           </div>
           <Button
@@ -140,54 +142,62 @@ export function SettingsDrawer({
           </Select>
         </FormControl>
 
-        <Divider />
+        {showGroundTruth && onGroundTruthChange && (
+          <>
+            <Divider />
 
-        <div>
-          <Typography sx={{ fontWeight: 700 }}>Ground-truth CSV</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            Optional. Add known answers to measure recognition accuracy.
-          </Typography>
-          <Button
-            component="label"
-            variant="outlined"
-            startIcon={<FileCheck2 size={18} />}
-          >
-            {groundTruth ? 'Replace CSV' : 'Choose CSV'}
-            <input
-              hidden
-              type="file"
-              accept=".csv,text/csv"
-              onChange={(event) =>
-                onGroundTruthChange(event.target.files?.[0] ?? null)
-              }
-            />
-          </Button>
-          {groundTruth && (
-            <Stack
-              direction="row"
-              sx={{
-                mt: 1.25,
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
+            <div>
+              <Typography sx={{ fontWeight: 700 }}>Ground-truth CSV</Typography>
               <Typography
                 variant="body2"
-                sx={{
-                  maxWidth: 270,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
+                color="text.secondary"
+                sx={{ mb: 1.5 }}
               >
-                {groundTruth.name}
+                Optional. Add known answers to measure recognition accuracy.
               </Typography>
-              <Button size="small" onClick={() => onGroundTruthChange(null)}>
-                Remove
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<FileCheck2 size={18} />}
+              >
+                {groundTruth ? 'Replace CSV' : 'Choose CSV'}
+                <input
+                  hidden
+                  type="file"
+                  accept=".csv,text/csv"
+                  onChange={(event) =>
+                    onGroundTruthChange(event.target.files?.[0] ?? null)
+                  }
+                />
               </Button>
-            </Stack>
-          )}
-        </div>
+              {groundTruth && (
+                <Stack
+                  direction="row"
+                  sx={{
+                    mt: 1.25,
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      maxWidth: 270,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {groundTruth.name}
+                  </Typography>
+                  <Button size="small" onClick={() => onGroundTruthChange(null)}>
+                    Remove
+                  </Button>
+                </Stack>
+              )}
+            </div>
+          </>
+        )}
 
         <Button variant="contained" size="large" onClick={onClose}>
           Done

@@ -104,6 +104,9 @@ class LlmVisionOcrEngine:
             "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": "curl/8.0.0",
+            # Compatible services can use this to deduplicate a retry after a
+            # connection is lost after the response was produced.
+            "Idempotency-Key": hashlib.sha256(body).hexdigest(),
         }
         request = urllib.request.Request(
             self.config.api_url,

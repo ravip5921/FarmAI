@@ -7,8 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from .config import PROJECT_ROOT, get_config
-from .database import initialize_database
+from .database import LATEST_SCHEMA_VERSION, get_schema_version, initialize_database
 from .repository import JobRepository
+from .routes.inbox import router as inbox_router
 from .routes.jobs import router as jobs_router
 from .routes.settings import router as settings_router
 
@@ -17,6 +18,7 @@ from .routes.settings import router as settings_router
 async def lifespan(app: FastAPI):
     config = get_config()
     config.jobs_dir.mkdir(parents=True, exist_ok=True)
+    (config.runtime_dir / "documents").mkdir(parents=True, exist_ok=True)
     initialize_database(config.database_path)
     app.state.config = config
     app.state.repository = JobRepository(config.database_path)
@@ -38,13 +40,19 @@ app.add_middleware(
 )
 app.include_router(settings_router, prefix="/api")
 app.include_router(jobs_router, prefix="/api")
+app.include_router(inbox_router, prefix="/api")
 
 FRONTEND_DIST = PROJECT_ROOT / "user_interface" / "frontend" / "dist"
 
 
 @app.get("/api/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def health() -> dict[str, str | int]:
+    database_path = get_config().database_path
+    return {
+        "status": "ok",
+        "schema_version": get_schema_version(database_path),
+        "latest_schema_version": LATEST_SCHEMA_VERSION,
+    }
 
 
 def _frontend_index() -> FileResponse:

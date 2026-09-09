@@ -45,6 +45,8 @@ export interface CreatedJob {
 
 export interface JobSummary {
   job_id: string
+  document_id: string | null
+  batch_id: string | null
   status: JobStatus
   stage: string
   progress_current: number
@@ -52,6 +54,7 @@ export interface JobSummary {
   filename: string
   template_id: string | null
   ocr_engine: string
+  attempt_count: number
   created_at: string
   started_at: string | null
   completed_at: string | null
@@ -63,6 +66,53 @@ export interface JobSummary {
 
 export interface JobsResponse {
   jobs: JobSummary[]
+}
+
+export type DocumentStatus =
+  | 'pending'
+  | 'queued'
+  | 'running'
+  | 'completed'
+  | 'completed_with_warnings'
+  | 'failed'
+  | 'cancelled'
+
+export interface DocumentSummary {
+  document_id: string
+  filename: string
+  status: DocumentStatus
+  size_bytes: number
+  created_at: string
+  updated_at: string
+  latest_job_id: string | null
+}
+
+export interface DocumentCounts {
+  total: number
+  pending: number
+  queued: number
+  running: number
+  completed: number
+  completed_with_warnings: number
+  failed: number
+  cancelled: number
+}
+
+export interface DocumentsResponse {
+  documents: DocumentSummary[]
+  counts: DocumentCounts
+  limit?: number
+  offset?: number
+  has_more?: boolean
+}
+
+export interface AnalysisBatchResponse {
+  batch_id: string | null
+  status: string
+  document_count: number
+  job_ids: string[]
+  created_at: string | null
+  counts: DocumentCounts
 }
 
 export interface ResultColumn {

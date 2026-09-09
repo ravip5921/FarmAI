@@ -13,6 +13,7 @@ import {
   FileText,
   Home,
   RotateCcw,
+  Sparkles,
   Upload,
   X,
 } from 'lucide-react'
@@ -25,12 +26,13 @@ import {
 import { Link } from 'react-router-dom'
 import { AnalysisPanel } from '../components/AnalysisPanel'
 import { AppHeader } from '../components/AppHeader'
+import { DocumentInboxTable } from '../components/DocumentInboxTable'
 import { OcrResultGrid } from '../components/OcrResultGrid'
 import { OverlayViewer } from '../components/OverlayViewer'
 import { createDemoResult } from '../demo/demoResult'
 import type { JobResult, ResultCell } from '../types/api'
 
-type DemoStep = 'upload' | 'processing' | 'review'
+type DemoStep = 'upload' | 'inbox' | 'processing' | 'review'
 
 function formatSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`
@@ -108,6 +110,7 @@ export function DemoPage() {
   const [dragActive, setDragActive] = useState(false)
   const [step, setStep] = useState<DemoStep>('upload')
   const [progress, setProgress] = useState(0)
+  const [uploadedAt, setUploadedAt] = useState<string | null>(null)
   const [result, setResult] = useState<JobResult | null>(null)
   const [demoError, setDemoError] = useState<string | null>(null)
   const [selectedCell, setSelectedCell] = useState<ResultCell | null>(null)
@@ -115,7 +118,16 @@ export function DemoPage() {
   const analysisRef = useRef<HTMLDivElement>(null)
 
   const acceptFile = (file?: File) => {
-    if (file) setRecord(file)
+    if (!file) return
+    if (
+      file.type !== 'application/pdf' &&
+      !file.name.toLowerCase().endsWith('.pdf')
+    ) {
+      setDemoError('Choose a PDF to try the inbox workflow.')
+      return
+    }
+    setDemoError(null)
+    setRecord(file)
   }
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {
@@ -148,6 +160,13 @@ export function DemoPage() {
     }, 120)
   }
 
+  const uploadToDemoInbox = () => {
+    if (!record) return
+    setDemoError(null)
+    setUploadedAt(new Date().toISOString())
+    setStep('inbox')
+  }
+
   const page = result?.pages[0]
   const reviewCount = useMemo(
     () =>
@@ -158,6 +177,116 @@ export function DemoPage() {
     [page],
   )
 
+  if (step === 'inbox' && record && uploadedAt) {
+    return (
+      <div className="app-shell">
+        <AppHeader backTo="/" />
+        <main className="page inbox-page">
+          <div className="page-heading">
+            <h1>Demo PDF inbox</h1>
+            <p>
+              The upload step is complete. Analysis still waits for a separate,
+              explicit action.
+            </p>
+          </div>
+
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Demo mode: this PDF was not sent to the server and does not affect
+            the real inbox counts.
+          </Alert>
+
+          <section className="inbox-counts" aria-label="Demo PDF inbox summary">
+            <div className="inbox-count">
+              <span className="inbox-count__label">Uploaded total</span>
+              <span className="inbox-count__value">1</span>
+              <span className="inbox-count__note">Demo only</span>
+            </div>
+            <div className="inbox-count">
+              <span className="inbox-count__label">Awaiting analysis</span>
+              <span className="inbox-count__value">1</span>
+              <span className="inbox-count__note">Ready when you are</span>
+            </div>
+            <div className="inbox-count">
+              <span className="inbox-count__label">Queued / running</span>
+              <span className="inbox-count__value">0</span>
+              <span className="inbox-count__note">No analysis yet</span>
+            </div>
+            <div className="inbox-count">
+              <span className="inbox-count__label">Completed</span>
+              <span className="inbox-count__value">0</span>
+              <span className="inbox-count__note">Ready after analysis</span>
+            </div>
+            <div className="inbox-count">
+              <span className="inbox-count__label">Failed</span>
+              <span className="inbox-count__value">0</span>
+              <span className="inbox-count__note">Needs attention</span>
+            </div>
+          </section>
+
+          <section
+            className="inbox-panel analysis-control"
+            aria-labelledby="demo-analyze-heading"
+          >
+            <div className="inbox-panel__heading">
+              <span className="step-number" aria-hidden="true">2</span>
+              <div>
+                <h2 id="demo-analyze-heading">Analyze awaiting PDFs</h2>
+                <p>
+                  In the real inbox, this creates an independent backend job for
+                  every PDF that is waiting.
+                </p>
+              </div>
+            </div>
+            <div className="analysis-control__body">
+              <div>
+                <span className="analysis-control__label">
+                  Settings for this demo batch
+                </span>
+                <strong>Boar Room</strong>
+                <span>Best handwriting recognition · saved result only</span>
+              </div>
+              <div className="analysis-control__actions">
+                <Button
+                  variant="outlined"
+                  startIcon={<RotateCcw size={17} />}
+                  onClick={() => {
+                    setStep('upload')
+                    setUploadedAt(null)
+                    setProgress(0)
+                  }}
+                >
+                  Start over
+                </Button>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<Sparkles size={18} />}
+                  onClick={startDemo}
+                >
+                  Analyze 1 awaiting PDF
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          <DocumentInboxTable
+            documents={[
+              {
+                document_id: 'demo-document',
+                filename: record.name,
+                status: 'pending',
+                size_bytes: record.size,
+                created_at: uploadedAt,
+                updated_at: uploadedAt,
+                latest_job_id: null,
+              },
+            ]}
+          />
+        </main>
+      </div>
+    )
+  }
+
   if (step === 'processing') {
     return (
       <div className="app-shell">
@@ -165,8 +294,11 @@ export function DemoPage() {
         <main className="page">
           <div className="progress-layout">
             <div className="page-heading">
-              <h1>Reading demo record</h1>
-              <p>FarmAI is simulating the same review flow with saved results.</p>
+              <h1>Analyzing demo PDF</h1>
+              <p>
+                The PDF was already uploaded. FarmAI is now simulating the
+                separate analysis step with saved results.
+              </p>
             </div>
             <section className="progress-panel" aria-live="polite">
               <p className="progress-file">{record?.name ?? 'Demo record'}</p>
@@ -188,7 +320,7 @@ export function DemoPage() {
                 <span>About 2 seconds</span>
               </div>
               <div className="return-note">
-                This demo does not contact the handwriting service.
+                This demo does not contact the server or handwriting service.
               </div>
             </section>
           </div>
@@ -335,10 +467,10 @@ export function DemoPage() {
       <AppHeader backTo="/" />
       <main className="page upload-page">
         <div className="page-heading">
-          <h1>Demo a farm record</h1>
+          <h1>Try the two-step PDF workflow</h1>
           <p>
-            Choose any record image or PDF. Demo mode shows saved Boar Room
-            results without contacting the handwriting service.
+            Choose a PDF, upload it to a browser-only demo inbox, and then start
+            a simulated analysis using saved Boar Room results.
           </p>
         </div>
 
@@ -374,7 +506,7 @@ export function DemoPage() {
             ref={fileInput}
             hidden
             type="file"
-            accept=".png,.jpg,.jpeg,.tif,.tiff,.bmp,.pdf"
+            accept=".pdf,application/pdf"
             onChange={(event) => acceptFile(event.target.files?.[0])}
           />
           {record ? (
@@ -394,6 +526,7 @@ export function DemoPage() {
                   onClick={(event) => {
                     event.stopPropagation()
                     setRecord(null)
+                    if (fileInput.current) fileInput.current.value = ''
                   }}
                 >
                   <X size={20} />
@@ -405,16 +538,16 @@ export function DemoPage() {
               <span className="dropzone__icon">
                 <Upload size={24} aria-hidden="true" />
               </span>
-              <p className="dropzone__title">Drop a record here</p>
+              <p className="dropzone__title">Drop a PDF here</p>
               <p className="dropzone__hint">
-                or click to choose a PDF, JPG, PNG, or TIFF
+                or click to choose a scanned PDF
               </p>
             </div>
           )}
         </div>
 
         <div className="settings-summary">
-          Demo mode | Boar Room | Best handwriting recognition
+          Step 1 only stores the PDF. No backend, OCR, or AI is used in demo mode.
         </div>
 
         <div className="upload-actions">
@@ -429,13 +562,29 @@ export function DemoPage() {
             Back home
           </Button>
           <Button
+            variant="outlined"
+            size="large"
+            startIcon={<FileText size={19} />}
+            onClick={() => {
+              setDemoError(null)
+              setRecord(
+                new File(['FarmAI demo PDF'], 'boar-room-demo.pdf', {
+                  type: 'application/pdf',
+                }),
+              )
+            }}
+            sx={{ minHeight: 48 }}
+          >
+            Use sample PDF
+          </Button>
+          <Button
             variant="contained"
             size="large"
             disabled={!record}
-            onClick={startDemo}
+            onClick={uploadToDemoInbox}
             sx={{ minWidth: 160, minHeight: 48 }}
           >
-            Read demo record
+            Upload to demo inbox
           </Button>
         </div>
       </main>

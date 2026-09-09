@@ -1,0 +1,9 @@
+# Validate with visudo -cf before installing as /etc/sudoers.d/farmai-deploy.
+# Adjust the account and systemctl path if the server differs.
+Cmnd_Alias FARMAI_RELEASE_SERVICES = \
+    /usr/bin/systemctl start farmai-api.service, \
+    /usr/bin/systemctl stop farmai-api.service, \
+    /usr/bin/systemctl start farmai-worker.service, \
+    /usr/bin/systemctl stop farmai-worker.service
+
+ravi ALL=(root) NOPASSWD: FARMAI_RELEASE_SERVICES

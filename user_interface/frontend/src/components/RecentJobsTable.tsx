@@ -49,7 +49,17 @@ function formatDate(value: string) {
   }).format(new Date(value))
 }
 
-export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
+interface RecentJobsTableProps {
+  jobs: JobSummary[]
+  title?: string
+  description?: string
+}
+
+export function RecentJobsTable({
+  jobs,
+  title = 'Recent jobs',
+  description = 'Open a running job or return to a previous result.',
+}: RecentJobsTableProps) {
   const queryClient = useQueryClient()
   const [checkedJobIds, setCheckedJobIds] = useState<Set<string>>(new Set())
   const [jobsToDelete, setJobsToDelete] = useState<JobSummary[]>([])
@@ -104,8 +114,8 @@ export function RecentJobsTable({ jobs }: { jobs: JobSummary[] }) {
       <section className="recent-jobs" aria-labelledby="recent-jobs-heading">
         <div className="recent-jobs__heading">
           <div>
-            <h2 id="recent-jobs-heading">Recent jobs</h2>
-            <p>Open a running job or return to a previous result.</p>
+            <h2 id="recent-jobs-heading">{title}</h2>
+            <p>{description}</p>
           </div>
           <span className="recent-jobs__heading-actions">
             <Button

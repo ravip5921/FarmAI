@@ -89,6 +89,7 @@ class TestLlmClient(unittest.TestCase):
         self.assertEqual(request.full_url, "http://example.test/api/chat")
         self.assertEqual(request.headers["User-agent"], "curl/8.0.0")
         self.assertEqual(request.headers["Accept"], "application/json")
+        self.assertEqual(len(request.headers["Idempotency-key"]), 64)
         payload = json.loads(request.data.decode("utf-8"))
         self.assertEqual(payload["model"], "model")
         self.assertTrue(payload["messages"][0]["images"][0])

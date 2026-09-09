@@ -16,3 +16,18 @@ The goal is for you to become familiar with setting up and managing a web applic
 There are two apps hosted by Apache server for now, I think you can use the similar architecture for this Farm app, so we can set up a virtual host and redirect to this app. 
 Feel free to explore different deployment approaches and learn how the various components work together. The server is intended to be a hands-on learning environment.
 If you need any software installed, additional permissions, a database configured, Apache updated, or help troubleshooting any part of the setup, just let me know. I'm happy to help whenever you get stuck.
+
+## Managed application releases
+
+The `interface` branch now uses the safe release process documented in
+[`deploy/README.md`](deploy/README.md). The GitHub workflow tests the exact
+commit first, stages and smoke-tests it separately from the running release,
+waits for the analysis worker to drain, backs up and migrates SQLite, and then
+atomically switches the active-release symlink. Failed post-switch health checks
+automatically restore the prior code release.
+
+The one-time systemd, Apache, environment-file, shared-runtime, and limited
+sudo setup in that document must be installed on the server before enabling the
+new workflow. In particular, the service working directory must be
+`/home/ravi/apps/farmai/current`; deployments no longer modify the live
+`/home/ravi/apps/FarmAI` checkout in place.

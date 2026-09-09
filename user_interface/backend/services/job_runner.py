@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import traceback
 from pathlib import Path
 from typing import Any
@@ -8,13 +9,33 @@ import cv2
 
 from src.application import ProcessingProgress, ProcessingSettings, process_document
 from src.application.ground_truth import GroundTruthError, score_result
+from src.ocr import create_ocr_engine
 
 from ..repository import JobRepository
 from .artifact_store import write_csv_artifact, write_result
+from .checkpoint_engine import CheckpointingOcrEngine
+from .retrying_engine import RetryingOcrEngine
 
 
 class JobCancelled(RuntimeError):
     pass
+
+
+def _resumable_engine(
+    job: dict[str, Any], artifact_dir: Path, engine: Any | None
+) -> Any | None:
+    engine_name = str(job["ocr_engine"]).strip().casefold()
+    if engine_name not in {"llm", "llm-vision"}:
+        return engine
+    base_engine = engine or create_ocr_engine(engine_name)
+    retried = RetryingOcrEngine(
+        base_engine,
+        max_attempts=int(os.getenv("FARMAI_LLM_MAX_ATTEMPTS", "3")),
+        backoff_seconds=float(
+            os.getenv("FARMAI_LLM_RETRY_BACKOFF_SECONDS", "1")
+        ),
+    )
+    return CheckpointingOcrEngine(retried, artifact_dir / "checkpoints" / "ocr")
 
 
 def _user_safe_error(exc: Exception) -> tuple[str, str]:
@@ -70,7 +91,7 @@ def run_claimed_job(
                 extra_filtered_columns=extra_filters,
             ),
             progress_callback=progress,
-            engine=engine,
+            engine=_resumable_engine(job, artifact_dir, engine),
         )
         pages_payload: list[dict[str, Any]] = []
         for page in processed.pages:

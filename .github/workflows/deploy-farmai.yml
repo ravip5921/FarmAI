@@ -1,75 +1,127 @@
-name: Deploy FarmAI UI
+name: Test and deploy FarmAI UI
 
 on:
   push:
     branches: [interface]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: farmai-ui-deploy
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    name: Deploy to Ubuntu server
+  release-gate:
+    name: Test exact release commit
     runs-on: ubuntu-latest
+    outputs:
+      commit: ${{ steps.revision.outputs.commit }}
 
     steps:
+      - name: Checkout release commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Record immutable revision
+        id: revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          checked_out_commit="$(git rev-parse HEAD)"
+          test "$checked_out_commit" = "$GITHUB_SHA"
+          printf 'commit=%s\n' "$checked_out_commit" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install Python dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
+
+      - name: Run Python type and test gates
+        run: |
+          set -euo pipefail
+          python -m nox -s typecheck tests
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: user_interface/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: user_interface/frontend
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: user_interface/frontend
+        run: npm run lint
+
+      - name: Build frontend
+        working-directory: user_interface/frontend
+        run: npm run build
+
+  deploy:
+    name: Promote tested release on Ubuntu server
+    needs: release-gate
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout tested deployment script
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-gate.outputs.commit }}
+          fetch-depth: 1
+
+      - name: Verify deployment revision
+        env:
+          TESTED_COMMIT: ${{ needs.release-gate.outputs.commit }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$TESTED_COMMIT"
+
       - name: Configure SSH
         env:
           DEPLOY_HOST: ${{ secrets.FARMAI_DEPLOY_HOST }}
           DEPLOY_PORT: ${{ secrets.FARMAI_DEPLOY_PORT }}
           DEPLOY_KEY: ${{ secrets.FARMAI_DEPLOY_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.FARMAI_DEPLOY_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
+          install -d -m 0700 ~/.ssh
           printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/farmai_deploy_key
-          chmod 600 ~/.ssh/farmai_deploy_key
-          ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          chmod 0600 ~/.ssh/farmai_deploy_key
+          if [ -n "$DEPLOY_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" > ~/.ssh/known_hosts
+          fi
+          chmod 0600 ~/.ssh/known_hosts
 
-      - name: Deploy application
+      - name: Stage, verify, and atomically promote release
         env:
           DEPLOY_HOST: ${{ secrets.FARMAI_DEPLOY_HOST }}
           DEPLOY_PORT: ${{ secrets.FARMAI_DEPLOY_PORT }}
           DEPLOY_USER: ${{ secrets.FARMAI_DEPLOY_USER }}
+          TESTED_COMMIT: ${{ needs.release-gate.outputs.commit }}
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/farmai_deploy_key -p "$DEPLOY_PORT" "$DEPLOY_USER@$DEPLOY_HOST" 'bash -se' <<'EOF'
-          set -euo pipefail
-
-          cd /home/ravi/apps/FarmAI
-          git fetch origin interface
-          git checkout interface
-          git reset --hard origin/interface
-
-          .venv/bin/python -m pip install -r requirements.txt
-          .venv/bin/python -m pip install -e .
-
-          export NVM_DIR="$HOME/.nvm"
-          . "$NVM_DIR/nvm.sh"
-          nvm use 22
-
-          cd user_interface/frontend
-          npm ci
-          npm run build
-          rsync -a --delete dist/ /var/www/farmai/
-
-          sudo -n systemctl restart farmai-api.service
-          sudo -n systemctl restart farmai-worker.service
-          api_ready=0
-          for attempt in {1..20}; do
-            if curl -fsS http://127.0.0.1:8000/api/health > /tmp/farmai-api-health.json; then
-              cat /tmp/farmai-api-health.json
-              api_ready=1
-              break
-            fi
-            sleep 2
-          done
-
-          if [ "$api_ready" -ne 1 ]; then
-            sudo -n systemctl status farmai-api.service --no-pager
-            sudo -n systemctl status farmai-worker.service --no-pager
-            exit 1
-          fi
-          EOF
+          ssh \
+            -i ~/.ssh/farmai_deploy_key \
+            -p "$DEPLOY_PORT" \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "bash -s -- '$TESTED_COMMIT'" \
+            < deploy/deploy-release.sh
