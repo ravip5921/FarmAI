@@ -1,0 +1,8 @@
+result_file,ground_truth_file,template_id,ocr_rows,ground_truth_rows,rows_compared,row_count_difference,columns_compared,missing_result_columns,missing_ground_truth_columns,scored_cells,exact_correct,exact_accuracy,normalized_correct,normalized_accuracy,fully_exact_rows,fully_normalized_rows
+Boar room_p1_boar_room_llm.csv,boar_room.csv,boar_room,32,32,32,0,5,,,160,0,0,0,0,0,0
+Breeding_p1_breeding_llm.csv,breeding.csv,breeding,32,33,32,-1,5,,,160,12,0.075,12,0.075,0,0
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4.csv,farrowing_room_4,32,32,32,0,2,,Daily HI; Daily LO; Current Temp AM / Noon / PM; Current Inventory +/-; Current Inventory,64,32,0.5,32,0.5,0,0
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3.csv,finisher_room_3,1,32,1,-31,8,,Inventory +/-,8,0,0,0,0,0,0
+Gestation_p1_gestation_llm.csv,gestation.csv,gestation,31,33,31,-2,3,,,93,0,0,0,0,0,0
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer.csv,gilt_developer,32,33,32,-1,5,,,160,0,0,0,0,0,0
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e.csv,metabolism_room_e,31,34,31,-3,2,,Daily HI; Daily LO; Current Temp AM / Noon / PM; Initials AM / Noon / PM; Current Inventory +/-; Current Inventory,62,29,0.467741935,29,0.467741935,0,0

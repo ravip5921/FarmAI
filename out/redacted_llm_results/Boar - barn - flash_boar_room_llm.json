@@ -1,0 +1,185 @@
+{
+  "filename": "Boar - barn - flash_redacted.png",
+  "template_id": "boar_room",
+  "template_name": "Boar Room",
+  "ocr_engine": "llm-vision",
+  "warning_count": 2,
+  "metrics": null,
+  "pages": [
+    {
+      "page_number": 1,
+      "source_url": "",
+      "overlay_url": "",
+      "image_width": 3072,
+      "image_height": 4080,
+      "skew_angle": 0.9348132119793462,
+      "columns": [
+        {
+          "index": 0,
+          "source_index": 0,
+          "key": "date",
+          "name": "Date",
+          "value_type": "date_dd_mon",
+          "format": "DD-Mon",
+          "range_min": null,
+          "range_max": null
+        },
+        {
+          "index": 1,
+          "source_index": 1,
+          "key": "current_temperature",
+          "name": "Current Temperature",
+          "value_type": "temperature",
+          "format": "TT.T",
+          "range_min": 50.0,
+          "range_max": 110.0
+        },
+        {
+          "index": 2,
+          "source_index": 2,
+          "key": "hi",
+          "name": "HI",
+          "value_type": "temperature",
+          "format": "TT.T",
+          "range_min": 50.0,
+          "range_max": 110.0
+        },
+        {
+          "index": 3,
+          "source_index": 3,
+          "key": "lo",
+          "name": "LO",
+          "value_type": "temperature",
+          "format": "TT.T",
+          "range_min": 50.0,
+          "range_max": 110.0
+        },
+        {
+          "index": 4,
+          "source_index": 6,
+          "key": "comments",
+          "name": "Comments",
+          "value_type": "english_text",
+          "format": null,
+          "range_min": null,
+          "range_max": null
+        }
+      ],
+      "cells": [
+        {
+          "row": 1,
+          "column_index": 0,
+          "source_column_index": 0,
+          "column_key": "date",
+          "column_name": "Date",
+          "bbox": [
+            322,
+            1322,
+            16,
+            74
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\": \"\", \"status\": \"blank\"}\n```",
+          "validation_error": null,
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "unscored"
+        },
+        {
+          "row": 1,
+          "column_index": 1,
+          "source_column_index": 1,
+          "column_key": "current_temperature",
+          "column_name": "Current Temperature",
+          "bbox": [
+            342,
+            1322,
+            17,
+            74
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"\",\"status\":\"blank\"}\n```",
+          "validation_error": "expected temperature pattern",
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "validation_warning"
+        },
+        {
+          "row": 1,
+          "column_index": 2,
+          "source_column_index": 2,
+          "column_key": "hi",
+          "column_name": "HI",
+          "bbox": [
+            363,
+            1322,
+            17,
+            74
+          ],
+          "ocr_text": "83",
+          "reviewed_text": "83",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"83\", \"status\":\"uncertain\"}\n```",
+          "validation_error": null,
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "unscored"
+        },
+        {
+          "row": 1,
+          "column_index": 3,
+          "source_column_index": 3,
+          "column_key": "lo",
+          "column_name": "LO",
+          "bbox": [
+            384,
+            1322,
+            18,
+            74
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+          "validation_error": "expected temperature pattern",
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "validation_warning"
+        },
+        {
+          "row": 1,
+          "column_index": 4,
+          "source_column_index": 6,
+          "column_key": "comments",
+          "column_name": "Comments",
+          "bbox": [
+            433,
+            1322,
+            266,
+            74
+          ],
+          "ocr_text": "68.3 69.5",
+          "reviewed_text": "68.3 69.5",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"68.3 69.5\", \"status\":\"ok\"}\n```",
+          "validation_error": null,
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "unscored"
+        }
+      ],
+      "data_row_count": 1,
+      "warning_count": 2,
+      "metrics": null
+    }
+  ]
+}

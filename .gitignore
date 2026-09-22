@@ -71,9 +71,12 @@ Thumbs.db
 
 # Project-specific debug / outputs
 debug_outputs/
+user_interface/runtime/
 
 # Local env files
+.env
 .env.local
 .env.*.local
 **/chats.txt
 **/__pycache__/**
+demo/*

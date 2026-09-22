@@ -1,0 +1,18 @@
+{
+  "id": "breeding",
+  "name": "Breeding",
+  "description": "Template for breeding room daily farm log tables.",
+  "table": {"column_widths": [1.2, 0.3, 1.5, 1.5, 1.4, 0.3, 18.3, 2.1, 0.3, 2.0], "uniform_row_height": false},
+  "columns": [
+    {"index": 0, "key": "date", "name": "Date", "value_type": "date_dd_mon", "format": "DD-Mon", "common_values": [], "filter_out": false},
+    {"index": 1, "key": "divider1", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 2, "key": "current_temperature", "name": "Current Temperature", "value_type": "temperature", "format": "TT.T", "range": {"min": 50.0, "max": 110.0}, "common_values": [], "filter_out": false},
+    {"index": 3, "key": "hi", "name": "HI", "value_type": "temperature", "format": "TT.T", "range": {"min": 50.0, "max": 110.0}, "common_values": [], "filter_out": false},
+    {"index": 4, "key": "lo", "name": "LO", "value_type": "temperature", "format": "TT.T", "range": {"min": 50.0, "max": 110.0}, "common_values": [], "filter_out": false},
+    {"index": 5, "key": "divider2", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 6, "key": "comments", "name": "Comments", "value_type": "english_text", "common_values": ["All good"], "filter_out": false},
+    {"index": 7, "key": "initials", "name": "Initials AM / PM", "value_type": "initials", "common_values": [], "filter_out": true},
+    {"index": 8, "key": "divider3", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 9, "key": "manager_initials", "name": "Mgr. Initials", "value_type": "initials", "common_values": [], "filter_out": true}
+  ]
+}

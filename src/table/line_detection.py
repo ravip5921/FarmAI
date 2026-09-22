@@ -140,13 +140,47 @@ class LineDetectionStage(PipelineStage):
             horizontal_mask,
             cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),
         )
+        _, horizontal_labels, _, _ = cv2.connectedComponentsWithStats(
+            horizontal_hits, connectivity=8
+        )
         filtered = np.zeros_like(vertical_mask)
 
         for label in range(1, num_labels):
             component = labels == label
-            crossings = int(
-                np.count_nonzero(np.any(component & (horizontal_hits > 0), axis=1))
-            )
+            crossing_labels = np.unique(horizontal_labels[component])
+            crossings = sum(1 for crossing in crossing_labels if crossing != 0)
+            if crossings >= min_crossings:
+                filtered[component] = 255
+
+        return filtered
+
+    def _retain_horizontal_components_with_crossings(
+        self,
+        horizontal_mask: np.ndarray,
+        vertical_mask: np.ndarray,
+        *,
+        min_crossings: int,
+    ) -> np.ndarray:
+        """Keep horizontal components that intersect vertical rules enough times."""
+        num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+            horizontal_mask, connectivity=8
+        )
+        if num_labels <= 1:
+            return horizontal_mask
+
+        vertical_hits = cv2.dilate(
+            vertical_mask,
+            cv2.getStructuringElement(cv2.MORPH_RECT, (3, 7)),
+        )
+        _, vertical_labels, _, _ = cv2.connectedComponentsWithStats(
+            vertical_hits, connectivity=8
+        )
+        filtered = np.zeros_like(horizontal_mask)
+
+        for label in range(1, num_labels):
+            component = labels == label
+            crossing_labels = np.unique(vertical_labels[component])
+            crossings = sum(1 for crossing in crossing_labels if crossing != 0)
             if crossings >= min_crossings:
                 filtered[component] = 255
 
@@ -245,6 +279,16 @@ class LineDetectionStage(PipelineStage):
 
         # Final gate: real table vertical rules should cross horizontal rules.
         crossing_threshold = 1 if binary.shape[0] < 200 else 2
+        vertical_mask = self._retain_vertical_components_with_crossings(
+            vertical_mask,
+            horizontal_mask,
+            min_crossings=crossing_threshold,
+        )
+        horizontal_mask = self._retain_horizontal_components_with_crossings(
+            horizontal_mask,
+            vertical_mask,
+            min_crossings=crossing_threshold,
+        )
         vertical_mask = self._retain_vertical_components_with_crossings(
             vertical_mask,
             horizontal_mask,

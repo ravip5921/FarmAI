@@ -1,0 +1,21 @@
+{
+  "id": "farrowing_room_4",
+  "name": "Farrowing Room",
+  "description": "Template for Farrowing Room 4 daily log tables.",
+  "table": {"column_widths": [1.1, 0.2, 1.4, 1.5, 5.0, 5.1, 0.2, 1.7, 0.2, 1.5, 2.2, 0.3, 10.2], "uniform_row_height": false},
+  "columns": [
+    {"index": 0, "key": "date", "name": "Date", "value_type": "date_dd_mon", "format": "DD-Mon", "common_values": [], "filter_out": false},
+    {"index": 1, "key": "divider1", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 2, "key": "daily_hi", "name": "Daily HI", "value_type": "temperature", "format": "TT.T", "range": {"min": 50.0, "max": 110.0}, "common_values": [], "filter_out": false},
+    {"index": 3, "key": "daily_lo", "name": "Daily LO", "value_type": "temperature", "format": "TT.T", "range": {"min": 50.0, "max": 110.0}, "common_values": [], "filter_out": false},
+    {"index": 4, "key": "current_temperature", "name": "Current Temp AM / Noon / PM", "value_type": "temperature_readings", "format": "TT.T / TT.T / TT.T", "common_values": [], "filter_out": false},
+    {"index": 5, "key": "initials", "name": "Initials AM / Noon / PM", "value_type": "initials", "common_values": [], "filter_out": true},
+    {"index": 6, "key": "divider2", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 7, "key": "manager_initials", "name": "Manager's Initials", "value_type": "initials", "common_values": [], "filter_out": true},
+    {"index": 8, "key": "divider3", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 9, "key": "inventory_change", "name": "Current Inventory +/-", "value_type": "integer", "common_values": [], "filter_out": false},
+    {"index": 10, "key": "current_inventory", "name": "Current Inventory", "value_type": "integer", "common_values": [], "filter_out": false},
+    {"index": 11, "key": "divider4", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 12, "key": "comments", "name": "Comments", "value_type": "english_text", "common_values": ["All good"], "filter_out": false}
+  ]
+}

@@ -1,0 +1,23 @@
+[Unit]
+Description=FarmAI analysis worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ravi
+Group=ravi
+WorkingDirectory=/home/ravi/apps/farmai/current
+EnvironmentFile=/etc/farmai/farmai.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/ravi/apps/farmai/current/.venv/bin/python -m user_interface.backend.worker
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+# Never let systemd force-kill an in-flight external AI request. Normal release
+# deployment drains through worker.drain before asking systemd to stop.
+TimeoutStopSec=infinity
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

@@ -45,3 +45,30 @@ jobs:
         shell: bash -el {0}
         run: |
           nox
+
+  frontend:
+    name: Frontend lint and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: user_interface/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: user_interface/frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: user_interface/frontend
+        run: npm run lint
+
+      - name: Build
+        working-directory: user_interface/frontend
+        run: npm run build

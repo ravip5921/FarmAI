@@ -16,6 +16,11 @@ dependencies = [
     "pandas",
     "scikit-image",
     "pytesseract",
+    "pypdfium2",
+    "streamlit",
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
 ]
 
 [[project.authors]]
@@ -24,6 +29,7 @@ email = "ravipandey@unomaha.edu"
 
 [project.optional-dependencies]
 dev = ["jupyter"]
+htr = ["transformers", "Pillow"]
 
 [project.scripts]
 farm-ai = "main:main"
@@ -33,4 +39,4 @@ package-dir = {"" = "."}
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
+include = ["src*", "user_interface*"]

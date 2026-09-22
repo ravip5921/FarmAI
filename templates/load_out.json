@@ -1,0 +1,18 @@
+{
+  "id": "load_out",
+  "name": "Load Out",
+  "description": "Template for load out daily farm log tables.",
+  "table": {"column_widths": [1.4, 4.2, 0.3, 1.5, 2.0, 0.3, 2.0, 0.3, 11.0, 2.0], "uniform_row_height": false},
+  "columns": [
+    {"index": 0, "key": "date", "name": "Date", "value_type": "date_dd_mon", "format": "DD-Mon", "common_values": [], "filter_out": false},
+    {"index": 1, "key": "current_temperature", "name": "Current Temperature", "value_type": "text", "common_values": [], "filter_out": false},
+    {"index": 2, "key": "divider1", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 3, "key": "inventory_change", "name": "Inventory +/-", "value_type": "integer", "common_values": [], "filter_out": false},
+    {"index": 4, "key": "inventory", "name": "Inventory", "value_type": "integer", "common_values": [], "filter_out": false},
+    {"index": 5, "key": "divider2", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 6, "key": "barn_cleaner", "name": "Barn Cleaner Y/N", "value_type": "yes_no", "format": "Y/N", "common_values": ["Y", "N"], "filter_out": false},
+    {"index": 7, "key": "divider3", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 8, "key": "comments", "name": "Comments", "value_type": "english_text", "common_values": ["All good"], "filter_out": false},
+    {"index": 9, "key": "initials", "name": "Initials AM / PM", "value_type": "initials", "format": "AM / PM", "common_values": [], "filter_out": false}
+  ]
+}

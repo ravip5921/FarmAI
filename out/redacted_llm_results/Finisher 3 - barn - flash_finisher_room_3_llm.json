@@ -1,0 +1,313 @@
+{
+  "filename": "Finisher 3 - barn - flash_redacted.png",
+  "template_id": "finisher_room_3",
+  "template_name": "Finisher Room",
+  "ocr_engine": "llm-vision",
+  "warning_count": 3,
+  "metrics": null,
+  "pages": [
+    {
+      "page_number": 1,
+      "source_url": "",
+      "overlay_url": "",
+      "image_width": 3072,
+      "image_height": 4080,
+      "skew_angle": 0.0,
+      "columns": [
+        {
+          "index": 0,
+          "source_index": 0,
+          "key": "date",
+          "name": "Date",
+          "value_type": "date_dd_mon",
+          "format": "DD-Mon",
+          "range_min": null,
+          "range_max": null
+        },
+        {
+          "index": 1,
+          "source_index": 1,
+          "key": "current_temperature",
+          "name": "Current Temperature",
+          "value_type": "temperature",
+          "format": "TT.T",
+          "range_min": 50.0,
+          "range_max": 110.0
+        },
+        {
+          "index": 2,
+          "source_index": 2,
+          "key": "hi",
+          "name": "HI",
+          "value_type": "temperature",
+          "format": "TT.T",
+          "range_min": 50.0,
+          "range_max": 110.0
+        },
+        {
+          "index": 3,
+          "source_index": 3,
+          "key": "lo",
+          "name": "LO",
+          "value_type": "temperature",
+          "format": "TT.T",
+          "range_min": 50.0,
+          "range_max": 110.0
+        },
+        {
+          "index": 4,
+          "source_index": 5,
+          "key": "inventory_change",
+          "name": "Inventory +/-",
+          "value_type": "integer",
+          "format": null,
+          "range_min": null,
+          "range_max": null
+        },
+        {
+          "index": 5,
+          "source_index": 6,
+          "key": "inventory",
+          "name": "Inventory",
+          "value_type": "integer",
+          "format": null,
+          "range_min": null,
+          "range_max": null
+        },
+        {
+          "index": 6,
+          "source_index": 8,
+          "key": "alley_scraped",
+          "name": "Alley Scraped",
+          "value_type": "yes_no",
+          "format": "Y/N",
+          "range_min": null,
+          "range_max": null
+        },
+        {
+          "index": 7,
+          "source_index": 9,
+          "key": "scraper_ran",
+          "name": "Scraper Ran Y/N",
+          "value_type": "yes_no",
+          "format": "Y/N",
+          "range_min": null,
+          "range_max": null
+        },
+        {
+          "index": 8,
+          "source_index": 11,
+          "key": "comments",
+          "name": "Comments",
+          "value_type": "english_text",
+          "format": null,
+          "range_min": null,
+          "range_max": null
+        }
+      ],
+      "cells": [
+        {
+          "row": 1,
+          "column_index": 0,
+          "source_column_index": 0,
+          "column_key": "date",
+          "column_name": "Date",
+          "bbox": [
+            740,
+            612,
+            13,
+            89
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+          "validation_error": null,
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "unscored"
+        },
+        {
+          "row": 1,
+          "column_index": 1,
+          "source_column_index": 1,
+          "column_key": "current_temperature",
+          "column_name": "Current Temperature",
+          "bbox": [
+            757,
+            612,
+            14,
+            89
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+          "validation_error": "expected temperature pattern",
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "validation_warning"
+        },
+        {
+          "row": 1,
+          "column_index": 2,
+          "source_column_index": 2,
+          "column_key": "hi",
+          "column_name": "HI",
+          "bbox": [
+            775,
+            612,
+            13,
+            89
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+          "validation_error": "expected temperature pattern",
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "validation_warning"
+        },
+        {
+          "row": 1,
+          "column_index": 3,
+          "source_column_index": 3,
+          "column_key": "lo",
+          "column_name": "LO",
+          "bbox": [
+            792,
+            612,
+            13,
+            89
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"\",\"status\":\"illegible\"}\n```",
+          "validation_error": "expected temperature pattern",
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "validation_warning"
+        },
+        {
+          "row": 1,
+          "column_index": 4,
+          "source_column_index": 5,
+          "column_key": "inventory_change",
+          "column_name": "Inventory +/-",
+          "bbox": [
+            812,
+            612,
+            15,
+            89
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\": \"\", \"status\": \"blank\"}\n```",
+          "validation_error": null,
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "unscored"
+        },
+        {
+          "row": 1,
+          "column_index": 5,
+          "source_column_index": 6,
+          "column_key": "inventory",
+          "column_name": "Inventory",
+          "bbox": [
+            831,
+            612,
+            19,
+            89
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"\", \"status\":\"blank\"}\n```",
+          "validation_error": null,
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "unscored"
+        },
+        {
+          "row": 1,
+          "column_index": 6,
+          "source_column_index": 8,
+          "column_key": "alley_scraped",
+          "column_name": "Alley Scraped",
+          "bbox": [
+            857,
+            612,
+            18,
+            89
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"\",\"status\":\"blank\"}\n```",
+          "validation_error": null,
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "unscored"
+        },
+        {
+          "row": 1,
+          "column_index": 7,
+          "source_column_index": 9,
+          "column_key": "scraper_ran",
+          "column_name": "Scraper Ran Y/N",
+          "bbox": [
+            879,
+            612,
+            17,
+            89
+          ],
+          "ocr_text": "",
+          "reviewed_text": "",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\":\"\", \"status\":\"blank\"}\n```",
+          "validation_error": null,
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "unscored"
+        },
+        {
+          "row": 1,
+          "column_index": 8,
+          "source_column_index": 11,
+          "column_key": "comments",
+          "column_name": "Comments",
+          "bbox": [
+            903,
+            612,
+            132,
+            89
+          ],
+          "ocr_text": "60",
+          "reviewed_text": "60",
+          "was_edited": false,
+          "confidence": null,
+          "raw_text": "```json\n{\"text\": \"60\", \"status\": \"ok\"}\n```",
+          "validation_error": null,
+          "ground_truth_text": null,
+          "ground_truth_match": null,
+          "state": "unscored"
+        }
+      ],
+      "data_row_count": 1,
+      "warning_count": 3,
+      "metrics": null
+    }
+  ]
+}

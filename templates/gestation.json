@@ -1,0 +1,16 @@
+{
+  "id": "gestation",
+  "name": "Gestation",
+  "description": "Template for gestation daily farm log tables.",
+  "table": {"column_widths": [1.4,0.3, 1.7, 0.3, 20.1, 2.3, 0.3, 2.2], "uniform_row_height": false},
+  "columns": [
+    {"index": 0, "key": "date", "name": "Date", "value_type": "date_dd_mon", "format": "DD-Mon", "common_values": [], "filter_out": false},
+    {"index": 1, "key": "divider1", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 2, "key": "current_temperature", "name": "Current Temperature", "value_type": "temperature", "format": "TT.T", "range": {"min": 50.0, "max": 110.0}, "common_values": [], "filter_out": false},
+    {"index": 3, "key": "divider2", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 4, "key": "comments", "name": "Comments", "value_type": "english_text", "common_values": ["All good"], "filter_out": false},
+    {"index": 5, "key": "initials", "name": "Initials AM / PM", "value_type": "initials", "common_values": [], "filter_out": true},
+    {"index": 6, "key": "divider3", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 7, "key": "manager_initials", "name": "Mgr. Initials", "value_type": "initials", "common_values": [], "filter_out": true}
+  ]
+}

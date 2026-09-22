@@ -16,7 +16,14 @@ def typecheck(session: nox.Session) -> None:
     from the PATH of the currently-active environment. Ensure `mypy` is
     installed in your conda env before running `nox`.
     """
-    session.run("mypy", "src", "--config-file", "mypy.ini", external=True)
+    session.run(
+        "mypy",
+        "src",
+        "--config-file",
+        "mypy.ini",
+        "--no-sqlite-cache",
+        external=True,
+    )
 
 
 @nox.session(python="3.11")

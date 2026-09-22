@@ -5,6 +5,11 @@ scipy
 pandas
 scikit-image
 pytesseract
+pypdfium2
+streamlit
+fastapi
+uvicorn
+python-multipart
 jupyter
 nox
 mypy

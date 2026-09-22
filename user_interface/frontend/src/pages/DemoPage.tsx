@@ -1,0 +1,593 @@
+import {
+  Alert,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  LinearProgress,
+  Tooltip,
+} from '@mui/material'
+import {
+  BarChart3,
+  Download,
+  FileText,
+  Home,
+  RotateCcw,
+  Sparkles,
+  Upload,
+  X,
+} from 'lucide-react'
+import {
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent,
+} from 'react'
+import { Link } from 'react-router-dom'
+import { AnalysisPanel } from '../components/AnalysisPanel'
+import { AppHeader } from '../components/AppHeader'
+import { DocumentInboxTable } from '../components/DocumentInboxTable'
+import { OcrResultGrid } from '../components/OcrResultGrid'
+import { OverlayViewer } from '../components/OverlayViewer'
+import { createDemoResult } from '../demo/demoResult'
+import type { JobResult, ResultCell } from '../types/api'
+
+type DemoStep = 'upload' | 'inbox' | 'processing' | 'review'
+
+function formatSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function percent(value: number | null | undefined) {
+  return value == null ? 'No accuracy CSV provided' : `${(value * 100).toFixed(1)}%`
+}
+
+function hasAccuracy(value: number | null | undefined) {
+  return value != null
+}
+
+function updateCell(
+  data: JobResult,
+  pageNumber: number,
+  target: ResultCell,
+  value: string,
+): JobResult {
+  return {
+    ...data,
+    pages: data.pages.map((page) =>
+      page.page_number === pageNumber
+        ? {
+            ...page,
+            cells: page.cells.map((cell) =>
+              cell.row === target.row && cell.column_key === target.column_key
+                ? {
+                    ...cell,
+                    reviewed_text: value,
+                    was_edited: value !== cell.ocr_text,
+                  }
+                : cell,
+            ),
+          }
+        : page,
+    ),
+  }
+}
+
+function csvValue(value: string) {
+  return /[",\n\r]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value
+}
+
+function downloadCsv(data: JobResult) {
+  const page = data.pages[0]
+  const lines = [page.columns.map((column) => csvValue(column.name)).join(',')]
+  for (let row = 1; row <= page.data_row_count; row += 1) {
+    lines.push(
+      page.columns
+        .map((column) => {
+          const cell = page.cells.find(
+            (item) => item.row === row && item.column_key === column.key,
+          )
+          return csvValue(cell?.reviewed_text ?? '')
+        })
+        .join(','),
+    )
+  }
+  const blob = new Blob([`${lines.join('\n')}\n`], {
+    type: 'text/csv;charset=utf-8',
+  })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'farmai-demo-reviewed.csv'
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+export function DemoPage() {
+  const fileInput = useRef<HTMLInputElement>(null)
+  const [record, setRecord] = useState<File | null>(null)
+  const [dragActive, setDragActive] = useState(false)
+  const [step, setStep] = useState<DemoStep>('upload')
+  const [progress, setProgress] = useState(0)
+  const [uploadedAt, setUploadedAt] = useState<string | null>(null)
+  const [result, setResult] = useState<JobResult | null>(null)
+  const [demoError, setDemoError] = useState<string | null>(null)
+  const [selectedCell, setSelectedCell] = useState<ResultCell | null>(null)
+  const [needsReviewOnly, setNeedsReviewOnly] = useState(false)
+  const analysisRef = useRef<HTMLDivElement>(null)
+
+  const acceptFile = (file?: File) => {
+    if (!file) return
+    if (
+      file.type !== 'application/pdf' &&
+      !file.name.toLowerCase().endsWith('.pdf')
+    ) {
+      setDemoError('Choose a PDF to try the inbox workflow.')
+      return
+    }
+    setDemoError(null)
+    setRecord(file)
+  }
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setDragActive(false)
+    acceptFile(event.dataTransfer.files[0])
+  }
+
+  const startDemo = () => {
+    if (!record) return
+    setStep('processing')
+    setProgress(0)
+    setDemoError(null)
+    const started = Date.now()
+    const id = window.setInterval(() => {
+      const next = Math.min(100, Math.round(((Date.now() - started) / 2000) * 100))
+      setProgress(next)
+      if (next >= 100) {
+        window.clearInterval(id)
+        createDemoResult(record.name || 'boar-room-demo.jpg')
+          .then((demoResult) => {
+            setResult(demoResult)
+            setStep('review')
+          })
+          .catch((error: Error) => {
+            setDemoError(error.message)
+            setStep('upload')
+          })
+      }
+    }, 120)
+  }
+
+  const uploadToDemoInbox = () => {
+    if (!record) return
+    setDemoError(null)
+    setUploadedAt(new Date().toISOString())
+    setStep('inbox')
+  }
+
+  const page = result?.pages[0]
+  const reviewCount = useMemo(
+    () =>
+      page?.cells.filter(
+        (cell) =>
+          Boolean(cell.validation_error) || cell.ground_truth_match === false,
+      ).length ?? 0,
+    [page],
+  )
+
+  if (step === 'inbox' && record && uploadedAt) {
+    return (
+      <div className="app-shell">
+        <AppHeader backTo="/" />
+        <main className="page inbox-page">
+          <div className="page-heading">
+            <h1>Demo PDF inbox</h1>
+            <p>
+              The upload step is complete. Analysis still waits for a separate,
+              explicit action.
+            </p>
+          </div>
+
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Demo mode: this PDF was not sent to the server and does not affect
+            the real inbox counts.
+          </Alert>
+
+          <section className="inbox-counts" aria-label="Demo PDF inbox summary">
+            <div className="inbox-count">
+              <span className="inbox-count__label">Uploaded total</span>
+              <span className="inbox-count__value">1</span>
+              <span className="inbox-count__note">Demo only</span>
+            </div>
+            <div className="inbox-count">
+              <span className="inbox-count__label">Awaiting analysis</span>
+              <span className="inbox-count__value">1</span>
+              <span className="inbox-count__note">Ready when you are</span>
+            </div>
+            <div className="inbox-count">
+              <span className="inbox-count__label">Queued / running</span>
+              <span className="inbox-count__value">0</span>
+              <span className="inbox-count__note">No analysis yet</span>
+            </div>
+            <div className="inbox-count">
+              <span className="inbox-count__label">Completed</span>
+              <span className="inbox-count__value">0</span>
+              <span className="inbox-count__note">Ready after analysis</span>
+            </div>
+            <div className="inbox-count">
+              <span className="inbox-count__label">Failed</span>
+              <span className="inbox-count__value">0</span>
+              <span className="inbox-count__note">Needs attention</span>
+            </div>
+          </section>
+
+          <section
+            className="inbox-panel analysis-control"
+            aria-labelledby="demo-analyze-heading"
+          >
+            <div className="inbox-panel__heading">
+              <span className="step-number" aria-hidden="true">2</span>
+              <div>
+                <h2 id="demo-analyze-heading">Analyze awaiting PDFs</h2>
+                <p>
+                  In the real inbox, this creates an independent backend job for
+                  every PDF that is waiting.
+                </p>
+              </div>
+            </div>
+            <div className="analysis-control__body">
+              <div>
+                <span className="analysis-control__label">
+                  Settings for this demo batch
+                </span>
+                <strong>Boar Room</strong>
+                <span>Best handwriting recognition · saved result only</span>
+              </div>
+              <div className="analysis-control__actions">
+                <Button
+                  variant="outlined"
+                  startIcon={<RotateCcw size={17} />}
+                  onClick={() => {
+                    setStep('upload')
+                    setUploadedAt(null)
+                    setProgress(0)
+                  }}
+                >
+                  Start over
+                </Button>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<Sparkles size={18} />}
+                  onClick={startDemo}
+                >
+                  Analyze 1 awaiting PDF
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          <DocumentInboxTable
+            documents={[
+              {
+                document_id: 'demo-document',
+                filename: record.name,
+                status: 'pending',
+                size_bytes: record.size,
+                created_at: uploadedAt,
+                updated_at: uploadedAt,
+                latest_job_id: null,
+              },
+            ]}
+          />
+        </main>
+      </div>
+    )
+  }
+
+  if (step === 'processing') {
+    return (
+      <div className="app-shell">
+        <AppHeader backTo="/" />
+        <main className="page">
+          <div className="progress-layout">
+            <div className="page-heading">
+              <h1>Analyzing demo PDF</h1>
+              <p>
+                The PDF was already uploaded. FarmAI is now simulating the
+                separate analysis step with saved results.
+              </p>
+            </div>
+            <section className="progress-panel" aria-live="polite">
+              <p className="progress-file">{record?.name ?? 'Demo record'}</p>
+              <p className="progress-stage">
+                {progress < 35
+                  ? 'Finding the table'
+                  : progress < 82
+                    ? `Reading cells (${Math.round((progress / 100) * 40)} of 40)`
+                    : 'Preparing review'}
+              </p>
+              <LinearProgress
+                variant="determinate"
+                value={progress}
+                aria-label="Demo progress"
+                sx={{ height: 9, borderRadius: 1 }}
+              />
+              <div className="progress-meta">
+                <span>{progress}% of demo</span>
+                <span>About 2 seconds</span>
+              </div>
+              <div className="return-note">
+                This demo does not contact the server or handwriting service.
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (step === 'review' && result && page) {
+    return (
+      <div className="app-shell">
+        <AppHeader backTo="/" />
+        <main className="page review-page">
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Demo mode: these are saved sample results for the Boar Room template.
+          </Alert>
+          <div className="review-topbar">
+            <div className="review-title">
+              <h1>{result.filename}</h1>
+              <p>Boar Room | Best handwriting recognition</p>
+            </div>
+            <div className="review-actions">
+              <Button
+                component={Link}
+                to="/"
+                variant="outlined"
+                startIcon={<Home size={17} />}
+              >
+                Home
+              </Button>
+              <Tooltip title="Start demo again">
+                <IconButton
+                  aria-label="Start demo again"
+                  onClick={() => {
+                    setStep('upload')
+                    setProgress(0)
+                    setResult(null)
+                    setSelectedCell(null)
+                  }}
+                >
+                  <RotateCcw size={19} />
+                </IconButton>
+              </Tooltip>
+              <Button
+                variant="contained"
+                startIcon={<Download size={17} />}
+                onClick={() => downloadCsv(result)}
+              >
+                Download CSV
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<BarChart3 size={17} />}
+                onClick={() =>
+                  analysisRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                  })
+                }
+              >
+                Analysis
+              </Button>
+            </div>
+          </div>
+
+          <section className="metrics-band" aria-label="Result summary">
+            <div className="metric">
+              <span className="metric__label">Rows</span>
+              <span className="metric__value">{page.data_row_count}</span>
+            </div>
+            <div className="metric">
+              <span className="metric__label">Cells read</span>
+              <span className="metric__value">{page.cells.length}</span>
+            </div>
+            <div className="metric">
+              <span className="metric__label">Needs review</span>
+              <span className="metric__value">{reviewCount}</span>
+            </div>
+            <div className="metric">
+              <span className="metric__label">OCR accuracy</span>
+              <span
+                className={[
+                  'metric__value',
+                  hasAccuracy(
+                    result.metrics?.normalized_accuracy ??
+                      result.metrics?.exact_accuracy,
+                  )
+                    ? ''
+                    : 'metric__value--message',
+                ].join(' ')}
+              >
+                {percent(
+                  result.metrics?.normalized_accuracy ??
+                    result.metrics?.exact_accuracy,
+                )}
+              </span>
+            </div>
+          </section>
+
+          <div className="review-workspace">
+            <OverlayViewer
+              page={page}
+              selectedCell={selectedCell}
+              onSelectCell={setSelectedCell}
+            />
+            <section className="review-pane">
+              <div className="pane-toolbar">
+                <span className="pane-title">Extracted table</span>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={needsReviewOnly}
+                      onChange={(event) =>
+                        setNeedsReviewOnly(event.target.checked)
+                      }
+                    />
+                  }
+                  label="Needs review only"
+                />
+              </div>
+              <OcrResultGrid
+                page={page}
+                needsReviewOnly={needsReviewOnly}
+                selectedCell={selectedCell}
+                onSelectCell={setSelectedCell}
+                onEdit={(cell, value) => {
+                  setResult((current) =>
+                    current ? updateCell(current, page.page_number, cell, value) : current,
+                  )
+                }}
+              />
+            </section>
+          </div>
+          <div ref={analysisRef}>
+            <AnalysisPanel result={result} />
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  return (
+    <div className="app-shell">
+      <AppHeader backTo="/" />
+      <main className="page upload-page">
+        <div className="page-heading">
+          <h1>Try the two-step PDF workflow</h1>
+          <p>
+            Choose a PDF, upload it to a browser-only demo inbox, and then start
+            a simulated analysis using saved Boar Room results.
+          </p>
+        </div>
+
+        {demoError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {demoError}
+          </Alert>
+        )}
+
+        <div
+          className={[
+            'dropzone',
+            dragActive ? 'dropzone--active' : '',
+            record ? 'dropzone--selected' : '',
+          ].join(' ')}
+          role="button"
+          tabIndex={0}
+          onClick={() => fileInput.current?.click()}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              fileInput.current?.click()
+            }
+          }}
+          onDragEnter={(event) => {
+            event.preventDefault()
+            setDragActive(true)
+          }}
+          onDragOver={(event) => event.preventDefault()}
+          onDragLeave={() => setDragActive(false)}
+          onDrop={handleDrop}
+        >
+          <input
+            ref={fileInput}
+            hidden
+            type="file"
+            accept=".pdf,application/pdf"
+            onChange={(event) => acceptFile(event.target.files?.[0])}
+          />
+          {record ? (
+            <div className="selected-file">
+              <span className="selected-file__icon">
+                <FileText size={22} aria-hidden="true" />
+              </span>
+              <span>
+                <span className="selected-file__name">{record.name}</span>
+                <span className="selected-file__size">
+                  {formatSize(record.size)}
+                </span>
+              </span>
+              <Tooltip title="Remove file">
+                <IconButton
+                  aria-label="Remove selected file"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setRecord(null)
+                    if (fileInput.current) fileInput.current.value = ''
+                  }}
+                >
+                  <X size={20} />
+                </IconButton>
+              </Tooltip>
+            </div>
+          ) : (
+            <div className="dropzone__content">
+              <span className="dropzone__icon">
+                <Upload size={24} aria-hidden="true" />
+              </span>
+              <p className="dropzone__title">Drop a PDF here</p>
+              <p className="dropzone__hint">
+                or click to choose a scanned PDF
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="settings-summary">
+          Step 1 only stores the PDF. No backend, OCR, or AI is used in demo mode.
+        </div>
+
+        <div className="upload-actions">
+          <Button
+            component={Link}
+            to="/"
+            variant="outlined"
+            size="large"
+            startIcon={<Home size={19} />}
+            sx={{ minHeight: 48 }}
+          >
+            Back home
+          </Button>
+          <Button
+            variant="outlined"
+            size="large"
+            startIcon={<FileText size={19} />}
+            onClick={() => {
+              setDemoError(null)
+              setRecord(
+                new File(['FarmAI demo PDF'], 'boar-room-demo.pdf', {
+                  type: 'application/pdf',
+                }),
+              )
+            }}
+            sx={{ minHeight: 48 }}
+          >
+            Use sample PDF
+          </Button>
+          <Button
+            variant="contained"
+            size="large"
+            disabled={!record}
+            onClick={uploadToDemoInbox}
+            sx={{ minWidth: 160, minHeight: 48 }}
+          >
+            Upload to demo inbox
+          </Button>
+        </div>
+      </main>
+    </div>
+  )
+}

@@ -5,6 +5,7 @@ import unittest
 
 import cv2
 import numpy as np
+from unittest.mock import patch
 
 from src.core.image import DocumentImage
 from src.preprocessing.skew import SkewCorrectionStage
@@ -88,6 +89,33 @@ class TestSkewStage(unittest.TestCase):
         # vertical-only lines should be ignored by angle filter and return deskewed False
         self.assertFalse(result.metadata.get("deskewed"))
         self.assertEqual(result.metadata.get("skew_angle"), 0.0)
+
+    def test_steep_cell_marks_do_not_outvote_horizontal_table_lines(self) -> None:
+        img = np.full((500, 800), 255, dtype=np.uint8)
+        for y in range(50, 451, 50):
+            cv2.line(img, (25, y), (775, y), color=0, thickness=2)
+        for offset in range(20):
+            start_x = 50 + offset * 20
+            cv2.line(
+                img,
+                (start_x, 400),
+                (start_x + 300, 100),
+                color=0,
+                thickness=2,
+            )
+
+        stage = SkewCorrectionStage(hough_threshold=20)
+
+        self.assertAlmostEqual(stage.estimate_angle(img), 0.0, delta=0.5)
+
+    def test_estimate_angle_accepts_flat_hough_line_array(self) -> None:
+        img = np.full((100, 200), 255, dtype=np.uint8)
+        lines = np.array([[10, 20, 190, 29], [10, 50, 190, 59]], dtype=np.int32)
+
+        with patch("src.preprocessing.skew.cv2.HoughLinesP", return_value=lines):
+            detected = self.stage.estimate_angle(img)
+
+        self.assertAlmostEqual(detected, 2.86, delta=0.1)
 
 
 if __name__ == "__main__":

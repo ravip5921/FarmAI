@@ -1,0 +1,10 @@
+[
+  {
+    "image": "examples\\redacted\\Finisher room 3_p1_redacted.png",
+    "error": "[WinError 10054] An existing connection was forcibly closed by the remote host"
+  },
+  {
+    "image": "examples\\redacted\\sample_01_redacted.png",
+    "error": "No matching template."
+  }
+]

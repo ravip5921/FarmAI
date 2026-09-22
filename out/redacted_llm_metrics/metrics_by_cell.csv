@@ -1,0 +1,725 @@
+result_file,template_id,row_number,column_key,column_name,value_type,ocr_value,ground_truth_value,exact_match,normalized_match
+Boar - barn - flash_boar_room_llm.csv,boar_room,1,date,Date,date_dd_mon,,01-May,False,False
+Boar - barn - flash_boar_room_llm.csv,boar_room,1,current_temperature,Current Temperature,temperature,,67,False,False
+Boar - barn - flash_boar_room_llm.csv,boar_room,1,hi,HI,temperature,83,69.5,False,False
+Boar - barn - flash_boar_room_llm.csv,boar_room,1,lo,LO,temperature,,65.8,False,False
+Boar - barn - flash_boar_room_llm.csv,boar_room,1,comments,Comments,english_text,68.3 69.5,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,1,date,Date,date_dd_mon,,01-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,2,date,Date,date_dd_mon,,02-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,3,date,Date,date_dd_mon,,03-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,4,date,Date,date_dd_mon,,04-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,5,date,Date,date_dd_mon,,05-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,6,date,Date,date_dd_mon,,06-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,7,date,Date,date_dd_mon,,07-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,8,date,Date,date_dd_mon,,08-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,9,date,Date,date_dd_mon,,09-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,10,date,Date,date_dd_mon,,10-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,11,date,Date,date_dd_mon,,11-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,12,date,Date,date_dd_mon,,12-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,13,date,Date,date_dd_mon,,13-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,14,date,Date,date_dd_mon,,14-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,15,date,Date,date_dd_mon,,15-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,16,date,Date,date_dd_mon,,16-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,17,date,Date,date_dd_mon,,17-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,18,date,Date,date_dd_mon,,18-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,19,date,Date,date_dd_mon,,19-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,20,date,Date,date_dd_mon,,20-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,21,date,Date,date_dd_mon,,21-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,22,date,Date,date_dd_mon,,22-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,23,date,Date,date_dd_mon,,23-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,24,date,Date,date_dd_mon,,24-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,25,date,Date,date_dd_mon,,25-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,26,date,Date,date_dd_mon,,26-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,27,date,Date,date_dd_mon,,27-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,28,date,Date,date_dd_mon,,28-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,29,date,Date,date_dd_mon,,29-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,30,date,Date,date_dd_mon,,30-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,31,date,Date,date_dd_mon,,31-May,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,32,date,Date,date_dd_mon,,01-Jun,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,1,current_temperature,Current Temperature,temperature,,67,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,2,current_temperature,Current Temperature,temperature,,68.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,3,current_temperature,Current Temperature,temperature,,62.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,4,current_temperature,Current Temperature,temperature,,66.7,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,5,current_temperature,Current Temperature,temperature,,68.1,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,6,current_temperature,Current Temperature,temperature,,66.9,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,7,current_temperature,Current Temperature,temperature,,66.9,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,8,current_temperature,Current Temperature,temperature,,67.9,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,9,current_temperature,Current Temperature,temperature,,68.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,10,current_temperature,Current Temperature,temperature,,68.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,11,current_temperature,Current Temperature,temperature,,67.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,12,current_temperature,Current Temperature,temperature,,66.4,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,13,current_temperature,Current Temperature,temperature,,69.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,14,current_temperature,Current Temperature,temperature,,68.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,15,current_temperature,Current Temperature,temperature,,67.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,16,current_temperature,Current Temperature,temperature,,69,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,17,current_temperature,Current Temperature,temperature,,68.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,18,current_temperature,Current Temperature,temperature,,66.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,19,current_temperature,Current Temperature,temperature,,68.2,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,20,current_temperature,Current Temperature,temperature,,67.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,21,current_temperature,Current Temperature,temperature,,69.1,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,22,current_temperature,Current Temperature,temperature,,68.7,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,23,current_temperature,Current Temperature,temperature,,66.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,24,current_temperature,Current Temperature,temperature,,68.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,25,current_temperature,Current Temperature,temperature,,67.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,26,current_temperature,Current Temperature,temperature,,67.9,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,27,current_temperature,Current Temperature,temperature,,68.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,28,current_temperature,Current Temperature,temperature,,64.2,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,29,current_temperature,Current Temperature,temperature,,64.7,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,30,current_temperature,Current Temperature,temperature,,66.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,31,current_temperature,Current Temperature,temperature,,66.7,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,32,current_temperature,Current Temperature,temperature,,64.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,1,hi,HI,temperature,,69.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,2,hi,HI,temperature,,73.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,3,hi,HI,temperature,,69.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,4,hi,HI,temperature,,69.2,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,5,hi,HI,temperature,,69.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,6,hi,HI,temperature,,74.1,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,7,hi,HI,temperature,,69.2,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,8,hi,HI,temperature,,78.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,9,hi,HI,temperature,,69.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,10,hi,HI,temperature,,69.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,11,hi,HI,temperature,,78.4,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,12,hi,HI,temperature,,72,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,13,hi,HI,temperature,,80.6,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,14,hi,HI,temperature,,73.7,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,15,hi,HI,temperature,,77.2,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,16,hi,HI,temperature,,83.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,17,hi,HI,temperature,,83.6,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,18,hi,HI,temperature,,69,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,19,hi,HI,temperature,,69,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,20,hi,HI,temperature,,69.2,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,21,hi,HI,temperature,,69.1,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,22,hi,HI,temperature,,69.2,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,23,hi,HI,temperature,,69.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,24,hi,HI,temperature,,69.2,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,25,hi,HI,temperature,,70.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,26,hi,HI,temperature,,74,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,27,hi,HI,temperature,,77.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,28,hi,HI,temperature,,73.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,29,hi,HI,temperature,,69.1,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,30,hi,HI,temperature,,71.6,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,31,hi,HI,temperature,,72.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,32,hi,HI,temperature,,69.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,1,lo,LO,temperature,,65.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,2,lo,LO,temperature,,66.1,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,3,lo,LO,temperature,,59.9,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,4,lo,LO,temperature,,63.1,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,5,lo,LO,temperature,,66,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,6,lo,LO,temperature,,66.2,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,7,lo,LO,temperature,,66.1,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,8,lo,LO,temperature,,65.9,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,9,lo,LO,temperature,,65.1,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,10,lo,LO,temperature,,65.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,11,lo,LO,temperature,,66,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,12,lo,LO,temperature,,66,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,13,lo,LO,temperature,,66.4,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,14,lo,LO,temperature,,67.5,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,15,lo,LO,temperature,,66.6,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,16,lo,LO,temperature,,67.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,17,lo,LO,temperature,,68.1,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,18,lo,LO,temperature,,66.2,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,19,lo,LO,temperature,,65.9,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,20,lo,LO,temperature,,65.7,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,21,lo,LO,temperature,,66,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,22,lo,LO,temperature,84,66,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,23,lo,LO,temperature,,65.6,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,24,lo,LO,temperature,,65.7,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,25,lo,LO,temperature,,65.6,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,26,lo,LO,temperature,,66,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,27,lo,LO,temperature,,66.3,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,28,lo,LO,temperature,,63.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,29,lo,LO,temperature,,64,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,30,lo,LO,temperature,,63.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,31,lo,LO,temperature,,63.8,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,32,lo,LO,temperature,,63.4,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,1,comments,Comments,english_text,,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,2,comments,Comments,english_text,OB 3 73.3(,All good                Get Dreamboat up everyday,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,3,comments,Comments,english_text,62.869.5,All good                heater turned off,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,4,comments,Comments,english_text,66.7,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,5,comments,Comments,english_text,68.1 69.8,All good                dreamboat not getting up,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,6,comments,Comments,english_text,"669 74,1 60",All good                out of Boar Pac,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,7,comments,Comments,english_text,66.9 69.26,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,8,comments,Comments,english_text,67.9 785 6,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,9,comments,Comments,english_text,"68,3 69.5",All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,10,comments,Comments,english_text,,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,11,comments,Comments,english_text,67.8,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,12,comments,Comments,english_text,"66.4 72,0 6",All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,13,comments,Comments,english_text,69.5 80.60d,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,14,comments,Comments,english_text,68.3 73.7v,All good                Cull boar box is off,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,15,comments,Comments,english_text,67.3 772,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,16,comments,Comments,english_text,69.0 83.8 6,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,17,comments,Comments,english_text,68.3 83.6 4,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,18,comments,Comments,english_text,665 69.0,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,19,comments,Comments,english_text,68.2 69.0 6,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,20,comments,Comments,english_text,07.St09.26,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,21,comments,Comments,english_text,69.1 69.1 6,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,22,comments,Comments,english_text,68.7 69.2 6,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,23,comments,Comments,english_text,64.3 69.5,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,24,comments,Comments,english_text,68.8,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,25,comments,Comments,english_text,,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,26,comments,Comments,english_text,67.9 74.0,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,27,comments,Comments,english_text,,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,28,comments,Comments,english_text,642 733 6,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,29,comments,Comments,english_text,6d 7 l9 J,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,30,comments,Comments,english_text,66.5 71.6,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,31,comments,Comments,english_text,66.7,All good,False,False
+Boar room_p1_boar_room_llm.csv,boar_room,32,comments,Comments,english_text,Gov x 698,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,1,date,Date,date_dd_mon,,01-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,2,date,Date,date_dd_mon,,02-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,3,date,Date,date_dd_mon,,03-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,4,date,Date,date_dd_mon,,04-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,5,date,Date,date_dd_mon,,05-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,6,date,Date,date_dd_mon,,06-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,7,date,Date,date_dd_mon,,07-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,8,date,Date,date_dd_mon,,08-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,9,date,Date,date_dd_mon,,09-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,10,date,Date,date_dd_mon,,10-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,11,date,Date,date_dd_mon,,11-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,12,date,Date,date_dd_mon,,12-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,13,date,Date,date_dd_mon,,13-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,14,date,Date,date_dd_mon,,14-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,15,date,Date,date_dd_mon,,15-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,16,date,Date,date_dd_mon,,16-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,17,date,Date,date_dd_mon,31-Jan,17-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,18,date,Date,date_dd_mon,,18-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,19,date,Date,date_dd_mon,,19-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,20,date,Date,date_dd_mon,,20-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,21,date,Date,date_dd_mon,,21-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,22,date,Date,date_dd_mon,,22-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,23,date,Date,date_dd_mon,,23-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,24,date,Date,date_dd_mon,,24-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,25,date,Date,date_dd_mon,,25-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,26,date,Date,date_dd_mon,,26-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,27,date,Date,date_dd_mon,,27-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,28,date,Date,date_dd_mon,,28-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,29,date,Date,date_dd_mon,,29-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,30,date,Date,date_dd_mon,,30-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,31,date,Date,date_dd_mon,,31-May,False,False
+Breeding_p1_breeding_llm.csv,breeding,32,date,Date,date_dd_mon,,01-Jun,False,False
+Breeding_p1_breeding_llm.csv,breeding,1,current_temperature,Current Temperature,temperature,,65.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,2,current_temperature,Current Temperature,temperature,,66.4,False,False
+Breeding_p1_breeding_llm.csv,breeding,3,current_temperature,Current Temperature,temperature,80,67.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,4,current_temperature,Current Temperature,temperature,,67,False,False
+Breeding_p1_breeding_llm.csv,breeding,5,current_temperature,Current Temperature,temperature,,68.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,6,current_temperature,Current Temperature,temperature,,67.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,7,current_temperature,Current Temperature,temperature,97,69.1,False,False
+Breeding_p1_breeding_llm.csv,breeding,8,current_temperature,Current Temperature,temperature,,65,False,False
+Breeding_p1_breeding_llm.csv,breeding,9,current_temperature,Current Temperature,temperature,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,10,current_temperature,Current Temperature,temperature,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,11,current_temperature,Current Temperature,temperature,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,12,current_temperature,Current Temperature,temperature,,80.4,False,False
+Breeding_p1_breeding_llm.csv,breeding,13,current_temperature,Current Temperature,temperature,,69.2,False,False
+Breeding_p1_breeding_llm.csv,breeding,14,current_temperature,Current Temperature,temperature,,69.8,False,False
+Breeding_p1_breeding_llm.csv,breeding,15,current_temperature,Current Temperature,temperature,,69.2,False,False
+Breeding_p1_breeding_llm.csv,breeding,16,current_temperature,Current Temperature,temperature,,70.1,False,False
+Breeding_p1_breeding_llm.csv,breeding,17,current_temperature,Current Temperature,temperature,,69.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,18,current_temperature,Current Temperature,temperature,,68.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,19,current_temperature,Current Temperature,temperature,,66.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,20,current_temperature,Current Temperature,temperature,,65.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,21,current_temperature,Current Temperature,temperature,,65.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,22,current_temperature,Current Temperature,temperature,,65.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,23,current_temperature,Current Temperature,temperature,,66.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,24,current_temperature,Current Temperature,temperature,,67.5,False,False
+Breeding_p1_breeding_llm.csv,breeding,25,current_temperature,Current Temperature,temperature,,67.4,False,False
+Breeding_p1_breeding_llm.csv,breeding,26,current_temperature,Current Temperature,temperature,,67.5,False,False
+Breeding_p1_breeding_llm.csv,breeding,27,current_temperature,Current Temperature,temperature,,68.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,28,current_temperature,Current Temperature,temperature,,66.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,29,current_temperature,Current Temperature,temperature,,68.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,30,current_temperature,Current Temperature,temperature,,67.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,31,current_temperature,Current Temperature,temperature,,65.8,False,False
+Breeding_p1_breeding_llm.csv,breeding,32,current_temperature,Current Temperature,temperature,,64,False,False
+Breeding_p1_breeding_llm.csv,breeding,1,hi,HI,temperature,,69.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,2,hi,HI,temperature,,74.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,3,hi,HI,temperature,,69.4,False,False
+Breeding_p1_breeding_llm.csv,breeding,4,hi,HI,temperature,,69.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,5,hi,HI,temperature,,69.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,6,hi,HI,temperature,,77.8,False,False
+Breeding_p1_breeding_llm.csv,breeding,7,hi,HI,temperature,,69.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,8,hi,HI,temperature,,80.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,9,hi,HI,temperature,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,10,hi,HI,temperature,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,11,hi,HI,temperature,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,12,hi,HI,temperature,,80.5,False,False
+Breeding_p1_breeding_llm.csv,breeding,13,hi,HI,temperature,,81.9,False,False
+Breeding_p1_breeding_llm.csv,breeding,14,hi,HI,temperature,,73.1,False,False
+Breeding_p1_breeding_llm.csv,breeding,15,hi,HI,temperature,,78.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,16,hi,HI,temperature,,85.2,False,False
+Breeding_p1_breeding_llm.csv,breeding,17,hi,HI,temperature,,81.1,False,False
+Breeding_p1_breeding_llm.csv,breeding,18,hi,HI,temperature,,70.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,19,hi,HI,temperature,,70.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,20,hi,HI,temperature,,70.1,False,False
+Breeding_p1_breeding_llm.csv,breeding,21,hi,HI,temperature,,69.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,22,hi,HI,temperature,,67,False,False
+Breeding_p1_breeding_llm.csv,breeding,23,hi,HI,temperature,,69.8,False,False
+Breeding_p1_breeding_llm.csv,breeding,24,hi,HI,temperature,,69.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,25,hi,HI,temperature,,75.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,26,hi,HI,temperature,,77.5,False,False
+Breeding_p1_breeding_llm.csv,breeding,27,hi,HI,temperature,,80.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,28,hi,HI,temperature,,74.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,29,hi,HI,temperature,,72.4,False,False
+Breeding_p1_breeding_llm.csv,breeding,30,hi,HI,temperature,,74,False,False
+Breeding_p1_breeding_llm.csv,breeding,31,hi,HI,temperature,,79.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,32,hi,HI,temperature,,70.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,1,lo,LO,temperature,,65.4,False,False
+Breeding_p1_breeding_llm.csv,breeding,2,lo,LO,temperature,,65.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,3,lo,LO,temperature,,65.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,4,lo,LO,temperature,,65.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,5,lo,LO,temperature,,65.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,6,lo,LO,temperature,64,65.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,7,lo,LO,temperature,,65.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,8,lo,LO,temperature,,65,False,False
+Breeding_p1_breeding_llm.csv,breeding,9,lo,LO,temperature,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,10,lo,LO,temperature,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,11,lo,LO,temperature,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,12,lo,LO,temperature,,64.5,False,False
+Breeding_p1_breeding_llm.csv,breeding,13,lo,LO,temperature,,69,False,False
+Breeding_p1_breeding_llm.csv,breeding,14,lo,LO,temperature,68,68.4,False,False
+Breeding_p1_breeding_llm.csv,breeding,15,lo,LO,temperature,,69.2,False,False
+Breeding_p1_breeding_llm.csv,breeding,16,lo,LO,temperature,,69.1,False,False
+Breeding_p1_breeding_llm.csv,breeding,17,lo,LO,temperature,76,69.1,False,False
+Breeding_p1_breeding_llm.csv,breeding,18,lo,LO,temperature,74,66.5,False,False
+Breeding_p1_breeding_llm.csv,breeding,19,lo,LO,temperature,,63.9,False,False
+Breeding_p1_breeding_llm.csv,breeding,20,lo,LO,temperature,,64.5,False,False
+Breeding_p1_breeding_llm.csv,breeding,21,lo,LO,temperature,80,62.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,22,lo,LO,temperature,,61.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,23,lo,LO,temperature,,64.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,24,lo,LO,temperature,,64,False,False
+Breeding_p1_breeding_llm.csv,breeding,25,lo,LO,temperature,,64.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,26,lo,LO,temperature,,64.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,27,lo,LO,temperature,,64.2,False,False
+Breeding_p1_breeding_llm.csv,breeding,28,lo,LO,temperature,,64.1,False,False
+Breeding_p1_breeding_llm.csv,breeding,29,lo,LO,temperature,,64.3,False,False
+Breeding_p1_breeding_llm.csv,breeding,30,lo,LO,temperature,,64.6,False,False
+Breeding_p1_breeding_llm.csv,breeding,31,lo,LO,temperature,,63.8,False,False
+Breeding_p1_breeding_llm.csv,breeding,32,lo,LO,temperature,,63.7,False,False
+Breeding_p1_breeding_llm.csv,breeding,1,comments,Comments,english_text,Visit 9.3,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,2,comments,Comments,english_text,74.3,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,3,comments,Comments,english_text,677 69.4 6,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,4,comments,Comments,english_text,670 64.369,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,5,comments,Comments,english_text,108.6 109.3 6,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,6,comments,Comments,english_text,67.7 72.8 6,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,7,comments,Comments,english_text,69.169.36,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,8,comments,Comments,english_text,65.0 80.3 6,All good             emptied,False,False
+Breeding_p1_breeding_llm.csv,breeding,9,comments,Comments,english_text,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,10,comments,Comments,english_text,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,11,comments,Comments,english_text,,,True,True
+Breeding_p1_breeding_llm.csv,breeding,12,comments,Comments,english_text,80.4 80.5,"All good        wean  noon                            pm drop all
+                                 drop CJR                                  CJR",False,False
+Breeding_p1_breeding_llm.csv,breeding,13,comments,Comments,english_text,69.2 81.9 6,"All good        drop all               lunch All     P.m. All
+                                 am KT                                BS               CH",False,False
+Breeding_p1_breeding_llm.csv,breeding,14,comments,Comments,english_text,64.8 73.1,"All good        RK 4 standing-5          lunch 26/39 Drop    Pm All BS
+                             by recr Drop Am BS                  CJR",False,False
+Breeding_p1_breeding_llm.csv,breeding,15,comments,Comments,english_text,62 78.7,"All good        AM drop          lunch 27/39 Drop    Pm All CH
+                             all KT                        CJR",False,False
+Breeding_p1_breeding_llm.csv,breeding,16,comments,Comments,english_text,70.1 85.2%,"All good        27/39 Drop All         30/39 Drop Lunch   Pm All
+                             CJR                                      BS/CJR                               CJR",False,False
+Breeding_p1_breeding_llm.csv,breeding,17,comments,Comments,english_text,,"All good        am drop                  noon           Reset___________
+                             -11 KT                    drop all KT",False,False
+Breeding_p1_breeding_llm.csv,breeding,18,comments,Comments,english_text,186 703,"All good        Am BS
+                              dropped all",False,False
+Breeding_p1_breeding_llm.csv,breeding,19,comments,Comments,english_text,vol 3 p 7,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,20,comments,Comments,english_text,65.7 70.1 6,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,21,comments,Comments,english_text,65.6 69.3 6,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,22,comments,Comments,english_text,65.7 620,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,23,comments,Comments,english_text,6610 1985 6,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,24,comments,Comments,english_text,67.5 69.7 6,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,25,comments,Comments,english_text,67.4 75.7,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,26,comments,Comments,english_text,67.5 77.5,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,27,comments,Comments,english_text,686 806 6,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,28,comments,Comments,english_text,U63 743 L,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,29,comments,Comments,english_text,68 6 724 6,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,30,comments,Comments,english_text,67.6 74.0 6,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,31,comments,Comments,english_text,,All good,False,False
+Breeding_p1_breeding_llm.csv,breeding,32,comments,Comments,english_text,Ok,All good,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,1,date,Date,date_dd_mon,75,01-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,2,date,Date,date_dd_mon,24,02-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,3,date,Date,date_dd_mon,72,03-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,4,date,Date,date_dd_mon,,04-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,5,date,Date,date_dd_mon,79,05-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,6,date,Date,date_dd_mon,73,06-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,7,date,Date,date_dd_mon,60,07-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,8,date,Date,date_dd_mon,23-Nov,08-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,9,date,Date,date_dd_mon,79,09-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,10,date,Date,date_dd_mon,,10-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,11,date,Date,date_dd_mon,,11-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,12,date,Date,date_dd_mon,,12-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,13,date,Date,date_dd_mon,10,13-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,14,date,Date,date_dd_mon,,14-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,15,date,Date,date_dd_mon,,15-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,16,date,Date,date_dd_mon,,16-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,17,date,Date,date_dd_mon,,17-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,18,date,Date,date_dd_mon,,18-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,19,date,Date,date_dd_mon,,19-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,20,date,Date,date_dd_mon,,20-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,21,date,Date,date_dd_mon,78,21-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,22,date,Date,date_dd_mon,29,22-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,23,date,Date,date_dd_mon,,23-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,24,date,Date,date_dd_mon,,24-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,25,date,Date,date_dd_mon,,25-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,26,date,Date,date_dd_mon,,26-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,27,date,Date,date_dd_mon,17,27-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,28,date,Date,date_dd_mon,27,28-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,29,date,Date,date_dd_mon,,29-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,30,date,Date,date_dd_mon,77,30-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,31,date,Date,date_dd_mon,16,31-May,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,32,date,Date,date_dd_mon,15,01-Jun,False,False
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,1,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,2,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,3,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,4,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,5,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,6,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,7,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,8,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,9,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,10,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,11,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,12,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,13,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,14,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,15,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,16,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,17,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,18,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,19,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,20,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,21,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,22,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,23,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,24,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,25,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,26,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,27,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,28,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,29,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,30,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,31,comments,Comments,english_text,,,True,True
+Farrowing room 4_p1_farrowing_room_4_llm.csv,farrowing_room_4,32,comments,Comments,english_text,,,True,True
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,1,date,Date,date_dd_mon,,01-May,False,False
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,1,current_temperature,Current Temperature,temperature,,68.9,False,False
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,1,hi,HI,temperature,,70,False,False
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,1,lo,LO,temperature,,67.1,False,False
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,1,inventory,Inventory,integer,,"75
+                   66",False,False
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,1,alley_scraped,Alley Scraped,yes_no,,Y,False,False
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,1,scraper_ran,Scraper Ran Y/N,yes_no,,Y,False,False
+Finisher 3 - barn - flash_finisher_room_3_llm.csv,finisher_room_3,1,comments,Comments,english_text,60,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,1,date,Date,date_dd_mon,,01-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,2,date,Date,date_dd_mon,,02-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,3,date,Date,date_dd_mon,,03-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,4,date,Date,date_dd_mon,,04-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,5,date,Date,date_dd_mon,,05-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,6,date,Date,date_dd_mon,,06-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,7,date,Date,date_dd_mon,,07-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,8,date,Date,date_dd_mon,,08-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,9,date,Date,date_dd_mon,,09-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,10,date,Date,date_dd_mon,,10-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,11,date,Date,date_dd_mon,,11-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,12,date,Date,date_dd_mon,,12-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,13,date,Date,date_dd_mon,,13-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,14,date,Date,date_dd_mon,,14-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,15,date,Date,date_dd_mon,,15-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,16,date,Date,date_dd_mon,,16-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,17,date,Date,date_dd_mon,,17-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,18,date,Date,date_dd_mon,,18-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,19,date,Date,date_dd_mon,,19-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,20,date,Date,date_dd_mon,,20-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,21,date,Date,date_dd_mon,,21-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,22,date,Date,date_dd_mon,,22-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,23,date,Date,date_dd_mon,,23-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,24,date,Date,date_dd_mon,,24-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,25,date,Date,date_dd_mon,,25-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,26,date,Date,date_dd_mon,,26-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,27,date,Date,date_dd_mon,,27-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,28,date,Date,date_dd_mon,,28-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,29,date,Date,date_dd_mon,,29-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,30,date,Date,date_dd_mon,,30-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,31,date,Date,date_dd_mon,,31-May,False,False
+Gestation_p1_gestation_llm.csv,gestation,1,current_temperature,Current Temperature,temperature,,66.8,False,False
+Gestation_p1_gestation_llm.csv,gestation,2,current_temperature,Current Temperature,temperature,,65.8,False,False
+Gestation_p1_gestation_llm.csv,gestation,3,current_temperature,Current Temperature,temperature,,66.5,False,False
+Gestation_p1_gestation_llm.csv,gestation,4,current_temperature,Current Temperature,temperature,,65.5,False,False
+Gestation_p1_gestation_llm.csv,gestation,5,current_temperature,Current Temperature,temperature,,65.8,False,False
+Gestation_p1_gestation_llm.csv,gestation,6,current_temperature,Current Temperature,temperature,,65.6,False,False
+Gestation_p1_gestation_llm.csv,gestation,7,current_temperature,Current Temperature,temperature,,65.6,False,False
+Gestation_p1_gestation_llm.csv,gestation,8,current_temperature,Current Temperature,temperature,,67.2,False,False
+Gestation_p1_gestation_llm.csv,gestation,9,current_temperature,Current Temperature,temperature,,67.6,False,False
+Gestation_p1_gestation_llm.csv,gestation,10,current_temperature,Current Temperature,temperature,,66.5,False,False
+Gestation_p1_gestation_llm.csv,gestation,11,current_temperature,Current Temperature,temperature,,67.7,False,False
+Gestation_p1_gestation_llm.csv,gestation,12,current_temperature,Current Temperature,temperature,,67.9,False,False
+Gestation_p1_gestation_llm.csv,gestation,13,current_temperature,Current Temperature,temperature,,68.5,False,False
+Gestation_p1_gestation_llm.csv,gestation,14,current_temperature,Current Temperature,temperature,,68,False,False
+Gestation_p1_gestation_llm.csv,gestation,15,current_temperature,Current Temperature,temperature,,69.1,False,False
+Gestation_p1_gestation_llm.csv,gestation,16,current_temperature,Current Temperature,temperature,,68,False,False
+Gestation_p1_gestation_llm.csv,gestation,17,current_temperature,Current Temperature,temperature,,69.6,False,False
+Gestation_p1_gestation_llm.csv,gestation,18,current_temperature,Current Temperature,temperature,,69.6,False,False
+Gestation_p1_gestation_llm.csv,gestation,19,current_temperature,Current Temperature,temperature,,68.2,False,False
+Gestation_p1_gestation_llm.csv,gestation,20,current_temperature,Current Temperature,temperature,,65.9,False,False
+Gestation_p1_gestation_llm.csv,gestation,21,current_temperature,Current Temperature,temperature,,68.8,False,False
+Gestation_p1_gestation_llm.csv,gestation,22,current_temperature,Current Temperature,temperature,,65.9,False,False
+Gestation_p1_gestation_llm.csv,gestation,23,current_temperature,Current Temperature,temperature,,66.8,False,False
+Gestation_p1_gestation_llm.csv,gestation,24,current_temperature,Current Temperature,temperature,,66.5,False,False
+Gestation_p1_gestation_llm.csv,gestation,25,current_temperature,Current Temperature,temperature,,65.7,False,False
+Gestation_p1_gestation_llm.csv,gestation,26,current_temperature,Current Temperature,temperature,,65.7,False,False
+Gestation_p1_gestation_llm.csv,gestation,27,current_temperature,Current Temperature,temperature,,66.4,False,False
+Gestation_p1_gestation_llm.csv,gestation,28,current_temperature,Current Temperature,temperature,,67.8,False,False
+Gestation_p1_gestation_llm.csv,gestation,29,current_temperature,Current Temperature,temperature,,67.6,False,False
+Gestation_p1_gestation_llm.csv,gestation,30,current_temperature,Current Temperature,temperature,,66,False,False
+Gestation_p1_gestation_llm.csv,gestation,31,current_temperature,Current Temperature,temperature,,66,False,False
+Gestation_p1_gestation_llm.csv,gestation,1,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,2,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,3,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,4,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,5,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,6,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,7,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,8,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,9,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,10,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,11,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,12,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,13,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,14,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,15,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,16,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,17,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,18,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,19,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,20,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,21,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,22,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,23,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,24,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,25,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,26,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,27,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,28,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,29,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,30,comments,Comments,english_text,,All good,False,False
+Gestation_p1_gestation_llm.csv,gestation,31,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,1,date,Date,date_dd_mon,,01-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,2,date,Date,date_dd_mon,,02-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,3,date,Date,date_dd_mon,,03-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,4,date,Date,date_dd_mon,,04-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,5,date,Date,date_dd_mon,,05-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,6,date,Date,date_dd_mon,,06-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,7,date,Date,date_dd_mon,,07-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,8,date,Date,date_dd_mon,,08-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,9,date,Date,date_dd_mon,,09-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,10,date,Date,date_dd_mon,,10-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,11,date,Date,date_dd_mon,,11-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,12,date,Date,date_dd_mon,,12-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,13,date,Date,date_dd_mon,,13-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,14,date,Date,date_dd_mon,,14-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,15,date,Date,date_dd_mon,,15-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,16,date,Date,date_dd_mon,,16-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,17,date,Date,date_dd_mon,,17-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,18,date,Date,date_dd_mon,,18-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,19,date,Date,date_dd_mon,,19-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,20,date,Date,date_dd_mon,,20-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,21,date,Date,date_dd_mon,,21-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,22,date,Date,date_dd_mon,,22-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,23,date,Date,date_dd_mon,,23-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,24,date,Date,date_dd_mon,,24-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,25,date,Date,date_dd_mon,,25-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,26,date,Date,date_dd_mon,,26-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,27,date,Date,date_dd_mon,,27-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,28,date,Date,date_dd_mon,,28-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,29,date,Date,date_dd_mon,,29-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,30,date,Date,date_dd_mon,,30-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,31,date,Date,date_dd_mon,,31-May,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,32,date,Date,date_dd_mon,,01-Jun,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,1,current_temperature,Current Temperature,temperature,,67.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,2,current_temperature,Current Temperature,temperature,,67.5,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,3,current_temperature,Current Temperature,temperature,,68.2,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,4,current_temperature,Current Temperature,temperature,,68.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,5,current_temperature,Current Temperature,temperature,,69.8,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,6,current_temperature,Current Temperature,temperature,,67.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,7,current_temperature,Current Temperature,temperature,,67,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,8,current_temperature,Current Temperature,temperature,,69.6,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,9,current_temperature,Current Temperature,temperature,,65.5,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,10,current_temperature,Current Temperature,temperature,,68.7,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,11,current_temperature,Current Temperature,temperature,,67.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,12,current_temperature,Current Temperature,temperature,,69,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,13,current_temperature,Current Temperature,temperature,,72.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,14,current_temperature,Current Temperature,temperature,,72.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,15,current_temperature,Current Temperature,temperature,,72.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,16,current_temperature,Current Temperature,temperature,,82,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,17,current_temperature,Current Temperature,temperature,,72,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,18,current_temperature,Current Temperature,temperature,,69.3,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,19,current_temperature,Current Temperature,temperature,,68.9,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,20,current_temperature,Current Temperature,temperature,,69.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,21,current_temperature,Current Temperature,temperature,,70.7,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,22,current_temperature,Current Temperature,temperature,,69.2,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,23,current_temperature,Current Temperature,temperature,,69.2,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,24,current_temperature,Current Temperature,temperature,,70.6,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,25,current_temperature,Current Temperature,temperature,,68.8,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,26,current_temperature,Current Temperature,temperature,,69.8,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,27,current_temperature,Current Temperature,temperature,,68.2,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,28,current_temperature,Current Temperature,temperature,,70.5,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,29,current_temperature,Current Temperature,temperature,,70.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,30,current_temperature,Current Temperature,temperature,,68.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,31,current_temperature,Current Temperature,temperature,,67.9,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,32,current_temperature,Current Temperature,temperature,,70.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,1,hi,HI,temperature,,75,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,2,hi,HI,temperature,,75.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,3,hi,HI,temperature,,74.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,4,hi,HI,temperature,,73.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,5,hi,HI,temperature,,71.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,6,hi,HI,temperature,,81.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,7,hi,HI,temperature,,70.3,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,8,hi,HI,temperature,,84.2,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,9,hi,HI,temperature,,73.3,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,10,hi,HI,temperature,,76.5,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,11,hi,HI,temperature,,84.3,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,12,hi,HI,temperature,,80.6,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,13,hi,HI,temperature,,89.2,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,14,hi,HI,temperature,,75.8,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,15,hi,HI,temperature,,82.6,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,16,hi,HI,temperature,,91.5,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,17,hi,HI,temperature,,86.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,18,hi,HI,temperature,,72.5,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,19,hi,HI,temperature,,77.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,20,hi,HI,temperature,,72.3,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,21,hi,HI,temperature,,72.2,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,22,hi,HI,temperature,,72.3,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,23,hi,HI,temperature,,72.2,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,24,hi,HI,temperature,,72.5,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,25,hi,HI,temperature,,72.8,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,26,hi,HI,temperature,,75.9,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,27,hi,HI,temperature,,79.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,28,hi,HI,temperature,,80.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,29,hi,HI,temperature,,74.6,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,30,hi,HI,temperature,,73.6,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,31,hi,HI,temperature,,79.8,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,32,hi,HI,temperature,,74.2,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,1,lo,LO,temperature,,66.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,2,lo,LO,temperature,,66.8,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,3,lo,LO,temperature,,66.2,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,4,lo,LO,temperature,,66,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,5,lo,LO,temperature,,69.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,6,lo,LO,temperature,,66.7,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,7,lo,LO,temperature,,66.3,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,8,lo,LO,temperature,,65.9,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,9,lo,LO,temperature,,69.3,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,10,lo,LO,temperature,,65.5,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,11,lo,LO,temperature,,65.7,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,12,lo,LO,temperature,,65.5,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,13,lo,LO,temperature,,69,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,14,lo,LO,temperature,,69.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,15,lo,LO,temperature,,70.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,16,lo,LO,temperature,,69.9,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,17,lo,LO,temperature,,71.9,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,18,lo,LO,temperature,,68.8,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,19,lo,LO,temperature,,67.9,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,20,lo,LO,temperature,,67.3,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,21,lo,LO,temperature,,67.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,22,lo,LO,temperature,,67.6,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,23,lo,LO,temperature,,67.6,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,24,lo,LO,temperature,,67.5,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,25,lo,LO,temperature,,67.8,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,26,lo,LO,temperature,,67.8,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,27,lo,LO,temperature,,68,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,28,lo,LO,temperature,,68.1,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,29,lo,LO,temperature,,67.9,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,30,lo,LO,temperature,,67.9,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,31,lo,LO,temperature,,67.4,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,32,lo,LO,temperature,,67,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,1,comments,Comments,english_text,,All good                         Matrix KT,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,2,comments,Comments,english_text,,All good                         Matrix KT,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,3,comments,Comments,english_text,,All good                         Matrix AI,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,4,comments,Comments,english_text,,All good                         Matrix CJR,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,5,comments,Comments,english_text,,"All good                         Matrix CJR   pen 5, 6 out of feed in pm",False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,6,comments,Comments,english_text,,All good                         Matrix AI,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,7,comments,Comments,english_text,,All good                         Matrix KT,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,8,comments,Comments,english_text,,All good                         Matrix KT,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,9,comments,Comments,english_text,,All good                         Matrix EY,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,10,comments,Comments,english_text,,All good                         Matrix EY,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,11,comments,Comments,english_text,,All good                         Matrix EY,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,12,comments,Comments,english_text,,All good                         -------------,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,13,comments,Comments,english_text,,"All good                         AM drop          -------------
+                                            all KT",False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,14,comments,Comments,english_text,,"All good                         AM drop          lunch CJR        PM BS
+                                            all CH",False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,15,comments,Comments,english_text,,"All good                         AM drop                                          PM CH
+                                            all KT",False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,16,comments,Comments,english_text,,"All good                         noon drop                                      Temps taken
+                                                                                                           @ shutdown",False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,17,comments,Comments,english_text,,All good                         -------------,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,18,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,19,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,20,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,21,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,22,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,23,comments,Comments,english_text,,All good                         Bin 3 empty,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,24,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,25,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,26,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,27,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,28,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,29,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,30,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,31,comments,Comments,english_text,,All good,False,False
+Gilt developer_p1_gilt_developer_llm.csv,gilt_developer,32,comments,Comments,english_text,,All good,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,1,date,Date,date_dd_mon,,01-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,2,date,Date,date_dd_mon,,02-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,3,date,Date,date_dd_mon,,03-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,4,date,Date,date_dd_mon,,04-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,5,date,Date,date_dd_mon,,05-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,6,date,Date,date_dd_mon,,06-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,7,date,Date,date_dd_mon,,07-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,8,date,Date,date_dd_mon,,08-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,9,date,Date,date_dd_mon,,09-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,10,date,Date,date_dd_mon,,10-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,11,date,Date,date_dd_mon,,11-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,12,date,Date,date_dd_mon,,12-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,13,date,Date,date_dd_mon,,13-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,14,date,Date,date_dd_mon,,14-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,15,date,Date,date_dd_mon,,15-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,16,date,Date,date_dd_mon,,16-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,17,date,Date,date_dd_mon,,17-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,18,date,Date,date_dd_mon,,18-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,19,date,Date,date_dd_mon,,19-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,20,date,Date,date_dd_mon,,20-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,21,date,Date,date_dd_mon,,21-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,22,date,Date,date_dd_mon,,22-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,23,date,Date,date_dd_mon,,23-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,24,date,Date,date_dd_mon,,24-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,25,date,Date,date_dd_mon,,25-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,26,date,Date,date_dd_mon,,26-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,27,date,Date,date_dd_mon,,27-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,28,date,Date,date_dd_mon,,28-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,29,date,Date,date_dd_mon,,29-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,30,date,Date,date_dd_mon,,30-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,31,date,Date,date_dd_mon,,31-May,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,1,comments,Comments,english_text,,Loaded,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,2,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,3,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,4,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,5,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,6,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,7,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,8,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,9,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,10,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,11,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,12,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,13,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,14,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,15,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,16,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,17,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,18,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,19,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,20,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,21,comments,Comments,english_text,,Loaded,False,False
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,22,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,23,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,24,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,25,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,26,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,27,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,28,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,29,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,30,comments,Comments,english_text,,,True,True
+Metabolism room E_p1_metabolism_room_e_llm.csv,metabolism_room_e,31,comments,Comments,english_text,,,True,True

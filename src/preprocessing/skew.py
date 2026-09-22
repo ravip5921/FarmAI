@@ -9,13 +9,46 @@ from src.core.image import DocumentImage
 from src.core.stage import PipelineStage
 
 
+def rotate_image(
+    image: np.ndarray,
+    angle: float,
+    *,
+    is_binary: bool | None = None,
+) -> np.ndarray:
+    """Rotate an image using the same fixed canvas used by deskewing."""
+    if abs(angle) < 0.1:
+        return image.copy()
+
+    height, width = image.shape[:2]
+    center = (width / 2.0, height / 2.0)
+    matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+    if is_binary is None:
+        is_binary = image.ndim == 2 and len(np.unique(image)) <= 2
+    interpolation = cv2.INTER_NEAREST if is_binary else cv2.INTER_LINEAR
+    border_value: int | tuple[int, int, int]
+    border_value = 255 if image.ndim == 2 else (255, 255, 255)
+    return cv2.warpAffine(
+        image,
+        matrix,
+        (width, height),
+        flags=interpolation,
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=border_value,
+    )
+
+
 class SkewCorrectionStage(PipelineStage):
     def __init__(
-        self, canny_low: int = 50, canny_high: int = 150, hough_threshold: int = 80
+        self,
+        canny_low: int = 50,
+        canny_high: int = 150,
+        hough_threshold: int = 80,
+        max_skew_angle: float = 15.0,
     ):
         self.canny_low = canny_low
         self.canny_high = canny_high
         self.hough_threshold = hough_threshold
+        self.max_skew_angle = max_skew_angle
 
     def _estimate_angle(self, image: np.ndarray) -> float:
         if image.ndim == 3:
@@ -37,15 +70,19 @@ class SkewCorrectionStage(PipelineStage):
             print("[SkewCorrectionStage] No lines detected by Hough transform.")
             return 0.0
 
+        line_segments = np.asarray(lines).reshape(-1, 4)
         angles: list[float] = []
-        for line in lines[:, 0]:
+        for line in line_segments:
             x1, y1, x2, y2 = line
             dx = x2 - x1
             dy = y2 - y1
             if dx == 0:
                 continue
             angle = math.degrees(math.atan2(dy, dx))
-            if abs(angle) <= 45:
+            # A document needing more than a modest deskew is probably rotated,
+            # not skewed. Excluding steep strokes also prevents handwriting and
+            # diagonal marks inside form cells from outvoting horizontal rules.
+            if abs(angle) <= self.max_skew_angle:
                 angles.append(angle)
 
         if not angles:
@@ -55,6 +92,10 @@ class SkewCorrectionStage(PipelineStage):
         median_angle = float(np.median(angles))
         print(f"[SkewCorrectionStage] Detected angle: {median_angle:.2f}°")
         return median_angle
+
+    def estimate_angle(self, image: np.ndarray) -> float:
+        """Expose angle estimation for coordinate-aligned source previews."""
+        return self._estimate_angle(image)
 
     def process(self, doc: DocumentImage) -> DocumentImage:
         image = doc.image
@@ -66,21 +107,10 @@ class SkewCorrectionStage(PipelineStage):
             metadata["skew_angle"] = 0.0
             return DocumentImage(image.copy(), metadata)
 
-        height, width = image.shape[:2]
-        center = (width / 2.0, height / 2.0)
-        matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
         is_binary = bool(doc.metadata.get("binary")) or (
             image.ndim == 2 and len(np.unique(image)) <= 2
         )
-        interpolation = cv2.INTER_NEAREST if is_binary else cv2.INTER_LINEAR
-        rotated = cv2.warpAffine(
-            image,
-            matrix,
-            (width, height),
-            flags=interpolation,
-            borderMode=cv2.BORDER_CONSTANT,
-            borderValue=255,
-        )
+        rotated = rotate_image(image, angle, is_binary=is_binary)
 
         metadata = dict(doc.metadata)
         metadata["deskewed"] = True

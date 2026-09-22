@@ -1,0 +1,23 @@
+{
+  "id": "finisher_room_3",
+  "name": "Finisher Room",
+  "description": "Template for Finisher Room 3 daily log tables.",
+  "table": {"column_widths": [1.5, 1.6, 1.5, 1.5, 0.3, 1.7, 2, 0.3, 1.9, 1.9, 0.3, 12.0, 2.3, 0.3, 1.6], "uniform_row_height": false},
+  "columns": [
+    {"index": 0, "key": "date", "name": "Date", "value_type": "date_dd_mon", "format": "DD-Mon", "common_values": [], "filter_out": false},
+    {"index": 1, "key": "current_temperature", "name": "Current Temperature", "value_type": "temperature", "format": "TT.T", "range": {"min": 50.0, "max": 110.0}, "common_values": [], "filter_out": false},
+    {"index": 2, "key": "hi", "name": "HI", "value_type": "temperature", "format": "TT.T", "range": {"min": 50.0, "max": 110.0}, "common_values": [], "filter_out": false},
+    {"index": 3, "key": "lo", "name": "LO", "value_type": "temperature", "format": "TT.T", "range": {"min": 50.0, "max": 110.0}, "common_values": [], "filter_out": false},
+    {"index": 4, "key": "divider1", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 5, "key": "inventory_change", "name": "Inventory +/-", "value_type": "integer", "common_values": [], "filter_out": false},
+    {"index": 6, "key": "inventory", "name": "Inventory", "value_type": "integer", "common_values": [], "filter_out": false},
+    {"index": 7, "key": "divider2", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 8, "key": "alley_scraped", "name": "Alley Scraped", "value_type": "yes_no", "format": "Y/N", "common_values": ["Y", "N"], "filter_out": false},
+    {"index": 9, "key": "scraper_ran", "name": "Scraper Ran Y/N", "value_type": "yes_no", "format": "Y/N", "common_values": ["Y", "N"], "filter_out": false},
+    {"index": 10, "key": "divider3", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 11, "key": "comments", "name": "Comments", "value_type": "english_text", "common_values": ["All good"], "filter_out": false},
+    {"index": 12, "key": "initials", "name": "Initials AM / PM", "value_type": "initials", "common_values": [], "filter_out": true},
+    {"index": 13, "key": "divider4", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},
+    {"index": 14, "key": "manager_initials", "name": "Mgr. Initials", "value_type": "initials", "common_values": [], "filter_out": true}
+  ]
+}

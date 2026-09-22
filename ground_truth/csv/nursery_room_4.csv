@@ -1,0 +1,33 @@
+﻿Date,Current Temperature,HI,LO,+/-,Inventory,Comments
+01-May,71.9,73.6,69.8,,,All good
+02-May,73.1,74.3,70.8,,,All good                Bin empty
+03-May,70.14,77.8,68.7,,,All good
+04-May,68.6,71.7,66.7,,,All good
+05-May,71,71.7,67.8,,,All good
+06-May,70,73.7,68.6,,,All good
+07-May,,,,,,
+08-May,,,,,,
+09-May,,,,,,
+10-May,,,,,,
+11-May,,,,,,
+12-May,83.9,,,,503,"ROOM LOADED, temps Reset"
+13-May,82.4,85.2,85.8,,,All good
+14-May,83.9,84.4,81.6,,,All good
+15-May,83.4,84.4,81.6,,,All good
+16-May,80.8,87.1,78.9,,,All good                feedlines ran
+17-May,82.8,86.6,78.9,,,All good
+18-May,82.2,84,81.5,,,All good
+19-May,82,84.2,81.3,,,All good
+20-May,80.3,83.4,79.1,,,All good
+21-May,81.5,81.7,79.5,,,All good
+22-May,82.2,82.4,79.5,,,All good
+23-May,80.9,82.9,79.8,-1,502,All good                Bin Empty
+24-May,82,82.8,79.3,,,All good
+25-May,82,80.9,82.7,,,All good
+26-May,81.1,82.6,80.9,,,All good
+27-May,81.9,82.6,80.6,,,All good
+28-May,81.2,81.9,80.1,-235,264,All good
+29-May,79.4,81.4,78.4,,,All good
+30-May,72.9,80.9,76.4,,,All good                   Denagard Started
+31-May,77.9,80.4,76.8,,,All good
+01-Jun,76,80.4,74.5,,,All good
