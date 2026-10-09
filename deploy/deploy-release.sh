@@ -398,7 +398,13 @@ fi
 grep -Eq '<div[^>]+id="root"' "$SMOKE_DIR/index.html" \
   || fail "candidate frontend response is not the built application"
 kill -TERM "$SMOKE_PID"
-wait "$SMOKE_PID"
+if wait "$SMOKE_PID"; then
+  :
+else
+  SMOKE_EXIT_STATUS="$?"
+  [ "$SMOKE_EXIT_STATUS" -eq 143 ] \
+    || fail "candidate API exited unexpectedly during shutdown: $SMOKE_EXIT_STATUS"
+fi
 SMOKE_PID=""
 
 log "Smoke-testing candidate worker against an empty isolated database"
