@@ -16,7 +16,7 @@ Open three PowerShell terminals from the repository root.
 
 ```powershell
 conda activate farm-ai
-python -m uvicorn user_interface.backend.app:app --reload --port 8000
+python -m uvicorn user_interface.backend.app:app --reload --reload-dir src --reload-dir user_interface/backend --port 8000
 ```
 
 ### 2. Job Worker

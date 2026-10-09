@@ -4,7 +4,9 @@ import unittest
 
 from src.application.ground_truth import (
     GroundTruthError,
+    _normalized_value,
     clear_ground_truth,
+    parse_ground_truth_csv,
     score_result,
 )
 
@@ -65,6 +67,49 @@ def _result() -> dict:
 
 
 class TestGroundTruthScoring(unittest.TestCase):
+    def test_csv_header_and_value_edge_cases(self) -> None:
+        columns = [{"key": "date", "name": "Date"}, {"key": "note", "name": "Note"}]
+        invalid = [
+            ("", "no header"),
+            (" ,Note\n1,2\n", "blank header"),
+            ("Date,date\n1,2\n", "duplicate header"),
+            ("Date,Note,note\n1,2,3\n", "duplicate header"),
+        ]
+        for csv_text, message in invalid:
+            with (
+                self.subTest(csv_text=csv_text),
+                self.assertRaisesRegex(GroundTruthError, message),
+            ):
+                parse_ground_truth_csv(csv_text, columns=columns, expected_rows=1)
+        with self.assertRaisesRegex(GroundTruthError, "More than one CSV header"):
+            parse_ground_truth_csv(
+                "field,Friendly\n1,2\n",
+                columns=[{"key": "field", "name": "Friendly"}],
+                expected_rows=1,
+            )
+        with self.assertRaisesRegex(GroundTruthError, "does not contain any pages"):
+            score_result({"pages": []}, "Date,Note\n")
+        self.assertEqual(_normalized_value("2?May", "date_dd_mon"), "02may")
+        self.assertEqual(_normalized_value("nonsense", "date_dd_mon"), "nonsense")
+        self.assertEqual(_normalized_value("A, B!", "english_text"), "ab")
+        self.assertEqual(_normalized_value(" A   B ", "text"), "a b")
+        self.assertEqual(_normalized_value("unknown", "temperature"), "unknown")
+
+    def test_malformed_csv_is_rejected_and_out_of_range_cells_are_skipped(self) -> None:
+        columns = [{"key": "note", "name": "Note"}]
+        with self.assertRaisesRegex(GroundTruthError, "invalid"):
+            parse_ground_truth_csv(
+                'Note\n"unclosed\n', columns=columns, expected_rows=1
+            )
+        result = _result()
+        result["pages"][0]["cells"].append(
+            {"row": 3, "column_key": "comments", "ocr_text": "ignored"}
+        )
+        scored = score_result(
+            result, "Current Temperature,Comments\n67.8,All good\n68.0,\n"
+        )
+        self.assertNotIn("ground_truth_text", scored["pages"][0]["cells"][-1])
+
     def test_scores_exact_matches_blanks_and_validation_mismatches(self) -> None:
         scored = score_result(
             _result(),

@@ -6,8 +6,13 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 
-from src.application.processing import process_document
-from src.application.result_models import ProcessingSettings
+from src.application.processing import (
+    _detection_pipeline,
+    _generic_columns,
+    _notify,
+    process_document,
+)
+from src.application.result_models import ProcessingSettings, UiCell, UiColumn
 from src.core.image import DocumentImage
 from src.ocr.base import OcrText
 from src.table.grid_reconstruction import GridCell, GridStructure
@@ -41,6 +46,41 @@ def _grid() -> GridStructure:
 
 
 class TestApplicationProcessing(unittest.TestCase):
+    def test_helpers_and_result_serialization(self) -> None:
+        _notify(None, stage="ignored")
+        self.assertEqual(len(_detection_pipeline().stages), 3)
+        table = Mock()
+        table.text_matrix.return_value = []
+        table.col_count = 2
+        self.assertEqual(
+            [column.name for column in _generic_columns(table)],
+            ["Column 1", "Column 2"],
+        )
+        self.assertEqual(UiColumn(0, 0, "x", "X").to_dict()["key"], "x")
+        self.assertEqual(
+            UiCell(1, 0, 0, "x", "X", (0, 0, 1, 1), "text").to_dict()["reviewed_text"],
+            "text",
+        )
+
+    @patch("src.application.processing.process_table_image")
+    @patch("src.application.processing._detection_pipeline")
+    @patch("src.application.processing.load_document")
+    def test_empty_table_reports_clear_error(
+        self, load_document, detection_pipeline, process_table_image
+    ) -> None:
+        image = np.full((10, 10), 255, dtype=np.uint8)
+        load_document.return_value = DocumentImage(image)
+        detection_pipeline.return_value.run.return_value = DocumentImage(image)
+        process_table_image.return_value = SimpleNamespace(
+            grid=GridStructure([0, 10], [0, 10], [])
+        )
+        with patch(
+            "src.application.processing.SkewCorrectionStage.estimate_angle",
+            return_value=0,
+        ):
+            with self.assertRaisesRegex(ValueError, "could not find the table"):
+                process_document("missing.png", engine=_Engine())
+
     @patch("src.application.processing.process_table_image")
     @patch("src.application.processing._detection_pipeline")
     @patch("src.application.processing.load_document")

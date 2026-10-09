@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import os
 import tempfile
 import unittest
-import os
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -14,7 +14,10 @@ from src.application.result_models import (
 )
 from user_interface.backend.services.artifact_store import read_result
 from user_interface.backend.services.checkpoint_engine import CheckpointingOcrEngine
-from user_interface.backend.services.job_runner import _resumable_engine, run_claimed_job
+from user_interface.backend.services.job_runner import (
+    _resumable_engine,
+    run_claimed_job,
+)
 
 
 class TestJobRunner(unittest.TestCase):

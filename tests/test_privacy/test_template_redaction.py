@@ -13,6 +13,33 @@ from src.templates import load_template
 
 
 class TestTemplateRedaction(unittest.TestCase):
+    def test_empty_and_outside_grid_are_unchanged(self) -> None:
+        template = load_template("boar_room")
+        image = np.full((10, 10, 3), 255, dtype=np.uint8)
+        grid = GridStructure(row_coords=[0, 10], col_coords=[0, 2], cells=[])
+        self.assertEqual(
+            redacted_template_column_indices(
+                template, extra_filtered_columns={"comments"}
+            ),
+            {5, 6, 7, 9},
+        )
+        redacted = redact_filtered_template_columns(image, grid, template)
+        self.assertTrue(np.array_equal(redacted, image))
+        grid = GridStructure(row_coords=[0], col_coords=[0, 10], cells=[])
+        self.assertTrue(
+            np.array_equal(
+                redact_filtered_template_columns(image, grid, template), image
+            )
+        )
+        grid = GridStructure(
+            row_coords=[0, 10], col_coords=[0, 2, 4, 6, 8, 10, 12], cells=[]
+        )
+        redacted = redact_filtered_template_columns(image, grid, template)
+        self.assertTrue(np.array_equal(redacted, image))
+        grid = GridStructure(row_coords=[10, 12], col_coords=list(range(11)), cells=[])
+        redacted = redact_filtered_template_columns(image, grid, template)
+        self.assertTrue(np.array_equal(redacted, image))
+
     def test_redacted_indices_skip_only_dividers(self) -> None:
         template = load_template("boar_room")
 

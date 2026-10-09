@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import json
+import os
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 
+from src.ocr import llm_client
 from src.ocr.base import OcrText
 from src.ocr.column_rules import ColumnOcrRule
 from src.ocr.llm_client import (
@@ -35,6 +37,116 @@ class _Response:
 
 
 class TestLlmClient(unittest.TestCase):
+    def test_env_file_ignores_comments_and_existing_values(self) -> None:
+        with TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / ".env"
+            llm_client._load_env_file(path)
+            path.write_text(
+                "# comment\ninvalid\nFARMAI_TEST_ENV='from file'\n", encoding="utf-8"
+            )
+            with patch.dict(os.environ, {"FARMAI_TEST_ENV": "existing"}):
+                llm_client._load_env_file(path)
+                self.assertEqual(os.environ["FARMAI_TEST_ENV"], "existing")
+            with patch.dict(os.environ, {}, clear=True):
+                llm_client._load_env_file(path)
+                self.assertEqual(os.environ["FARMAI_TEST_ENV"], "from file")
+
+    def test_unconfigured_and_blank_ocr_responses(self) -> None:
+        image = np.zeros((3, 3), dtype=np.uint8)
+        result = LlmVisionOcrEngine(LlmVisionConfig(api_url="", model="")).recognize(
+            image
+        )
+        self.assertIn("not configured", result.validation_error or "")
+        engine = LlmVisionOcrEngine()
+        with patch.object(
+            engine, "_chat_with_image", return_value='{"text":"","status":"blank"}'
+        ):
+            self.assertEqual(engine.recognize(image).text, "")
+        with patch.object(
+            engine, "_chat_with_image", return_value='{"text":"","status":"ok"}'
+        ):
+            self.assertIn("status ok", engine.recognize(image).validation_error or "")
+
+    def test_verifier_modes_and_validation(self) -> None:
+        text = OcrText(text="12", raw_text="raw")
+        self.assertFalse(LlmOcrVerifier("off").should_verify(text, None))
+        self.assertTrue(LlmOcrVerifier("always").should_verify(text, None))
+        self.assertFalse(LlmOcrVerifier("invalid").should_verify(text, None))
+        self.assertFalse(LlmOcrVerifier("invalid").should_verify(text, object()))
+        with self.assertRaises(ValueError):
+            LlmOcrVerifier("wrong").should_verify(text, None)
+        rule = Mock()
+        rule.validate.return_value = (False, "", "bad value")
+        engine = Mock()
+        engine.recognize_with_rule.return_value = OcrText(text="bad")
+        verifier = LlmOcrVerifier("always", engine=engine)
+        rejected = verifier.verify(
+            image=np.zeros((2, 2), dtype=np.uint8), rule=rule, ocr_text=text
+        )
+        self.assertEqual(rejected.validation_error, "bad value")
+        rule.validate.return_value = (True, "normalized", None)
+        accepted = verifier.verify(
+            image=np.zeros((2, 2), dtype=np.uint8), rule=rule, ocr_text=text
+        )
+        self.assertEqual(accepted.text, "normalized")
+        self.assertEqual(
+            llm_client._ocr_guess_for_prompt(OcrText(text="", raw_text="raw")), "raw"
+        )
+
+    def test_response_formats_and_invalid_payloads(self) -> None:
+        self.assertEqual(extract_chat_content({"response": "reply"}), "reply")
+        self.assertEqual(
+            extract_chat_content({"choices": [{"message": {"content": "reply"}}]}),
+            "reply",
+        )
+        self.assertEqual(
+            extract_chat_content({"choices": [{"text": "reply"}]}), "reply"
+        )
+        with self.assertRaises(RuntimeError):
+            extract_chat_content({"choices": [{}]})
+        self.assertEqual(
+            parse_llm_text_response('prefix {"text":"yes"} suffix'), ("yes", "ok")
+        )
+        self.assertEqual(parse_llm_text_response('"plain"'), ("plain", "ok"))
+        self.assertEqual(parse_llm_text_response("plain"), ("plain", "ok"))
+
+    def test_image_encoding_and_log_options(self) -> None:
+        image = np.array([[300.0, -1.0]], dtype=np.float32)
+        encoded = llm_client.encode_image_base64(
+            image, config=LlmVisionConfig(image_extension=".png")
+        )
+        self.assertTrue(encoded)
+        with patch.object(llm_client.cv2, "imencode", return_value=(False, None)):
+            with self.assertRaises(RuntimeError):
+                llm_client.encode_image_base64(image, config=LlmVisionConfig())
+        payload = {"messages": [None, {"images": "bad"}, {"images": ["abc"]}]}
+        with patch.dict(os.environ, {"FARMAI_LLM_LOG_FULL_IMAGES": "1"}):
+            self.assertEqual(llm_client._request_payload_for_log(payload), payload)
+        with patch.dict(os.environ, {"FARMAI_LLM_LOG_FULL_IMAGES": ""}):
+            redacted = llm_client._request_payload_for_log(payload)
+        self.assertTrue(redacted["messages"][2]["images"][0]["redacted"])
+        with patch.dict(os.environ, {"FARMAI_LLM_LOG_DIR": "relative-logs"}):
+            self.assertEqual(
+                llm_client._llm_log_dir(), llm_client._PROJECT_ROOT / "relative-logs"
+            )
+        rule = ColumnOcrRule(
+            index=0,
+            key="temperature",
+            value_type="temperature",
+            format="NN.N",
+            pattern=r"^\d+$",
+            range_min=1,
+            range_max=100,
+        )
+        prompt = build_llm_ocr_prompt(rule=rule)
+        for expected in (
+            "Expected format",
+            "Validation regex",
+            "Expected range",
+            "Allowed characters",
+        ):
+            self.assertIn(expected, prompt)
+
     def test_parse_llm_text_response_reads_json_content(self) -> None:
         self.assertEqual(
             parse_llm_text_response('{"text": "All good", "status": "ok"}'),

@@ -57,9 +57,7 @@ class TestCheckpointingOcrEngine(unittest.TestCase):
             second_engine = _Engine()
             second = CheckpointingOcrEngine(second_engine, path)
             self.assertEqual(second.recognize(image).confidence, 91.0)
-            cached_rule = second.recognize_with_rule(
-                image, rule=_Rule("temperature")
-            )
+            cached_rule = second.recognize_with_rule(image, rule=_Rule("temperature"))
             self.assertEqual(cached_rule.raw_text, "raw")
             self.assertEqual(second_engine.calls, 0)
             self.assertEqual(len(list(path.glob("*.json"))), 2)

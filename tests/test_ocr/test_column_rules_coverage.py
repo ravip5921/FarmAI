@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 
@@ -16,6 +16,35 @@ from src.ocr.tesseract_engine import TesseractConfig, TesseractOcrEngine
 
 
 class TestColumnRulesCoverage(unittest.TestCase):
+    def test_rule_aware_engine_rejects_and_accepts_values(self) -> None:
+        rule = ColumnOcrRule(
+            index=0, key="temp", value_type="temperature", pattern=r"^\d+$"
+        )
+        engine = Mock()
+        engine.recognize_with_rule.side_effect = [
+            OcrText(text="", validation_error="service down"),
+            OcrText(text="12"),
+            OcrText(text="bad", confidence=0.4),
+        ]
+        image = np.zeros((2, 2), dtype=np.uint8)
+        self.assertEqual(
+            recognize_with_column_rule(engine, image, rule).validation_error,
+            "service down",
+        )
+        self.assertEqual(recognize_with_column_rule(engine, image, rule).text, "12")
+        rejected = recognize_with_column_rule(engine, image, rule)
+        self.assertEqual(rejected.text, "")
+        self.assertEqual(rejected.raw_text, "bad")
+        verifier = Mock()
+        verifier.should_verify.return_value = True
+        verifier.verify.return_value = OcrText(text="verified")
+        engine.recognize_with_rule.side_effect = None
+        engine.recognize_with_rule.return_value = OcrText(text="12")
+        self.assertEqual(
+            recognize_with_column_rule(engine, image, rule, llm_verifier=verifier).text,
+            "verified",
+        )
+
     def test_validate_reports_numeric_error_when_range_requires_number(self) -> None:
         rule = ColumnOcrRule(
             index=0,

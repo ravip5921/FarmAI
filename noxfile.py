@@ -1,14 +1,11 @@
 import nox
 
-# Prefer running tools in the currently-activated environment (e.g. conda).
-# When running `nox` from an activated conda env this file will run the
-# external tools from that environment instead of creating new virtualenvs.
+# Run all sessions in the activated environment (for example, the farm-ai
+# conda environment used locally and in CI).
 nox.options.sessions = ["typecheck", "tests", "format"]
-# Try to avoid recreating virtualenvs when possible.
-nox.options.reuse_existing_virtualenvs = True
 
 
-@nox.session(python="3.11")
+@nox.session(venv_backend="none")
 def typecheck(session: nox.Session) -> None:
     """Run mypy type checks against the `src` package using the active env.
 
@@ -26,7 +23,7 @@ def typecheck(session: nox.Session) -> None:
     )
 
 
-@nox.session(python="3.11")
+@nox.session(venv_backend="none")
 def tests(session: nox.Session) -> None:
     """Run unit tests under coverage using the active env and emit reports.
 
@@ -51,7 +48,7 @@ def tests(session: nox.Session) -> None:
     session.run("coverage", "xml", "-o", "coverage.xml", external=True)
 
 
-@nox.session(python="3.11")
+@nox.session(venv_backend="none")
 def format(session: nox.Session) -> None:
     """Auto-format code, sort imports, and remove unused imports/variables."""
 
@@ -79,6 +76,8 @@ def format(session: nox.Session) -> None:
         "black",
         "--target-version",
         "py311",
+        "--workers",
+        "1",
         *paths,
         external=True,
     )

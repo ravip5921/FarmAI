@@ -52,7 +52,9 @@ class TestInboxRepository(unittest.TestCase):
             self.assertEqual(repository.document_counts()["queued"], 2)
             jobs = repository.list_jobs()
             self.assertEqual(len(jobs), 2)
-            self.assertEqual({job["document_id"] for job in jobs}, {"doc-one", "doc-two"})
+            self.assertEqual(
+                {job["document_id"] for job in jobs}, {"doc-one", "doc-two"}
+            )
             self.assertTrue(all(job["batch_id"] == accepted[0]["id"] for job in jobs))
             self.assertTrue(all(job["template_id"] == "boar_room" for job in jobs))
             self.assertTrue(
@@ -82,7 +84,9 @@ class TestInboxRepository(unittest.TestCase):
             )
 
             first = repository.claim_next_job(worker_id="worker")
-            self.assertEqual(repository.get_document(first["document_id"])["status"], "running")
+            self.assertEqual(
+                repository.get_document(first["document_id"])["status"], "running"
+            )
             repository.complete_job(
                 first["id"], result_path=root / "first.json", with_warnings=False
             )

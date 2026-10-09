@@ -52,7 +52,7 @@ def parse_ground_truth_csv(
     expected_rows: int,
 ) -> list[dict[str, str]]:
     try:
-        reader = csv.DictReader(io.StringIO(csv_text.lstrip("\ufeff")))
+        reader = csv.DictReader(io.StringIO(csv_text.lstrip("\ufeff")), strict=True)
         headers = reader.fieldnames
         if not headers:
             raise GroundTruthError("The ground-truth CSV has no header row.")

@@ -2,18 +2,25 @@ from __future__ import annotations
 
 import math
 import unittest
+from unittest.mock import patch
 
 import cv2
 import numpy as np
-from unittest.mock import patch
 
 from src.core.image import DocumentImage
-from src.preprocessing.skew import SkewCorrectionStage
+from src.preprocessing.skew import SkewCorrectionStage, rotate_image
 
 from . import make_tiny_gray_image
 
 
 class TestSkewStage(unittest.TestCase):
+    def test_rotation_copy_and_binary_inference(self) -> None:
+        image = np.array([[0, 255], [255, 0]], dtype=np.uint8)
+        copy = rotate_image(image, 0)
+        self.assertTrue(np.array_equal(copy, image))
+        self.assertIsNot(copy, image)
+        self.assertEqual(rotate_image(image, 5).shape, image.shape)
+
     def setUp(self) -> None:
         self.stage = SkewCorrectionStage()
 

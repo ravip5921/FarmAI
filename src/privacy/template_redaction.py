@@ -29,8 +29,7 @@ def redacted_template_column_indices(
     return {
         column.index
         for column in template.columns
-        if column.index in filtered
-        and not _is_divider_column(column.key)
+        if column.index in filtered and not _is_divider_column(column.key)
     }
 
 

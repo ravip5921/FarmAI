@@ -4,12 +4,15 @@ import os
 import tempfile
 import unittest
 from contextlib import asynccontextmanager
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
 import httpx
+from fastapi import HTTPException
 
 from user_interface.backend.app import app
+from user_interface.backend.routes.inbox import upload_documents
 
 
 def _pdf(label: str) -> bytes:
@@ -28,6 +31,60 @@ async def _api_client(runtime_dir: str):
 
 
 class TestInboxApi(unittest.IsolatedAsyncioTestCase):
+    async def test_upload_and_batch_validation_edges(self) -> None:
+        with self.assertRaises(HTTPException) as empty:
+            await upload_documents(None, [])
+        self.assertEqual(empty.exception.status_code, 400)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            async with _api_client(tmpdir) as client:
+                self.assertEqual(
+                    (await client.get("/api/analysis-batches/not-a-uuid")).status_code,
+                    404,
+                )
+                self.assertEqual(
+                    (
+                        await client.get(
+                            "/api/analysis-batches/00000000-0000-0000-0000-000000000000"
+                        )
+                    ).status_code,
+                    404,
+                )
+                for settings in ({"template_id": "unknown"}, {"ocr_engine": "unknown"}):
+                    response = await client.post("/api/analysis-batches", json=settings)
+                    self.assertEqual(response.status_code, 422)
+                with patch(
+                    "user_interface.backend.routes.inbox.MAX_DOCUMENTS_PER_UPLOAD", 1
+                ):
+                    response = await client.post(
+                        "/api/documents",
+                        files=[
+                            ("documents", ("one.pdf", _pdf("one"), "application/pdf")),
+                            ("documents", ("two.pdf", _pdf("two"), "application/pdf")),
+                        ],
+                    )
+                    self.assertEqual(response.status_code, 400)
+                with patch.object(
+                    app.state, "config", replace(app.state.config, max_upload_bytes=2)
+                ):
+                    response = await client.post(
+                        "/api/documents",
+                        files={
+                            "documents": ("large.pdf", _pdf("large"), "application/pdf")
+                        },
+                    )
+                    self.assertEqual(response.status_code, 413)
+                response = await client.post(
+                    "/api/documents",
+                    files={"documents": ("empty.pdf", b"", "application/pdf")},
+                )
+                self.assertEqual(response.status_code, 400)
+                with patch.object(Path, "rmdir", side_effect=OSError("busy")):
+                    response = await client.post(
+                        "/api/documents",
+                        files={"documents": ("bad.pdf", b"invalid", "application/pdf")},
+                    )
+                    self.assertEqual(response.status_code, 400)
+
     async def test_upload_batch_snapshot_and_later_upload(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             async with _api_client(tmpdir) as client:
@@ -35,7 +92,10 @@ class TestInboxApi(unittest.IsolatedAsyncioTestCase):
                     "/api/documents",
                     files=[
                         ("documents", ("first.pdf", _pdf("first"), "application/pdf")),
-                        ("documents", ("second.PDF", _pdf("second"), "application/pdf")),
+                        (
+                            "documents",
+                            ("second.PDF", _pdf("second"), "application/pdf"),
+                        ),
                     ],
                 )
 
@@ -91,11 +151,17 @@ class TestInboxApi(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(later.json()["counts"]["queued"], 2)
 
                 jobs = (await client.get("/api/jobs")).json()["jobs"]
-                batch_jobs = [job for job in jobs if job["batch_id"] == batch["batch_id"]]
+                batch_jobs = [
+                    job for job in jobs if job["batch_id"] == batch["batch_id"]
+                ]
                 self.assertEqual(len(batch_jobs), 2)
                 self.assertTrue(all(job["document_id"] for job in batch_jobs))
-                self.assertTrue(all(job["template_id"] == "boar_room" for job in batch_jobs))
-                self.assertTrue(all(job["ocr_engine"] == "tesseract" for job in batch_jobs))
+                self.assertTrue(
+                    all(job["template_id"] == "boar_room" for job in batch_jobs)
+                )
+                self.assertTrue(
+                    all(job["ocr_engine"] == "tesseract" for job in batch_jobs)
+                )
                 stored_batch = await client.get(
                     f"/api/analysis-batches/{batch['batch_id']}"
                 )
@@ -127,9 +193,7 @@ class TestInboxApi(unittest.IsolatedAsyncioTestCase):
             async with _api_client(tmpdir) as client:
                 response = await client.post(
                     "/api/documents",
-                    files={
-                        "documents": ("scan.png", _pdf("disguised"), "image/png")
-                    },
+                    files={"documents": ("scan.png", _pdf("disguised"), "image/png")},
                 )
 
                 self.assertEqual(response.status_code, 400)

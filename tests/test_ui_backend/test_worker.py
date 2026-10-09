@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from user_interface.backend.services.worker_control import WorkerControl
 from user_interface.backend.worker import main, parse_args, run_worker

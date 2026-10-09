@@ -5,7 +5,9 @@ import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from unittest.mock import Mock, patch
 
+from user_interface.backend import database as database_module
 from user_interface.backend.database import (
     LATEST_SCHEMA_VERSION,
     connect,
@@ -14,7 +16,6 @@ from user_interface.backend.database import (
     migrate_database,
 )
 from user_interface.backend.repository import JobRepository
-
 
 LEGACY_JOBS_SCHEMA = """
 CREATE TABLE jobs (
@@ -43,6 +44,50 @@ CREATE TABLE jobs (
 
 
 class TestDatabaseMigrations(unittest.TestCase):
+    def test_connection_propagates_non_lock_journal_error(self) -> None:
+        connection = Mock()
+        connection.execute.side_effect = [None, sqlite3.OperationalError("disk full")]
+        with patch.object(sqlite3, "connect", return_value=connection):
+            with self.assertRaisesRegex(sqlite3.OperationalError, "disk full"):
+                with connect(Path("unused.sqlite3")):
+                    pass
+        connection.rollback.assert_called_once()
+        connection.close.assert_called_once()
+
+    def test_schema_version_and_migration_failures(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            database_path = Path(tmpdir) / "jobs.sqlite3"
+            self.assertEqual(get_schema_version(database_path), 0)
+            sqlite3.connect(database_path).close()
+            self.assertEqual(get_schema_version(database_path), 0)
+            initialize_database(database_path)
+            with connect(database_path) as connection:
+                connection.execute(
+                    "INSERT INTO schema_migrations (version, name, applied_at) VALUES (99, 'future', 'now')"
+                )
+            with self.assertRaisesRegex(RuntimeError, "unknown migration"):
+                migrate_database(database_path)
+            with connect(database_path) as connection:
+                connection.execute("DELETE FROM schema_migrations WHERE version = 99")
+                connection.execute("DELETE FROM schema_migrations WHERE version = 3")
+            migration = (
+                3,
+                "failing",
+                lambda connection: (_ for _ in ()).throw(RuntimeError("broken")),
+            )
+            with patch.object(
+                database_module,
+                "MIGRATIONS",
+                (
+                    database_module.MIGRATIONS[0],
+                    database_module.MIGRATIONS[1],
+                    migration,
+                ),
+            ):
+                with self.assertRaisesRegex(RuntimeError, "broken"):
+                    migrate_database(database_path)
+            self.assertEqual(get_schema_version(database_path), 2)
+
     def test_upgrades_legacy_database_without_changing_job_or_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -137,14 +182,12 @@ class TestDatabaseMigrations(unittest.TestCase):
                 )
             )
             with connect(database_path) as connection:
-                connection.execute(
-                    """
+                connection.execute("""
                     UPDATE jobs
                     SET lease_expires_at = '2000-01-01T00:00:00+00:00',
                         progress_current = 7, progress_total = 10
                     WHERE id = 'job-id'
-                    """
-                )
+                    """)
 
             self.assertEqual(repository.recover_interrupted_jobs(), 1)
             recovered = repository.get_job("job-id")
