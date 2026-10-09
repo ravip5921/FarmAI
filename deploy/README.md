@@ -102,6 +102,7 @@ port 8000.
 ```bash
 sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai
 sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai/releases
+sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai/shared
 sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai/shared/runtime
 sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai/shared/backups
 sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai/tmp
