@@ -34,15 +34,16 @@ class TestAppRoutes(unittest.TestCase):
                 (directory / "assets").mkdir()
                 (directory / "assets" / "app.js").write_text("code", encoding="utf-8")
                 self.assertEqual(
-                    app_module.frontend_root().path, directory / "index.html"
+                    Path(app_module.frontend_root().path).resolve(),
+                    (directory / "index.html").resolve(),
                 )
                 self.assertEqual(
-                    app_module.frontend_fallback("dashboard").path,
-                    directory / "index.html",
+                    Path(app_module.frontend_fallback("dashboard").path).resolve(),
+                    (directory / "index.html").resolve(),
                 )
                 self.assertEqual(
-                    app_module.frontend_fallback("assets/app.js").path,
-                    directory / "assets" / "app.js",
+                    Path(app_module.frontend_fallback("assets/app.js").path).resolve(),
+                    (directory / "assets" / "app.js").resolve(),
                 )
                 for path in ("api/missing", "../outside"):
                     with (
