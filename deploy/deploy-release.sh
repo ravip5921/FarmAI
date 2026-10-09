@@ -76,7 +76,12 @@ require_positive_integer \
   "$WORKER_STATUS_MAX_AGE_SECONDS"
 
 [ -d "$SOURCE_REPO/.git" ] || fail "source repository not found: $SOURCE_REPO"
-[ -r "$APP_ENV_FILE" ] || fail "application environment not readable: $APP_ENV_FILE"
+[ -e "$APP_ENV_FILE" ] \
+  || fail "application environment missing or path inaccessible: $APP_ENV_FILE (see deploy/README.md one-time server setup)"
+[ -f "$APP_ENV_FILE" ] \
+  || fail "application environment is not a regular file: $APP_ENV_FILE"
+[ -r "$APP_ENV_FILE" ] \
+  || fail "application environment exists but is not readable by $(id -un): $APP_ENV_FILE"
 
 # The application environment file is deliberately shell-compatible as well as
 # systemd EnvironmentFile-compatible. Candidate and migration commands receive

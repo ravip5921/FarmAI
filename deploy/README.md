@@ -29,21 +29,31 @@ window. The existing worker does not implement the drain protocol, so first
 confirm in the UI/database that it has no queued or running analysis before
 stopping it. Pause uploads during this initial adoption.
 
-1. Install Python 3.11 with `venv`, Git, `rsync`, curl, `flock` (normally from
+1. Install Python 3.11 or newer with `venv`, Git, `rsync`, curl, `flock` (normally from
    `util-linux`), Node.js 22, Apache, and the Apache `proxy`/`proxy_http`
    modules. Keep the existing checkout at
-   `/home/ravi/apps/FarmAI`; deployments only fetch objects from it.
-2. Stop the existing API and worker. Create the release directories owned by
-   `ravi`, including `releases`, `shared/runtime`, `shared/backups`, and `tmp`.
-3. While both old services are stopped, copy the contents of the old
-   `user_interface/runtime/` into `shared/runtime/`. Keep the old copy until the
-   new deployment and backup have both been verified.
+   `/home/ravi/apps/FarmAI`; deployments only fetch objects from it. Set
+   `FARMAI_PYTHON_COMMAND=python3` in `deploy.env` when only Python 3.12 is
+   installed.
+2. Confirm there are no queued or running jobs and pause uploads. Stop the
+   existing API first to prevent new submissions, then stop the worker. Create
+   the release directories owned by `ravi`, including `releases`,
+   `shared/runtime`, `shared/backups`, and `tmp`.
+3. While both old services are stopped, copy the contents of the **actual**
+   legacy runtime directory into `shared/runtime/`. The server may configure
+   `FARMAI_UI_RUNTIME_DIR` in `/etc/farmai-ui.env`; use that path rather than
+   assuming `user_interface/runtime/`. Keep the old copy until the new
+   deployment and backup have both been verified.
 4. Copy [config/farmai.env.example](config/farmai.env.example) to
    `/etc/farmai/farmai.env` (mode `0640`, readable by `ravi`) and
    [config/deploy.env.example](config/deploy.env.example) to
    `/etc/farmai/deploy.env` (mode `0644`). Update paths, origin, and secrets.
    These files must contain shell-compatible `KEY=value` assignments because
    both systemd and the deployment script read the application file.
+   A legacy installation may instead use `/etc/farmai-ui.env`; transfer its
+   working application settings into the new file without printing secrets in
+   deployment logs. Set `FARMAI_UI_RUNTIME_DIR` in the new file to the shared
+   runtime path used in step 3.
 5. Initially point `/home/ravi/apps/farmai/current` at the known-working
    `/home/ravi/apps/FarmAI` checkout. This preserves that checkout as the first
    automatic rollback target. Ensure its existing `.venv` and frontend build
@@ -54,43 +64,68 @@ stopping it. Pause uploads during this initial adoption.
 7. Validate [sudoers/farmai-deploy](sudoers/farmai-deploy) with `visudo -cf`,
    then install it as `/etc/sudoers.d/farmai-deploy` with mode `0440`. Grant
    only the listed service start/stop commands.
-8. Install and enable [apache/farmai.conf](apache/farmai.conf). Add TLS using the
-   server's normal certificate process; the checked-in file is the HTTP reverse
-   proxy only. Confirm `/api/health` and `/` through Apache.
+8. If Apache is not yet configured, install and enable
+   [apache/farmai.conf](apache/farmai.conf). Add TLS using the server's normal
+   certificate process; the checked-in file is the HTTP reverse proxy only.
+   Keep an existing working TLS site instead of replacing it. Confirm
+   `/api/health` and `/` through Apache.
 9. Start the API and worker. Verify that both use the shared runtime directory,
    then push or manually dispatch the workflow for the first managed release.
 
 From the existing checkout, the corresponding setup commands are below. Review
 all paths and edit the two environment files before starting the services:
 
-```bash
-sudo systemctl stop farmai-worker.service
-sudo systemctl stop farmai-api.service
+If that checkout predates the deployment files, fetch `main` without checking
+it out, then extract only the setup templates into a temporary directory. This
+does not change the running checkout:
 
+```bash
+git -C /home/ravi/apps/FarmAI fetch origin main
+mkdir -p /tmp/farmai-setup/deploy/config /tmp/farmai-setup/deploy/systemd /tmp/farmai-setup/deploy/sudoers
+for file in \
+  config/farmai.env.example config/deploy.env.example \
+  systemd/farmai-api.service systemd/farmai-worker.service \
+  sudoers/farmai-deploy; do
+  git -C /home/ravi/apps/FarmAI show "origin/main:deploy/$file" > "/tmp/farmai-setup/deploy/$file"
+done
+cd /tmp/farmai-setup
+```
+
+If the checkout already has these files, run the setup commands from its
+repository root. Prepare the environment files and validate the templates
+before stopping the old services; the runtime copy must wait until both
+services are stopped. For a legacy server with `/etc/farmai-ui.env`, transfer
+all working application settings into the new file and change only the runtime
+path. Keep the existing TLS Apache configuration when it already proxies to
+port 8000.
+
+```bash
 sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai
 sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai/releases
 sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai/shared/runtime
 sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai/shared/backups
 sudo install -d -o ravi -g ravi -m 0750 /home/ravi/apps/farmai/tmp
-sudo -u ravi rsync -a /home/ravi/apps/FarmAI/user_interface/runtime/ /home/ravi/apps/farmai/shared/runtime/
-sudo -u ravi ln -s /home/ravi/apps/FarmAI /home/ravi/apps/farmai/current
 
 sudo install -d -o root -g ravi -m 0750 /etc/farmai
 sudo install -o root -g ravi -m 0640 deploy/config/farmai.env.example /etc/farmai/farmai.env
 sudo install -o root -g root -m 0644 deploy/config/deploy.env.example /etc/farmai/deploy.env
+# Edit these files now: carry over legacy application settings, set the shared
+# runtime path, and select an installed Python command in deploy.env.
+sudoedit /etc/farmai/farmai.env /etc/farmai/deploy.env
+
+sudo systemctl stop farmai-api.service
+sudo systemctl stop farmai-worker.service
+# Replace SOURCE_RUNTIME with the active service's FARMAI_UI_RUNTIME_DIR.
+sudo -u ravi rsync -a SOURCE_RUNTIME/ /home/ravi/apps/farmai/shared/runtime/
+sudo -u ravi ln -s /home/ravi/apps/FarmAI /home/ravi/apps/farmai/current
 
 sudo install -o root -g root -m 0644 deploy/systemd/farmai-api.service /etc/systemd/system/farmai-api.service
 sudo install -o root -g root -m 0644 deploy/systemd/farmai-worker.service /etc/systemd/system/farmai-worker.service
 sudo visudo -cf deploy/sudoers/farmai-deploy
 sudo install -o root -g root -m 0440 deploy/sudoers/farmai-deploy /etc/sudoers.d/farmai-deploy
 
-sudo install -o root -g root -m 0644 deploy/apache/farmai.conf /etc/apache2/sites-available/farmai.conf
-sudo a2enmod proxy proxy_http
-sudo a2ensite farmai.conf
 sudo systemctl daemon-reload
 sudo systemctl enable farmai-api.service farmai-worker.service
-sudo apache2ctl configtest
-sudo systemctl reload apache2.service
 sudo systemctl start farmai-api.service
 sudo systemctl start farmai-worker.service
 ```
@@ -99,6 +134,25 @@ If `current`, either environment file, or a site/unit file already exists, stop
 and reconcile it instead of overwriting it blindly. The runtime copy is made
 only while both old processes are stopped so the SQLite database and artifacts
 represent one consistent point in time.
+
+If deployment stops with an application-environment error, check only file
+metadata and the configured path first; do not print the file's contents in
+workflow logs:
+
+```bash
+id ravi
+sudo ls -ld /etc/farmai
+sudo ls -l /etc/farmai/farmai.env /etc/farmai/deploy.env
+sudo grep '^FARMAI_APP_ENV_FILE=' /etc/farmai/deploy.env
+sudo -u ravi test -r /etc/farmai/farmai.env && echo readable
+```
+
+The default release script and both systemd services require
+`/etc/farmai/farmai.env`. If it is missing, finish step 4 of the one-time setup
+above. Keep the directory `root:ravi` at `0750` and the file `root:ravi` at
+`0640`; if the deployment SSH account is not `ravi`, it also needs read access
+through the appropriate service group. Review the file's actual runtime and
+LLM settings before retrying the workflow.
 
 The first managed deployment detects a legacy worker automatically. It stops
 the API to prevent new submissions, waits until the legacy SQLite queue has
