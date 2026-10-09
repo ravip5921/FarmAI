@@ -15,7 +15,6 @@ from user_interface.backend.database import (
 )
 from user_interface.backend.repository import JobRepository
 
-
 LEGACY_JOBS_SCHEMA = """
 CREATE TABLE jobs (
     id TEXT PRIMARY KEY,
@@ -74,7 +73,7 @@ class TestDatabaseMigrations(unittest.TestCase):
 
             applied = migrate_database(database_path)
 
-            self.assertEqual(applied, [1, 2, 3])
+            self.assertEqual(applied, [1, 2, 3, 4])
             self.assertEqual(get_schema_version(database_path), LATEST_SCHEMA_VERSION)
             self.assertEqual(migrate_database(database_path), [])
             with connect(database_path) as migrated:
@@ -103,7 +102,7 @@ class TestDatabaseMigrations(unittest.TestCase):
                     executor.map(lambda _: migrate_database(database_path), range(2))
                 )
 
-            self.assertIn([1, 2, 3], results)
+            self.assertIn([1, 2, 3, 4], results)
             self.assertIn([], results)
             self.assertEqual(get_schema_version(database_path), LATEST_SCHEMA_VERSION)
 
@@ -137,14 +136,12 @@ class TestDatabaseMigrations(unittest.TestCase):
                 )
             )
             with connect(database_path) as connection:
-                connection.execute(
-                    """
+                connection.execute("""
                     UPDATE jobs
                     SET lease_expires_at = '2000-01-01T00:00:00+00:00',
                         progress_current = 7, progress_total = 10
                     WHERE id = 'job-id'
-                    """
-                )
+                    """)
 
             self.assertEqual(repository.recover_interrupted_jobs(), 1)
             recovered = repository.get_job("job-id")

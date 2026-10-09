@@ -2,16 +2,29 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from pathlib import Path
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Body, File, HTTPException, Query, Request, UploadFile, status
+from pydantic import TypeAdapter, ValidationError
+
+from fastapi import (
+    APIRouter,
+    Body,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+    status,
+)
 
 from src.ocr import get_ocr_engine_names
 from src.templates import get_template_ids
 
-from ..repository import JobRepository
-from ..schemas import JobSettings
+from ..repository import JobRepository, JobIsRunningError
+from ..schemas import DocumentSelection, JobSettings, DocumentEdit
 
 router = APIRouter()
 MAX_DOCUMENTS_PER_UPLOAD = 100
@@ -26,6 +39,11 @@ def _public_document(document: dict) -> dict:
     return {
         "document_id": document["id"],
         "filename": document["original_filename"],
+        "reference_id": document["reference_id"],
+        "comments": document["comments"],
+        "settings": (
+            json.loads(document["settings_json"]) if document["settings_json"] else None
+        ),
         "status": document["status"],
         "size_bytes": document["size_bytes"],
         "sha256": document["sha256"],
@@ -104,15 +122,14 @@ def list_documents(
 ) -> dict:
     repository = _repository(request)
     documents = repository.list_documents(limit=limit, offset=offset)
-    return _document_response(
-        repository, documents, limit=limit, offset=offset
-    )
+    return _document_response(repository, documents, limit=limit, offset=offset)
 
 
 @router.post("/documents", status_code=status.HTTP_201_CREATED)
 async def upload_documents(
     request: Request,
     documents: list[UploadFile] = File(...),
+    settings: str | None = Form(default=None),
 ) -> dict:
     if not documents:
         raise HTTPException(status_code=400, detail="Select at least one PDF.")
@@ -122,10 +139,24 @@ async def upload_documents(
             detail=f"Upload at most {MAX_DOCUMENTS_PER_UPLOAD} PDFs at a time.",
         )
 
+    selected_settings: list[JobSettings | None] = [None] * len(documents)
+    if settings is not None:
+        try:
+            selected_settings = TypeAdapter(list[JobSettings | None]).validate_json(settings)
+        except ValidationError as exc:
+            raise HTTPException(status_code=422, detail="Invalid per-file settings.") from exc
+        if len(selected_settings) != len(documents):
+            raise HTTPException(status_code=422, detail="Provide one settings entry per PDF.")
+        for item in selected_settings:
+            if item is not None:
+                _validate_settings(item)
+
     config = request.app.state.config
     prepared: list[dict] = []
-    for upload in documents:
-        original_name = Path((upload.filename or "document.pdf").replace("\\", "/")).name
+    for upload, file_settings in zip(documents, selected_settings):
+        original_name = Path(
+            (upload.filename or "document.pdf").replace("\\", "/")
+        ).name
         if Path(original_name).suffix.lower() != ".pdf":
             raise HTTPException(
                 status_code=400,
@@ -142,6 +173,7 @@ async def upload_documents(
                 / document_id
                 / "document.pdf",
                 "upload": upload,
+                "settings_json": file_settings.model_dump_json() if file_settings else None,
             }
         )
 
@@ -226,8 +258,55 @@ def get_analysis_batch(request: Request, batch_id: str) -> dict:
     try:
         UUID(batch_id)
     except ValueError as exc:
-        raise HTTPException(status_code=404, detail="Analysis batch not found.") from exc
+        raise HTTPException(
+            status_code=404, detail="Analysis batch not found."
+        ) from exc
     batch = _repository(request).get_analysis_batch(batch_id)
     if batch is None:
         raise HTTPException(status_code=404, detail="Analysis batch not found.")
     return _public_batch(batch)
+
+
+@router.patch("/documents")
+def edit_documents(request: Request, edit: DocumentEdit) -> dict:
+    if edit.settings is not None:
+        _validate_settings(edit.settings)
+    try:
+        _repository(request).edit_records(
+            edit.document_ids,
+            documents=True,
+            settings=edit.settings.model_dump() if edit.settings else None,
+            reference_id=edit.reference_id,
+            comments=edit.comments,
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return {"updated": len(set(edit.document_ids))}
+
+
+@router.post("/documents/delete")
+def delete_documents(request: Request, selection: DocumentSelection) -> dict:
+    config = request.app.state.config
+    try:
+        paths = _repository(request).delete_documents(
+            selection.document_ids, documents_dir=config.runtime_dir / "documents",
+            jobs_dir=config.jobs_dir,
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (JobIsRunningError, ValueError) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    cleanup_failed = False
+    for path in paths:
+        try:
+            shutil.rmtree(path)
+        except FileNotFoundError:
+            pass
+        except OSError:
+            cleanup_failed = True
+    return {"deleted": len(set(selection.document_ids)), "cleanup_warning": (
+        "PDFs were removed from the queue, but some stored files could not be cleaned up."
+        if cleanup_failed else None
+    )}

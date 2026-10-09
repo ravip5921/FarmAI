@@ -71,9 +71,11 @@ def _sync_batch_status(
     if "running" in statuses:
         batch_status = "running"
     elif "queued" in statuses:
-        batch_status = "running" if any(
-            value not in {"queued"} for value in statuses
-        ) else "queued"
+        batch_status = (
+            "running"
+            if any(value not in {"queued"} for value in statuses)
+            else "queued"
+        )
     elif all(value in {"completed", "completed_with_warnings"} for value in statuses):
         batch_status = (
             "completed_with_warnings"
@@ -108,9 +110,120 @@ class JobRepository:
     def __init__(self, database_path: Path):
         self.database_path = database_path
 
-    def create_documents(
-        self, documents: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def edit_records(
+        self,
+        ids: list[str],
+        *,
+        documents: bool,
+        settings: dict[str, Any] | None = None,
+        reference_id: str | None = None,
+        comments: str | None = None,
+    ) -> None:
+        """Atomically edit a subset, serialized against worker claims and batching."""
+        table = "documents" if documents else "jobs"
+        now = _now()
+        with connect(self.database_path) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            for record_id in dict.fromkeys(ids):
+                row = connection.execute(
+                    f"SELECT * FROM {table} WHERE id = ?", (record_id,)
+                ).fetchone()
+                if row is None:
+                    raise LookupError("Record not found.")
+                job = (
+                    row
+                    if not documents
+                    else connection.execute(
+                        "SELECT * FROM jobs WHERE document_id = ? ORDER BY created_at DESC, rowid DESC LIMIT 1",
+                        (record_id,),
+                    ).fetchone()
+                )
+                if settings is not None and (
+                    row["status"]
+                    not in ({"pending", "queued"} if documents else {"queued"})
+                    or (job is not None and job["attempt_count"] > 0)
+                ):
+                    raise ValueError(
+                        "Settings can only change before a job starts processing."
+                    )
+                for name, value in (
+                    ("reference_id", reference_id),
+                    ("comments", comments),
+                ):
+                    if value is not None:
+                        connection.execute(
+                            f"UPDATE {table} SET {name} = ?, updated_at = ? WHERE id = ?",
+                            (value, now, record_id),
+                        )
+                        if documents and job is not None:
+                            connection.execute(
+                                f"UPDATE jobs SET {name} = ?, updated_at = ? WHERE id = ?",
+                                (value, now, job["id"]),
+                            )
+                        elif not documents and row["document_id"]:
+                            connection.execute(
+                                f"UPDATE documents SET {name} = ?, updated_at = ? WHERE id = ?",
+                                (value, now, row["document_id"]),
+                            )
+                if settings is not None:
+                    if documents:
+                        connection.execute(
+                            "UPDATE documents SET settings_json = ?, updated_at = ? WHERE id = ?",
+                            (json.dumps(settings), now, record_id),
+                        )
+                    if job is not None:
+                        connection.execute(
+                            "UPDATE jobs SET template_id = ?, ocr_engine = ?, extra_filtered_columns_json = ?, updated_at = ? WHERE id = ?",
+                            (
+                                settings["template_id"],
+                                settings["ocr_engine"],
+                                json.dumps(settings["extra_filtered_columns"]),
+                                now,
+                                job["id"],
+                            ),
+                        )
+                        if not documents and row["document_id"]:
+                            connection.execute(
+                                "UPDATE documents SET settings_json = ?, updated_at = ? WHERE id = ?",
+                                (json.dumps(settings), now, row["document_id"]),
+                            )
+
+    def delete_documents(self, ids: list[str], *, documents_dir: Path, jobs_dir: Path) -> list[Path]:
+        """Remove a selection atomically, serialized against batching and worker claims."""
+        paths: list[Path] = []
+        with connect(self.database_path) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            batches: set[str] = set()
+            for document_id in dict.fromkeys(ids):
+                document = connection.execute("SELECT * FROM documents WHERE id = ?", (document_id,)).fetchone()
+                if document is None:
+                    raise LookupError("A selected PDF no longer exists. Refresh the inbox.")
+                jobs = connection.execute("SELECT * FROM jobs WHERE document_id = ?", (document_id,)).fetchall()
+                if document["status"] == "running" or any(job["status"] == "running" for job in jobs):
+                    raise JobIsRunningError("Processing PDFs cannot be deleted. Wait for processing to finish.")
+                directory = Path(document["input_path"]).resolve().parent
+                if directory.parent != documents_dir.resolve() or directory.name != document_id:
+                    raise ValueError("Invalid document storage path; nothing was deleted.")
+                paths.append(directory)
+                for job in jobs:
+                    directory = Path(job["artifact_directory"]).resolve()
+                    if directory.parent != jobs_dir.resolve() or directory.name != job["id"]:
+                        raise ValueError("Invalid job storage path; nothing was deleted.")
+                    paths.append(directory)
+                    if job["batch_id"]:
+                        batches.add(job["batch_id"])
+                connection.execute("DELETE FROM jobs WHERE document_id = ?", (document_id,))
+                connection.execute("DELETE FROM documents WHERE id = ?", (document_id,))
+            for batch_id in batches:
+                count = connection.execute("SELECT COUNT(*) FROM jobs WHERE batch_id = ?", (batch_id,)).fetchone()[0]
+                if count:
+                    connection.execute("UPDATE analysis_batches SET document_count = ? WHERE id = ?", (count, batch_id))
+                    _sync_batch_status(connection, batch_id, now=_now())
+                else:
+                    connection.execute("DELETE FROM analysis_batches WHERE id = ?", (batch_id,))
+        return paths
+
+    def create_documents(self, documents: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not documents:
             return []
         now = _now()
@@ -120,8 +233,8 @@ class JobRepository:
                 """
                 INSERT INTO documents (
                     id, status, original_filename, content_type, size_bytes,
-                    sha256, input_path, created_at, updated_at
-                ) VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?)
+                    sha256, input_path, created_at, updated_at, settings_json
+                ) VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 [
                     (
@@ -133,6 +246,7 @@ class JobRepository:
                         str(document["input_path"]),
                         now,
                         now,
+                        document.get("settings_json"),
                     )
                     for document in documents
                 ],
@@ -197,13 +311,11 @@ class JobRepository:
     def document_counts(self) -> dict[str, int]:
         counts = {"total": 0, **{status: 0 for status in DOCUMENT_STATUSES}}
         with connect(self.database_path) as connection:
-            rows = connection.execute(
-                """
+            rows = connection.execute("""
                 SELECT status, COUNT(*) AS count
                 FROM documents
                 GROUP BY status
-                """
-            ).fetchall()
+                """).fetchall()
         for row in rows:
             status = str(row["status"])
             value = int(row["count"])
@@ -222,13 +334,11 @@ class JobRepository:
         now = _now()
         with connect(self.database_path) as connection:
             connection.execute("BEGIN IMMEDIATE")
-            documents = connection.execute(
-                """
+            documents = connection.execute("""
                 SELECT * FROM documents
                 WHERE status = 'pending'
                 ORDER BY created_at, rowid
-                """
-            ).fetchall()
+                """).fetchall()
             if not documents:
                 return {
                     "id": None,
@@ -260,6 +370,15 @@ class JobRepository:
             )
             jobs: list[dict[str, Any]] = []
             for document in documents:
+                selected = (
+                    json.loads(document["settings_json"])
+                    if document["settings_json"]
+                    else {
+                        "template_id": template_id,
+                        "ocr_engine": ocr_engine,
+                        "extra_filtered_columns": extra_filtered_columns,
+                    }
+                )
                 job_id = str(uuid4())
                 artifact_directory = jobs_dir / job_id
                 connection.execute(
@@ -276,9 +395,9 @@ class JobRepository:
                     (
                         job_id,
                         str(document["original_filename"]),
-                        template_id,
-                        ocr_engine,
-                        serialized_filters,
+                        selected["template_id"],
+                        selected["ocr_engine"],
+                        json.dumps(selected["extra_filtered_columns"]),
                         str(document["input_path"]),
                         str(artifact_directory),
                         now,
@@ -290,10 +409,14 @@ class JobRepository:
                 connection.execute(
                     """
                     UPDATE documents
-                    SET status = 'queued', updated_at = ?
+                    SET status = 'queued', updated_at = ?, settings_json = ?
                     WHERE id = ? AND status = 'pending'
                     """,
-                    (now, str(document["id"])),
+                    (now, json.dumps(selected), str(document["id"])),
+                )
+                connection.execute(
+                    "UPDATE jobs SET reference_id = ?, comments = ? WHERE id = ?",
+                    (document["reference_id"], document["comments"], job_id),
                 )
                 jobs.append(
                     {
@@ -428,9 +551,7 @@ class JobRepository:
             result = connection.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
             now = _now()
             if row["document_id"]:
-                _sync_document_status(
-                    connection, str(row["document_id"]), now=now
-                )
+                _sync_document_status(connection, str(row["document_id"]), now=now)
             if row["batch_id"]:
                 _sync_batch_status(connection, str(row["batch_id"]), now=now)
         return result.rowcount == 1
@@ -461,9 +582,7 @@ class JobRepository:
                 (now, now, job_id),
             )
             if row["document_id"]:
-                _sync_document_status(
-                    connection, str(row["document_id"]), now=now
-                )
+                _sync_document_status(connection, str(row["document_id"]), now=now)
             if row["batch_id"]:
                 _sync_batch_status(connection, str(row["batch_id"]), now=now)
             connection.commit()
@@ -602,9 +721,7 @@ class JobRepository:
                 "SELECT document_id, batch_id FROM jobs WHERE id = ?", (job_id,)
             ).fetchone()
             if row is not None and row["document_id"]:
-                _sync_document_status(
-                    connection, str(row["document_id"]), now=now
-                )
+                _sync_document_status(connection, str(row["document_id"]), now=now)
             if row is not None and row["batch_id"]:
                 _sync_batch_status(connection, str(row["batch_id"]), now=now)
 
@@ -640,9 +757,7 @@ class JobRepository:
                 "SELECT document_id, batch_id FROM jobs WHERE id = ?", (job_id,)
             ).fetchone()
             if row is not None and row["document_id"]:
-                _sync_document_status(
-                    connection, str(row["document_id"]), now=now
-                )
+                _sync_document_status(connection, str(row["document_id"]), now=now)
             if row is not None and row["batch_id"]:
                 _sync_batch_status(connection, str(row["batch_id"]), now=now)
 
@@ -690,9 +805,7 @@ class JobRepository:
             )
             for row in interrupted:
                 if row["document_id"]:
-                    _sync_document_status(
-                        connection, str(row["document_id"]), now=now
-                    )
+                    _sync_document_status(connection, str(row["document_id"]), now=now)
                 if row["batch_id"]:
                     _sync_batch_status(connection, str(row["batch_id"]), now=now)
         return result.rowcount

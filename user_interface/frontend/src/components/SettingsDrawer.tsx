@@ -1,13 +1,8 @@
+import { SettingsFields } from './SettingsFields'
 import {
   Button,
-  Checkbox,
   Divider,
   Drawer,
-  FormControl,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  Select,
   Stack,
   Typography,
 } from '@mui/material'
@@ -38,12 +33,6 @@ export function SettingsDrawer({
   onGroundTruthChange,
   onClose,
 }: SettingsDrawerProps) {
-  const template = options?.templates.find(
-    (item) => item.id === value.template_id,
-  )
-  const visibleColumns =
-    template?.columns.filter((column) => !column.filter_out) ?? []
-
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
       <Stack sx={{ width: { xs: 320, sm: 400 }, p: 3, gap: 2.5 }}>
@@ -68,79 +57,7 @@ export function SettingsDrawer({
           </Button>
         </Stack>
 
-        <FormControl fullWidth>
-          <InputLabel id="template-label">Record type</InputLabel>
-          <Select
-            labelId="template-label"
-            label="Record type"
-            value={value.template_id ?? ''}
-            onChange={(event) =>
-              onChange({
-                ...value,
-                template_id: event.target.value || null,
-                extra_filtered_columns: [],
-              })
-            }
-          >
-            <MenuItem value="">
-              Detected table (no template)
-            </MenuItem>
-            {options?.templates.map((item) => (
-              <MenuItem key={item.id} value={item.id}>
-                {item.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth>
-          <InputLabel id="engine-label">Recognition method</InputLabel>
-          <Select
-            labelId="engine-label"
-            label="Recognition method"
-            value={value.ocr_engine}
-            onChange={(event) =>
-              onChange({ ...value, ocr_engine: event.target.value })
-            }
-          >
-            {options?.ocr_engines.map((engine) => (
-              <MenuItem key={engine.name} value={engine.name}>
-                {engine.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl fullWidth>
-          <InputLabel id="filter-label">Hide additional columns</InputLabel>
-          <Select
-            multiple
-            labelId="filter-label"
-            label="Hide additional columns"
-            value={value.extra_filtered_columns}
-            renderValue={(selected) =>
-              selected.length ? selected.join(', ') : 'None'
-            }
-            onChange={(event) =>
-              onChange({
-                ...value,
-                extra_filtered_columns:
-                  typeof event.target.value === 'string'
-                    ? event.target.value.split(',')
-                    : event.target.value,
-              })
-            }
-          >
-            {visibleColumns.map((column) => (
-              <MenuItem key={column.key} value={column.key}>
-                <Checkbox
-                  checked={value.extra_filtered_columns.includes(column.key)}
-                />
-                <ListItemText primary={column.name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <SettingsFields options={options} value={value} onChange={onChange} />
 
         {showGroundTruth && onGroundTruthChange && (
           <>

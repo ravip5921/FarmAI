@@ -270,9 +270,13 @@ export function DemoPage() {
           </section>
 
           <DocumentInboxTable
+            editable={false}
             documents={[
               {
                 document_id: 'demo-document',
+                reference_id: '',
+                comments: '',
+                settings: null,
                 filename: record.name,
                 status: 'pending',
                 size_bytes: record.size,

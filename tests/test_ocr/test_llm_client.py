@@ -71,6 +71,26 @@ class TestLlmClient(unittest.TestCase):
         self.assertIn("Common values", prompt)
         self.assertIn("All gaad", prompt)
 
+    def test_selected_template_is_carried_into_prompt(self) -> None:
+        from src.templates import load_template
+        from src.ocr.column_rules import build_column_ocr_rules
+
+        template = load_template("boar_room")
+        rules = build_column_ocr_rules(
+            template.columns,
+            template_id=template.id,
+            template_name=template.name,
+        )
+        prompt = build_llm_ocr_prompt(rule=rules[1])
+        self.assertIn("Template ID: boar_room", prompt)
+        self.assertIn("Template name: Boar Room", prompt)
+        self.assertIn("Template column position (1-based): 2", prompt)
+        self.assertIn("Column name: Current Temperature", prompt)
+        self.assertIn("Expected format: TT.T", prompt)
+        self.assertIn("Expected range: 50.0 to 110.0", prompt)
+        self.assertIn("Do not fill blank cells", prompt)
+        self.assertNotIn("Selected template", build_llm_ocr_prompt(rule=None))
+
     def test_llm_engine_posts_image_and_parses_response(self) -> None:
         engine = LlmVisionOcrEngine(
             LlmVisionConfig(api_url="http://example.test/api/chat", model="model")

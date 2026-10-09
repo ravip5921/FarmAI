@@ -1,7 +1,13 @@
+import { SettingsFields } from '../components/SettingsFields'
 import {
   Alert,
   Button,
   CircularProgress,
+  Checkbox,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   IconButton,
   Tooltip,
 } from '@mui/material'
@@ -135,6 +141,10 @@ export function UploadPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [selectionError, setSelectionError] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [fileSettings, setFileSettings] = useState<Map<File, JobSettings>>(new Map())
+  const [checkedFiles, setCheckedFiles] = useState<Set<File>>(new Set())
+  const [editingFiles, setEditingFiles] = useState<File[]>([])
+  const [draftSettings, setDraftSettings] = useState<JobSettings>(defaultSettings)
   const [dragActive, setDragActive] = useState(false)
   const [settingsOverride, setSettingsOverride] =
     useState<JobSettings | null>(null)
@@ -188,9 +198,11 @@ export function UploadPage() {
   )
 
   const upload = useMutation({
-    mutationFn: uploadDocuments,
+    mutationFn: (files: File[]) => uploadDocuments(files, files.map(file => fileSettings.get(file) ?? settings)),
     onSuccess: async () => {
       setSelectedFiles([])
+      setFileSettings(new Map())
+      setCheckedFiles(new Set())
       if (fileInput.current) fileInput.current.value = ''
       await queryClient.invalidateQueries({ queryKey: ['documents'] })
     },
@@ -204,6 +216,11 @@ export function UploadPage() {
       ])
     },
   })
+
+  const editFileSettings = (files: File[]) => {
+    setDraftSettings(fileSettings.get(files[0]) ?? settings)
+    setEditingFiles(files)
+  }
 
   const acceptFiles = (files?: FileList | File[]) => {
     if (!files || upload.isPending) return
@@ -388,20 +405,36 @@ export function UploadPage() {
                   Clear all
                 </Button>
               </div>
+              <div className="inbox-panel__actions">
+                <Checkbox aria-label="Select all PDFs ready to upload"
+                  checked={selectedFiles.every(file => checkedFiles.has(file))}
+                  indeterminate={selectedFiles.some(file => checkedFiles.has(file)) && !selectedFiles.every(file => checkedFiles.has(file))}
+                  disabled={upload.isPending}
+                  onChange={(_, checked) => setCheckedFiles(checked ? new Set(selectedFiles) : new Set())}
+                />
+                <Button disabled={upload.isPending || !selectedFiles.some(file => checkedFiles.has(file))}
+                  onClick={() => editFileSettings(selectedFiles.filter(file => checkedFiles.has(file)))}>Settings for selected PDFs</Button>
+                <Button disabled={upload.isPending} onClick={() => editFileSettings(selectedFiles)}>Settings for all PDFs</Button>
+              </div>
               <ul>
                 {selectedFiles.map((file) => {
                   const key = `${file.name}:${file.size}:${file.lastModified}`
                   return (
                     <li key={key}>
+                      <Checkbox aria-label={`Select settings for ${file.name}`} checked={checkedFiles.has(file)} disabled={upload.isPending}
+                        onChange={(_, checked) => setCheckedFiles(current => { const next = new Set(current); if (checked) next.add(file); else next.delete(file); return next })}
+                      />
                       <span className="selected-file__icon">
                         <FileText size={20} aria-hidden="true" />
                       </span>
                       <span className="staged-file__details">
                         <span className="selected-file__name">{file.name}</span>
                         <span className="selected-file__size">
-                          {formatSize(file.size)}
+                          {formatSize(file.size)} | {(fileSettings.get(file) ?? settings).template_id ?? 'No template'}
+                          {fileSettings.has(file) ? ' (custom settings)' : ' (default settings)'}
                         </span>
                       </span>
+                      <Button disabled={upload.isPending} onClick={() => editFileSettings([file])}>Settings</Button>
                       <Tooltip title="Remove PDF">
                         <span>
                           <IconButton
@@ -466,8 +499,8 @@ export function UploadPage() {
             <div>
               <h2 id="analyze-heading">Analyze awaiting PDFs</h2>
               <p>
-                This creates one independent job for every PDF currently
-                awaiting analysis.
+                Customize individual PDFs or select a group in the inbox below.
+                Analysis uses each PDF's saved settings, falling back to these defaults.
               </p>
             </div>
           </div>
@@ -494,7 +527,7 @@ export function UploadPage() {
           <div className="analysis-control__body">
             <div>
               <span className="analysis-control__label">
-                Settings for this batch
+                Default settings for PDFs without custom settings
               </span>
               <strong>{templateName}</strong>
               <span>
@@ -555,6 +588,7 @@ export function UploadPage() {
         ) : !inbox.error ? (
           <DocumentInboxTable
             documents={documents}
+            defaultSettings={settings}
             hasMore={inbox.hasNextPage}
             isLoadingMore={inbox.isFetchingNextPage}
             onLoadMore={() => inbox.fetchNextPage()}
@@ -587,6 +621,21 @@ export function UploadPage() {
         />
       </main>
 
+      <Dialog open={editingFiles.length > 0} onClose={() => setEditingFiles([])} fullWidth maxWidth="sm">
+        <DialogTitle>{editingFiles.length === 1 ? `Settings for ${editingFiles[0].name}` : `Settings for ${editingFiles.length} PDFs`}</DialogTitle>
+        <DialogContent>
+          <p>These settings are saved with the upload and used when you start analysis.</p>
+          {options.error && <Alert severity="error">Settings could not be loaded.</Alert>}
+          <SettingsFields options={options.data} value={draftSettings} onChange={setDraftSettings} disabled={!options.data} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditingFiles([])}>Cancel</Button>
+          <Button variant="contained" disabled={!options.data} onClick={() => {
+            setFileSettings(current => { const next = new Map(current); editingFiles.forEach(file => next.set(file, draftSettings)); return next })
+            setEditingFiles([])
+          }}>Apply settings</Button>
+        </DialogActions>
+      </Dialog>
       <SettingsDrawer
         open={settingsOpen}
         options={options.data}
