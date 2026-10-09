@@ -15,11 +15,12 @@ export function getDocuments(offset = 0) {
   return apiRequest<DocumentsResponse>(`/api/documents?${query}`)
 }
 
-export function uploadDocuments(documents: File[]) {
+export function uploadDocuments(documents: File[], settings?: (JobSettings | null)[]) {
   const body = new FormData()
   for (const document of documents) {
     body.append('documents', document)
   }
+  if (settings) body.append('settings', JSON.stringify(settings))
   return apiRequest<DocumentsResponse>('/api/documents', {
     method: 'POST',
     body,

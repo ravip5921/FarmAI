@@ -63,6 +63,15 @@ class TestJobApiReview(unittest.IsolatedAsyncioTestCase):
                 repository = app.state.repository
                 with patch.object(
                     repository,
+                    "edit_records",
+                    side_effect=LookupError("missing during edit"),
+                ):
+                    response = await client.patch(
+                        f"/api/jobs/{job_id}", json={"comments": "updated"}
+                    )
+                    self.assertEqual(response.status_code, 404)
+                with patch.object(
+                    repository,
                     "cancel_job",
                     side_effect=JobCannotBeCancelledError("cannot"),
                 ):

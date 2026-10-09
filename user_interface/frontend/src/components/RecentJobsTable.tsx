@@ -1,3 +1,5 @@
+import { EditableMetadataCell } from './EditableMetadataCell'
+import { RecordEditor } from './RecordEditor'
 import {
   Alert,
   Button,
@@ -60,6 +62,7 @@ export function RecentJobsTable({
   title = 'Recent jobs',
   description = 'Open a running job or return to a previous result.',
 }: RecentJobsTableProps) {
+  const [editing, setEditing] = useState<JobSummary | null>(null)
   const queryClient = useQueryClient()
   const [checkedJobIds, setCheckedJobIds] = useState<Set<string>>(new Set())
   const [jobsToDelete, setJobsToDelete] = useState<JobSummary[]>([])
@@ -111,6 +114,12 @@ export function RecentJobsTable({
 
   return (
     <>
+      {editing && <RecordEditor ids={[editing.job_id]} title={`Edit ${editing.filename}`}
+        initialSettings={{ template_id: editing.template_id, ocr_engine: editing.ocr_engine, extra_filtered_columns: editing.extra_filtered_columns }}
+        referenceId={editing.reference_id} comments={editing.comments}
+        canEditSettings={editing.status === 'queued' && editing.attempt_count === 0}
+        onClose={() => setEditing(null)} />}
+
       <section className="recent-jobs" aria-labelledby="recent-jobs-heading">
         <div className="recent-jobs__heading">
           <div>
@@ -166,6 +175,8 @@ export function RecentJobsTable({
                   />
                 </TableCell>
                 <TableCell>Record</TableCell>
+                <TableCell>ID</TableCell>
+                <TableCell>Comments / label</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell className="recent-jobs__date">Started</TableCell>
                 <TableCell align="right">Actions</TableCell>
@@ -202,6 +213,8 @@ export function RecentJobsTable({
                       {job.filename}
                     </Link>
                   </TableCell>
+                  <EditableMetadataCell id={job.job_id} disabled={remove.isPending} field="reference_id" value={job.reference_id} fallback={job.job_id.slice(0, 8)} />
+                  <EditableMetadataCell id={job.job_id} disabled={remove.isPending} field="comments" value={job.comments} />
                   <TableCell>
                     <Chip
                       label={STATUS_LABELS[job.status]}
@@ -217,6 +230,7 @@ export function RecentJobsTable({
                   </TableCell>
                   <TableCell align="right">
                     <span className="job-actions">
+                      <Button size="small" onClick={() => setEditing(job)}>Edit</Button>
                       <Tooltip title="Open job">
                         <Link
                           className="job-open-link"

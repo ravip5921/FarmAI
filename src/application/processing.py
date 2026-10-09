@@ -237,7 +237,13 @@ def process_document(
             column_names=template.column_names if template else None,
             column_keys=template.column_keys if template else None,
             column_ocr_rules=(
-                build_column_ocr_rules(template.columns) if template else None
+                build_column_ocr_rules(
+                    template.columns,
+                    template_id=template.id,
+                    template_name=template.name,
+                )
+                if template
+                else None
             ),
             progress_callback=on_cell_progress,
         )

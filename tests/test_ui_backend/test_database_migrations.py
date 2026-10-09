@@ -67,26 +67,26 @@ class TestDatabaseMigrations(unittest.TestCase):
                 )
             with self.assertRaisesRegex(RuntimeError, "unknown migration"):
                 migrate_database(database_path)
+            latest_version = database_module.MIGRATIONS[-1][0]
             with connect(database_path) as connection:
                 connection.execute("DELETE FROM schema_migrations WHERE version = 99")
-                connection.execute("DELETE FROM schema_migrations WHERE version = 3")
+                connection.execute(
+                    "DELETE FROM schema_migrations WHERE version = ?",
+                    (latest_version,),
+                )
             migration = (
-                3,
+                latest_version,
                 "failing",
                 lambda connection: (_ for _ in ()).throw(RuntimeError("broken")),
             )
             with patch.object(
                 database_module,
                 "MIGRATIONS",
-                (
-                    database_module.MIGRATIONS[0],
-                    database_module.MIGRATIONS[1],
-                    migration,
-                ),
+                (*database_module.MIGRATIONS[:-1], migration),
             ):
                 with self.assertRaisesRegex(RuntimeError, "broken"):
                     migrate_database(database_path)
-            self.assertEqual(get_schema_version(database_path), 2)
+            self.assertEqual(get_schema_version(database_path), latest_version - 1)
 
     def test_upgrades_legacy_database_without_changing_job_or_artifact(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -119,7 +119,7 @@ class TestDatabaseMigrations(unittest.TestCase):
 
             applied = migrate_database(database_path)
 
-            self.assertEqual(applied, [1, 2, 3])
+            self.assertEqual(applied, [1, 2, 3, 4])
             self.assertEqual(get_schema_version(database_path), LATEST_SCHEMA_VERSION)
             self.assertEqual(migrate_database(database_path), [])
             with connect(database_path) as migrated:
@@ -148,7 +148,7 @@ class TestDatabaseMigrations(unittest.TestCase):
                     executor.map(lambda _: migrate_database(database_path), range(2))
                 )
 
-            self.assertIn([1, 2, 3], results)
+            self.assertIn([1, 2, 3, 4], results)
             self.assertIn([], results)
             self.assertEqual(get_schema_version(database_path), LATEST_SCHEMA_VERSION)
 

@@ -24,6 +24,44 @@ def _document(root: Path, document_id: str) -> dict:
 
 
 class TestInboxRepository(unittest.TestCase):
+    def test_delete_refuses_paths_outside_managed_directories(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            database = root / "farmai.sqlite3"
+            initialize_database(database)
+            repository = JobRepository(database)
+            repository.create_documents([_document(root, "doc")])
+            with connect(database) as connection:
+                connection.execute(
+                    "UPDATE documents SET input_path = ? WHERE id = 'doc'",
+                    (str(root / "outside.pdf"),),
+                )
+            with self.assertRaisesRegex(ValueError, "Invalid document storage path"):
+                repository.delete_documents(
+                    ["doc"], documents_dir=root / "documents", jobs_dir=root / "jobs"
+                )
+            with connect(database) as connection:
+                connection.execute(
+                    "UPDATE documents SET input_path = ? WHERE id = 'doc'",
+                    (str(root / "documents" / "doc" / "document.pdf"),),
+                )
+            batch = repository.create_analysis_batch(
+                template_id=None,
+                ocr_engine="tesseract",
+                extra_filtered_columns=[],
+                jobs_dir=root / "jobs",
+            )
+            with connect(database) as connection:
+                connection.execute(
+                    "UPDATE jobs SET artifact_directory = ? WHERE id = ?",
+                    (str(root / "outside-job"), batch["jobs"][0]["id"]),
+                )
+            with self.assertRaisesRegex(ValueError, "Invalid job storage path"):
+                repository.delete_documents(
+                    ["doc"], documents_dir=root / "documents", jobs_dir=root / "jobs"
+                )
+            self.assertIsNotNone(repository.get_document("doc"))
+
     def test_batch_creation_is_an_atomic_snapshot(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

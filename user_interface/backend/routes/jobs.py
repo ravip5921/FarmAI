@@ -32,7 +32,7 @@ from ..repository import (
     JobIsRunningError,
     JobRepository,
 )
-from ..schemas import CellEdits, JobSettings
+from ..schemas import CellEdits, JobSettings, RecordEdit
 from ..services.artifact_store import (
     read_result,
     result_to_csv,
@@ -67,6 +67,9 @@ def _public_job(job: dict) -> dict:
         "progress_current": job["progress_current"],
         "progress_total": job["progress_total"],
         "filename": job["original_filename"],
+        "reference_id": job["reference_id"],
+        "comments": job["comments"],
+        "extra_filtered_columns": json.loads(job["extra_filtered_columns_json"]),
         "document_id": job.get("document_id"),
         "batch_id": job.get("batch_id"),
         "template_id": job["template_id"],
@@ -111,8 +114,7 @@ async def create_job(
     request: Request,
     record: UploadFile = File(...),
     settings: str = Form(
-        '{"template_id":null,"ocr_engine":"llm-vision",'
-        '"extra_filtered_columns":[]}'
+        '{"template_id":null,"ocr_engine":"llm-vision",' '"extra_filtered_columns":[]}'
     ),
     ground_truth: UploadFile | None = File(default=None),
 ) -> dict:
@@ -362,3 +364,24 @@ def remove_ground_truth(request: Request, job_id: str) -> dict:
         Path(str(ground_truth_path)).unlink(missing_ok=True)
     repository.set_ground_truth_path(job_id, None)
     return result
+
+
+@router.patch("/jobs/{job_id}")
+def edit_job(request: Request, job_id: str, edit: RecordEdit) -> dict:
+    repository = _repository(request)
+    _job_or_404(repository, job_id)
+    if edit.settings is not None:
+        _parse_settings(edit.settings.model_dump_json())
+    try:
+        repository.edit_records(
+            [job_id],
+            documents=False,
+            settings=edit.settings.model_dump() if edit.settings else None,
+            reference_id=edit.reference_id,
+            comments=edit.comments,
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return _public_job(_job_or_404(repository, job_id))

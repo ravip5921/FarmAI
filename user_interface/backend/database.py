@@ -6,7 +6,6 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
-
 Migration = tuple[int, str, Callable[[sqlite3.Connection], None]]
 
 
@@ -51,8 +50,7 @@ def _migration_001_initial_jobs(connection: sqlite3.Connection) -> None:
     FarmAI versions that predate the migration ledger.
     """
 
-    connection.execute(
-        """
+    connection.execute("""
         CREATE TABLE IF NOT EXISTS jobs (
             id TEXT PRIMARY KEY,
             status TEXT NOT NULL,
@@ -75,13 +73,11 @@ def _migration_001_initial_jobs(connection: sqlite3.Connection) -> None:
             user_safe_error TEXT,
             technical_error TEXT
         )
-        """
-    )
+        """)
 
 
 def _migration_002_document_inbox(connection: sqlite3.Connection) -> None:
-    connection.execute(
-        """
+    connection.execute("""
         CREATE TABLE IF NOT EXISTS documents (
             id TEXT PRIMARY KEY,
             status TEXT NOT NULL,
@@ -93,10 +89,8 @@ def _migration_002_document_inbox(connection: sqlite3.Connection) -> None:
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
         )
-        """
-    )
-    connection.execute(
-        """
+        """)
+    connection.execute("""
         CREATE TABLE IF NOT EXISTS analysis_batches (
             id TEXT PRIMARY KEY,
             status TEXT NOT NULL,
@@ -109,8 +103,7 @@ def _migration_002_document_inbox(connection: sqlite3.Connection) -> None:
             completed_at TEXT,
             updated_at TEXT NOT NULL
         )
-        """
-    )
+        """)
 
     job_columns = _columns(connection, "jobs")
     if "document_id" not in job_columns:
@@ -132,16 +125,12 @@ def _migration_002_document_inbox(connection: sqlite3.Connection) -> None:
         "CREATE INDEX IF NOT EXISTS idx_jobs_document_created "
         "ON jobs(document_id, created_at DESC)"
     )
-    connection.execute(
-        "CREATE INDEX IF NOT EXISTS idx_jobs_batch ON jobs(batch_id)"
-    )
-    connection.execute(
-        """
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_jobs_batch ON jobs(batch_id)")
+    connection.execute("""
         CREATE UNIQUE INDEX IF NOT EXISTS idx_jobs_one_active_per_document
         ON jobs(document_id)
         WHERE document_id IS NOT NULL AND status IN ('queued', 'running')
-        """
-    )
+        """)
 
 
 def _migration_003_job_leases(connection: sqlite3.Connection) -> None:
@@ -158,8 +147,7 @@ def _migration_003_job_leases(connection: sqlite3.Connection) -> None:
                 f"ALTER TABLE jobs ADD COLUMN {column_name} {definition}"
             )
     connection.execute(
-        "CREATE INDEX IF NOT EXISTS idx_jobs_claimable "
-        "ON jobs(status, created_at)"
+        "CREATE INDEX IF NOT EXISTS idx_jobs_claimable " "ON jobs(status, created_at)"
     )
     connection.execute(
         "CREATE INDEX IF NOT EXISTS idx_jobs_expired_leases "
@@ -167,10 +155,20 @@ def _migration_003_job_leases(connection: sqlite3.Connection) -> None:
     )
 
 
+def _migration_004_record_settings(connection: sqlite3.Connection) -> None:
+    for table in ("documents", "jobs"):
+        for name in ("reference_id", "comments"):
+            connection.execute(
+                f"ALTER TABLE {table} ADD COLUMN {name} TEXT NOT NULL DEFAULT ''"
+            )
+    connection.execute("ALTER TABLE documents ADD COLUMN settings_json TEXT")
+
+
 MIGRATIONS: tuple[Migration, ...] = (
     (1, "initial_jobs", _migration_001_initial_jobs),
     (2, "document_inbox", _migration_002_document_inbox),
     (3, "job_leases", _migration_003_job_leases),
+    (4, "record_settings", _migration_004_record_settings),
 )
 LATEST_SCHEMA_VERSION = MIGRATIONS[-1][0]
 
@@ -179,12 +177,10 @@ def get_schema_version(path: Path) -> int:
     if not path.is_file():
         return 0
     with connect(path) as connection:
-        exists = connection.execute(
-            """
+        exists = connection.execute("""
             SELECT 1 FROM sqlite_master
             WHERE type = 'table' AND name = 'schema_migrations'
-            """
-        ).fetchone()
+            """).fetchone()
         if exists is None:
             return 0
         row = connection.execute(
@@ -201,15 +197,13 @@ def migrate_database(path: Path) -> list[int]:
     with connect(path) as connection:
         # Serialize migration discovery and application across API/worker starts.
         connection.execute("BEGIN IMMEDIATE")
-        connection.execute(
-            """
+        connection.execute("""
             CREATE TABLE IF NOT EXISTS schema_migrations (
                 version INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 applied_at TEXT NOT NULL
             )
-            """
-        )
+            """)
         known_versions = {
             int(row["version"])
             for row in connection.execute(

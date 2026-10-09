@@ -44,6 +44,9 @@ export interface CreatedJob {
 }
 
 export interface JobSummary {
+  reference_id: string
+  comments: string
+  extra_filtered_columns: string[]
   job_id: string
   document_id: string | null
   batch_id: string | null
@@ -78,6 +81,9 @@ export type DocumentStatus =
   | 'cancelled'
 
 export interface DocumentSummary {
+  reference_id: string
+  comments: string
+  settings: JobSettings | null
   document_id: string
   filename: string
   status: DocumentStatus

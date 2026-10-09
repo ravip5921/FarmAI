@@ -18,3 +18,17 @@ class CellEdit(BaseModel):
 
 class CellEdits(BaseModel):
     edits: list[CellEdit]
+
+
+class RecordEdit(BaseModel):
+    settings: JobSettings | None = None
+    reference_id: str | None = Field(default=None, max_length=200)
+    comments: str | None = Field(default=None, max_length=5000)
+
+
+class DocumentEdit(RecordEdit):
+    document_ids: list[str] = Field(min_length=1, max_length=500)
+
+
+class DocumentSelection(BaseModel):
+    document_ids: list[str] = Field(min_length=1, max_length=500)

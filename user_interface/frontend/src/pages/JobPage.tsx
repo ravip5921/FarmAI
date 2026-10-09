@@ -1,3 +1,4 @@
+import { RecordEditor } from '../components/RecordEditor'
 import {
   Alert,
   Button,
@@ -51,6 +52,7 @@ export function JobPage() {
   const { jobId = '' } = useParams()
   const queryClient = useQueryClient()
   const [pageNumber, setPageNumber] = useState(1)
+  const [editingRecord, setEditingRecord] = useState(false)
   const [selectedCell, setSelectedCell] = useState<ResultCell | null>(null)
   const [needsReviewOnly, setNeedsReviewOnly] = useState(false)
   const analysisRef = useRef<HTMLDivElement>(null)
@@ -144,6 +146,14 @@ export function JobPage() {
     )
   }
 
+  const recordEditor = editingRecord && <RecordEditor
+    ids={[jobId]} title={`Edit ${job.data.filename}`}
+    initialSettings={{ template_id: job.data.template_id, ocr_engine: job.data.ocr_engine, extra_filtered_columns: job.data.extra_filtered_columns }}
+    referenceId={job.data.reference_id} comments={job.data.comments}
+    canEditSettings={job.data.status === 'queued' && job.data.attempt_count === 0}
+    onClose={() => setEditingRecord(false)}
+  />
+
   if (job.data.status === 'failed') {
     return (
       <div className="app-shell">
@@ -188,8 +198,12 @@ export function JobPage() {
               {cancel.error.message}
             </Alert>
           )}
+          {recordEditor}
           <JobProgress job={job.data} />
+          <p>ID: {job.data.reference_id || jobId}</p>
+          <p style={{ whiteSpace: 'pre-wrap' }}>{job.data.comments}</p>
           <div className="processing-actions">
+            <Button variant="outlined" onClick={() => setEditingRecord(true)}>Edit job</Button>
             <Button
               color="error"
               variant="outlined"
@@ -221,9 +235,12 @@ export function JobPage() {
     <div className="app-shell">
       <AppHeader backTo="/" />
       <main className="page review-page">
+        {recordEditor}
         <div className="review-topbar">
           <div className="review-title">
             <h1>{data.filename}</h1>
+            <p>ID: {job.data.reference_id || jobId}</p>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{job.data.comments}</p>
             <p>
               {data.template_name ?? 'Detected table'} |{' '}
               {data.ocr_engine === 'llm-vision'
@@ -232,6 +249,7 @@ export function JobPage() {
             </p>
           </div>
           <div className="review-actions">
+            <Button onClick={() => setEditingRecord(true)}>Edit label / ID</Button>
             {data.pages.length > 1 && (
               <Select
                 size="small"

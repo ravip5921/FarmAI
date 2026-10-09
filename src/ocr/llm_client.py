@@ -218,7 +218,22 @@ def build_llm_ocr_prompt(
         "Do not explain your answer.",
     ]
     if rule is not None:
+        lines.append("Selected template cell context:")
+        for field, label in (
+            ("template_id", "Template ID"),
+            ("template_name", "Template name"),
+        ):
+            if value := getattr(rule, field, None):
+                lines.append(f"{label}: {value}")
+        index = getattr(rule, "index", None)
+        if index is not None:
+            lines.append(f"Template column position (1-based): {index + 1}")
         lines.extend(_rule_prompt_lines(rule))
+        lines.append(
+            "Use the template context to interpret visible handwriting only. "
+            "Common values are examples, not defaults. Do not fill blank cells "
+            "or invent a value to satisfy the expected format or range."
+        )
     if ocr_text is not None:
         lines.append(f"Existing OCR guess: {_ocr_guess_for_prompt(ocr_text)!r}")
         if ocr_text.validation_error:

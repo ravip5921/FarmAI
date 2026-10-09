@@ -26,6 +26,8 @@ class ColumnOcrRule:
     range_max: float | None = None
     tesseract_whitelist: str | None = None
     tesseract_retry_psms: tuple[int, ...] = ()
+    template_id: str | None = None
+    template_name: str | None = None
 
     def normalize_text(self, text: str) -> str:
         if self.value_type == "temperature":
@@ -61,13 +63,20 @@ class ColumnOcrRule:
         ]
 
 
-def build_column_ocr_rules(columns: Iterable[Any]) -> list[ColumnOcrRule]:
+def build_column_ocr_rules(
+    columns: Iterable[Any],
+    *,
+    template_id: str | None = None,
+    template_name: str | None = None,
+) -> list[ColumnOcrRule]:
     rules: list[ColumnOcrRule] = []
     for column in columns:
         value_type = str(getattr(column, "value_type", "text"))
         is_temperature = value_type == "temperature"
         rules.append(
             ColumnOcrRule(
+                template_id=template_id,
+                template_name=template_name,
                 index=int(getattr(column, "index")),
                 key=str(getattr(column, "key", "")),
                 name=str(getattr(column, "name", "")),
