@@ -284,14 +284,14 @@ on_exit() {
 trap on_exit EXIT
 
 log "Fetching immutable release commit $RELEASE_COMMIT"
-git -C "$SOURCE_REPO" fetch --no-tags origin interface
+git -C "$SOURCE_REPO" fetch --no-tags origin main
 RESOLVED_COMMIT="$(git -C "$SOURCE_REPO" rev-parse "$RELEASE_COMMIT^{commit}")"
 [ "$RESOLVED_COMMIT" = "$RELEASE_COMMIT" ] \
   || fail "source repository did not resolve the requested commit exactly"
 git -C "$SOURCE_REPO" merge-base --is-ancestor \
   "$RELEASE_COMMIT" \
-  refs/remotes/origin/interface \
-  || fail "requested commit is not on origin/interface"
+  refs/remotes/origin/main \
+  || fail "requested commit is not on origin/main"
 
 if [ -f "$RELEASE_DIR/REVISION" ] \
   && [ "$(tr -d '\n' < "$RELEASE_DIR/REVISION")" = "$RELEASE_COMMIT" ] \

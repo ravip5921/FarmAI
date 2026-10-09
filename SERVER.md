@@ -4,7 +4,7 @@ Below are the SSH credentials for the development server:
 - Password: 
 Please log in and change your password after your first login if prompted. I also added you to the sudo list, so please use this carefully if any change needs to be made. 
 This server will be used to develop and deploy the new FarmAI web service. Our production domain will eventually be:
-https://farmai.cht77.com (not yet set up)
+https://farmai.cht77.com
 During development, however, you are welcome to access and test your application using the server's IP address or another temporary URL while you are getting everything configured.
 The goal is for you to become familiar with setting up and managing a web application on an Ubuntu server. This includes tasks such as:
 - Setting up your project directory
@@ -19,7 +19,7 @@ If you need any software installed, additional permissions, a database configure
 
 ## Managed application releases
 
-The `interface` branch now uses the safe release process documented in
+The `main` branch uses the safe release process documented in
 [`deploy/README.md`](deploy/README.md). The GitHub workflow tests the exact
 commit first, stages and smoke-tests it separately from the running release,
 waits for the analysis worker to drain, backs up and migrates SQLite, and then

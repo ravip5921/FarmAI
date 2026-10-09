@@ -2,7 +2,7 @@ name: Test and deploy FarmAI UI
 
 on:
   push:
-    branches: [interface]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

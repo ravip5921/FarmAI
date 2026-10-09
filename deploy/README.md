@@ -1,6 +1,6 @@
 # FarmAI release deployment
 
-The deployment workflow promotes only the exact `interface` commit that passed
+The deployment workflow promotes only the exact `main` commit that passed
 the Python test/type gates and the frontend lint/build gates. It never resets
 the live checkout or writes build output into the current release.
 
@@ -124,7 +124,7 @@ to `ssh-keyscan`; pinning the server key is safer. Protect the GitHub
 
 For every release, `deploy-release.sh` performs these operations:
 
-1. Fetch and verify that the requested full SHA is on `origin/interface`.
+1. Fetch and verify that the requested full SHA is on `origin/main`.
 2. Export that SHA to a new release directory; install isolated dependencies;
    lint/build the frontend again.
 3. Start the candidate API on the loopback smoke port with a temporary database,
