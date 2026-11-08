@@ -170,6 +170,8 @@ def _trim_row_candidates(
     rows: list[int],
     row_support: list[int],
     axis_length: int,
+    *,
+    preserve_header_row: bool = False,
 ) -> tuple[list[int], int]:
     if len(rows) < 2:
         return rows, 0
@@ -202,7 +204,15 @@ def _trim_row_candidates(
                 end_index = index + 1
                 break
         table_rows = spacing_rows[:end_index]
-        table_rows = _merge_close_positions(table_rows, spacing)
+        # Some forms have a printed header much shorter than a data row.
+        # Keep its top edge out of the merge so the first data row is not
+        # consumed by the synthetic OCR header.
+        if preserve_header_row:
+            table_rows = table_rows[:1] + _merge_close_positions(
+                table_rows[1:], spacing
+            )
+        else:
+            table_rows = _merge_close_positions(table_rows, spacing)
         table_rows = _fill_missing_regular_positions(table_rows, spacing)
 
     if len(table_rows) < 2:
@@ -606,6 +616,8 @@ def refine_grid_with_projection_profiles(
     vertical_mask: np.ndarray,
     image_shape: tuple[int, int],
     intersection_centroids: list[tuple[int, int]] | None = None,
+    *,
+    preserve_header_row: bool = False,
 ) -> GridRefinementResult:
     """Snap grid axes to projection-profile peaks from line masks."""
     if horizontal_mask.ndim != 2 or vertical_mask.ndim != 2:
@@ -646,7 +658,12 @@ def refine_grid_with_projection_profiles(
         col_candidates,
         radius=radius,
     )
-    row_coords, spacing = _trim_row_candidates(row_candidates, row_support, height)
+    row_coords, spacing = _trim_row_candidates(
+        row_candidates,
+        row_support,
+        height,
+        preserve_header_row=preserve_header_row,
+    )
 
     endpoint_tolerance = max(1, min(8, width // 220))
     endpoint_candidates, endpoint_candidate_support = _horizontal_endpoint_candidates(

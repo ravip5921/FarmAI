@@ -29,6 +29,7 @@ class FormTemplate:
     column_widths: tuple[float, ...]
     uniform_row_height: bool
     columns: tuple[TemplateColumn, ...]
+    preserve_header_row: bool = False
 
     @property
     def filtered_column_indices(self) -> set[int]:
@@ -103,6 +104,7 @@ def form_template_from_dict(data: dict[str, Any]) -> FormTemplate:
         column_widths=column_widths,
         uniform_row_height=bool(table.get("uniform_row_height", False)),
         columns=columns,
+        preserve_header_row=bool(table.get("preserve_header_row", False)),
     )
 
 

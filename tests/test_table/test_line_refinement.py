@@ -27,6 +27,43 @@ class DiffEmptyColumns(list[int]):
 
 
 class TestLineRefinement(unittest.TestCase):
+    def test_template_preserves_short_header_and_first_data_row(self) -> None:
+        rows = [199, 213, 250, 286, 323, 359]
+        actual, spacing = line_refinement._trim_row_candidates(
+            rows,
+            [7, 14, 18, 19, 16, 17],
+            axis_length=1684,
+            preserve_header_row=True,
+        )
+        self.assertEqual(actual, rows)
+        self.assertEqual(spacing, 36)
+
+    def test_preserving_header_still_merges_duplicate_body_lines(self) -> None:
+        actual, _ = line_refinement._trim_row_candidates(
+            [199, 213, 250, 286, 323, 359, 392, 396, 433],
+            [7, 14, 18, 19, 16, 17, 15, 15, 11],
+            axis_length=1684,
+            preserve_header_row=True,
+        )
+        self.assertEqual(actual, [199, 213, 250, 286, 323, 359, 394, 433])
+
+    def test_preserving_header_leaves_already_separate_rows_unchanged(self) -> None:
+        for scale, offset in ((1, 0), (1, 70), (2, 40)):
+            with self.subTest(scale=scale, offset=offset):
+                rows = [offset + scale * y for y in (199, 235, 271, 307, 343, 379)]
+                support = [7, 14, 18, 19, 16, 17]
+                original, _ = line_refinement._trim_row_candidates(
+                    rows, support, axis_length=1684 * scale
+                )
+                preserved, _ = line_refinement._trim_row_candidates(
+                    rows,
+                    support,
+                    axis_length=1684 * scale,
+                    preserve_header_row=True,
+                )
+                self.assertEqual(original, rows)
+                self.assertEqual(preserved, original)
+
     def test_refinement_fills_missing_regular_row_and_recovers_endpoint_column(
         self,
     ) -> None:

@@ -129,6 +129,25 @@ streamlit run streamlit_app.py
 The web UI defaults to this template but also provides
 `Detected table (no template)` to use the reconstructed grid as-is.
 
+The Farrowing Room template retains the ID `farrowing_room_4`. Its
+`table.preserve_header_row` setting keeps the short printed header separate
+from the first data row during grid refinement. Without this setting, those
+two bands can merge and the header-skipping OCR step discards `01-May`.
+This uses the detected boundaries in each document, with no fixed coordinates
+or row count. An already separate header remains unchanged; the setting does
+not recover a header boundary that line detection missed entirely.
+
+To inspect the farrowing grid, cell crops, and exports from Python using the
+web interface's default crop settings:
+
+```powershell
+farm-ai '.\examples\Farrowing room 4.pdf' --template farrowing_room_4 --ocr-engine llm-vision --ocr-padding 2 --ocr-context-padding 0 --save-overlay --save-cells --save-csv --save-json
+```
+
+Use `--ocr-engine tesseract` for a local OCR check without the vision service.
+The template and grid processing are shared with the web interface; the web
+application additionally redacts filtered columns before OCR and previewing.
+
 ## Dataset Preparation
 
 Use `--save-cells` to create cell-level OCR samples, then generate an empty

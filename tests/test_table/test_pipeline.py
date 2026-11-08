@@ -3,9 +3,13 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
+import cv2
 import numpy as np
 
+from src.ocr.base import OcrText
+from src.ocr.cell_ocr import recognize_table_cells
 from src.table import (
     GridCell,
     GridStructure,
@@ -13,9 +17,53 @@ from src.table import (
     process_table_image,
     render_grid_overlay,
 )
+from src.table.line_detection import LineDetectionResult
+from src.templates import load_template
 
 
 class TestTablePipeline(unittest.TestCase):
+    def test_farrowing_template_keeps_first_date_through_grid_and_ocr(self) -> None:
+        class DateEngine:
+            def recognize(self, image: np.ndarray) -> OcrText:
+                return OcrText(text=f"{int(image[0, 0]):02d}-May")
+
+        template = load_template("farrowing_room_4")
+        for header_height in (14, 36):
+            for scale, offset in ((1, 0), (2, 40)):
+                with self.subTest(
+                    header_height=header_height, scale=scale, offset=offset
+                ):
+                    horizontal = np.zeros((600 * scale, 600), dtype=np.uint8)
+                    vertical = np.zeros_like(horizontal)
+                    rows = [20] + [20 + header_height + i * 36 for i in range(6)]
+                    rows = [offset + scale * y for y in rows]
+                    for y in rows:
+                        cv2.line(horizontal, (20, y), (550, y), 255)
+                    for x in (20, 100, 200, 350, 550):
+                        cv2.line(vertical, (x, rows[0]), (x, rows[-1]), 255)
+                    source = np.full_like(horizontal, 255)
+                    for row, (top, bottom) in enumerate(zip(rows, rows[1:])):
+                        source[top:bottom, :] = row
+
+                    with patch(
+                        "src.table.detect_lines",
+                        return_value=LineDetectionResult(horizontal, vertical),
+                    ):
+                        result = process_table_image(source, template=template)
+                    table = recognize_table_cells(
+                        source,
+                        result.grid,
+                        engine=DateEngine(),
+                        column_names=template.column_names,
+                        filter_out_column_indices=template.filtered_column_indices,
+                    )
+
+                    self.assertEqual(result.grid.row_coords, rows)
+                    self.assertEqual(
+                        [row[0] for row in table.text_matrix()],
+                        ["Date", "01-May", "02-May", "03-May", "04-May", "05-May"],
+                    )
+
     def test_process_table_image_returns_grid_result(self) -> None:
         bitmap = np.array(
             [

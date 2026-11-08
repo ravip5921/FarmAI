@@ -1,8 +1,8 @@
 {
   "id": "farrowing_room_4",
   "name": "Farrowing Room",
-  "description": "Template for Farrowing Room 4 daily log tables.",
-  "table": {"column_widths": [1.1, 0.2, 1.4, 1.5, 5.0, 5.1, 0.2, 1.7, 0.2, 1.5, 2.2, 0.3, 10.2], "uniform_row_height": false},
+  "description": "Template for Farrowing Room daily log tables with a short printed header.",
+  "table": {"column_widths": [1.1, 0.2, 1.4, 1.5, 5.0, 5.1, 0.2, 1.7, 0.2, 1.5, 2.2, 0.3, 10.2], "uniform_row_height": false, "preserve_header_row": true},
   "columns": [
     {"index": 0, "key": "date", "name": "Date", "value_type": "date_dd_mon", "format": "DD-Mon", "common_values": [], "filter_out": false},
     {"index": 1, "key": "divider1", "name": "EMPTY", "value_type": "empty", "common_values": [], "filter_out": true},

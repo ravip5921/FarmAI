@@ -157,6 +157,7 @@ def process_table_image(
         line_detection.vertical_mask,
         image.shape,
         intersection_centroids=intersections.centroids,
+        preserve_header_row=template.preserve_header_row if template else False,
     )
     grid = grid_refinement.grid if grid_refinement.grid.cells else raw_grid
     template_grid = None
