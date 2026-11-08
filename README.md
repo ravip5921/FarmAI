@@ -148,6 +148,21 @@ Use `--ocr-engine tesseract` for a local OCR check without the vision service.
 The template and grid processing are shared with the web interface; the web
 application additionally redacts filtered columns before OCR and previewing.
 
+The Nursery Room template (`nursery_room_4`) includes both employee AM/PM
+initials and the detached manager-initials column, and filters both from OCR.
+Only this template opts into `table.min_horizontal_line_length_ratio` to retain
+the short rules in that final column. The threshold scales with image width;
+other templates and detected-table mode keep their existing detection settings.
+Nursery also enables `redaction.follow_column_borders` so masks follow slightly
+slanted printed borders and cover the separator between the initials fields.
+
+Inspect its grid with `farm-ai` using `--template nursery_room_4`. To generate
+the same redacted source preview used by the web pipeline without running OCR:
+
+```powershell
+python -m scripts.redact_filtered_columns '.\examples\Nursery room 4.pdf' --template nursery_room_4 --output-dir '.\debug_outputs\nursery_review\redacted'
+```
+
 ## Dataset Preparation
 
 Use `--save-cells` to create cell-level OCR samples, then generate an empty

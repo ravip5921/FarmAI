@@ -53,6 +53,18 @@ class TestTemplatesCoverage(unittest.TestCase):
                 )
             )
 
+    def test_horizontal_line_length_ratio_must_be_a_positive_fraction(self) -> None:
+        for value in (0, -0.1, 1.1, float("nan")):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, "ratio"):
+                form_template_from_dict(
+                    _template_data(
+                        table={
+                            "column_widths": [1, 1],
+                            "min_horizontal_line_length_ratio": value,
+                        }
+                    )
+                )
+
     def test_unknown_template_error_lists_available_choices_when_present(self) -> None:
         with TemporaryDirectory() as tmpdir:
             template_dir = Path(tmpdir)

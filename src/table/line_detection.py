@@ -19,8 +19,14 @@ class LineDetectionResult:
 class LineDetectionStage(PipelineStage):
     """Extract horizontal and vertical line masks from a binary image."""
 
-    def __init__(self, min_line_scale: float = 1.55):
+    def __init__(
+        self,
+        min_line_scale: float = 1.55,
+        *,
+        min_horizontal_line_length_ratio: float | None = None,
+    ):
         self.min_line_scale = min_line_scale
+        self.min_horizontal_line_length_ratio = min_horizontal_line_length_ratio
 
     def _ensure_binary(self, image: np.ndarray) -> np.ndarray:
         if image.dtype != np.uint8:
@@ -225,6 +231,17 @@ class LineDetectionStage(PipelineStage):
         # Cap page-relative minima by character-relative maxima to avoid
         # over-pruning true rules on large pages while still rejecting text.
         min_h_length = max(18, min(int(binary.shape[1] * 0.08), int(size * 2.0)))
+        if self.min_horizontal_line_length_ratio is not None:
+            # Opt-in templates can retain rules in narrow, detached fields.
+            # Without them, the crossing checks also remove the field's
+            # vertical borders and shrink the detected table span.
+            min_h_length = min(
+                min_h_length,
+                max(
+                    3,
+                    int(round(binary.shape[1] * self.min_horizontal_line_length_ratio)),
+                ),
+            )
         min_v_length = max(
             14, min(int(binary.shape[0] * 0.08), int(vertical_size * 3.0))
         )
@@ -316,11 +333,17 @@ class LineDetectionStage(PipelineStage):
 
 
 def detect_lines(
-    binary: np.ndarray, min_line_scale: float = 1.7
+    binary: np.ndarray,
+    min_line_scale: float = 1.7,
+    *,
+    min_horizontal_line_length_ratio: float | None = None,
 ) -> LineDetectionResult:
     """Convenience function for line extraction without pipeline wiring."""
     doc = DocumentImage(binary)
-    stage = LineDetectionStage(min_line_scale=min_line_scale)
+    stage = LineDetectionStage(
+        min_line_scale=min_line_scale,
+        min_horizontal_line_length_ratio=min_horizontal_line_length_ratio,
+    )
     result = stage.process(doc)
     return LineDetectionResult(
         horizontal_mask=result.metadata["horizontal_mask"],

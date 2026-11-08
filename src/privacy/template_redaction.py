@@ -33,6 +33,69 @@ def redacted_template_column_indices(
     }
 
 
+def _column_border_lines(
+    image: np.ndarray,
+    grid: GridStructure,
+    top: int,
+    bottom: int,
+) -> dict[int, tuple[float, float]]:
+    """Match long printed rules to template edges on slightly slanted scans.
+
+    Return each matched edge's x positions at the top and bottom of the table.
+    Short strokes in handwritten initials must not determine the mask edges.
+    Unmatched edges keep their existing grid coordinates.
+    """
+    height = bottom - top
+    if height < 8:
+        return {}
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if image.ndim == 3 else image
+    _, foreground = cv2.threshold(
+        gray[top:bottom], 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
+    )
+    row_height = max(3, int(np.median(np.diff(grid.row_coords))))
+    vertical = cv2.morphologyEx(
+        foreground,
+        cv2.MORPH_OPEN,
+        cv2.getStructuringElement(cv2.MORPH_RECT, (1, max(3, row_height * 2 // 3))),
+    )
+    min_length = max(8, height // 3)
+    lines = cv2.HoughLinesP(
+        vertical,
+        1,
+        np.pi / 720,
+        threshold=max(10, height // 16),
+        minLineLength=min_length,
+        maxLineGap=row_height,
+    )
+    if lines is None:
+        return {}
+
+    candidates: list[tuple[float, float, int]] = []
+    for x0, y0, x1, y1 in lines[:, 0]:
+        dy = int(y1) - int(y0)
+        dx = int(x1) - int(x0)
+        if abs(dy) < min_length or abs(dx) > abs(dy) * 0.05:
+            continue
+        slope = dx / dy
+        start = float(x0) - slope * float(y0)
+        candidates.append((start, start + slope * height, abs(dy)))
+
+    tolerance = max(3, (max(grid.col_coords) - min(grid.col_coords)) * 0.015)
+    matched: dict[int, tuple[float, float]] = {}
+    for index, x in enumerate(grid.col_coords):
+        nearby = [
+            line for line in candidates if abs((line[0] + line[1]) / 2 - x) <= tolerance
+        ]
+        if nearby:
+            # Prefer the closest rule, using its length to break ties.
+            start, end, _ = min(
+                nearby,
+                key=lambda line: (abs((line[0] + line[1]) / 2 - x), -line[2]),
+            )
+            matched[index] = (start, end)
+    return matched
+
+
 def redact_filtered_template_columns(
     image: np.ndarray,
     grid: GridStructure,
@@ -53,13 +116,56 @@ def redact_filtered_template_columns(
     max_h, max_w = redacted.shape[:2]
     top = max(0, min(grid.row_coords))
     bottom = min(max_h, max(grid.row_coords))
-    for column_index in sorted(column_indices):
-        if column_index + 1 >= len(grid.col_coords):
+    if bottom <= top:
+        return redacted
+    border_lines = (
+        _column_border_lines(image, grid, top, bottom)
+        if template.redaction_follow_column_borders
+        else {}
+    )
+    column_ranges: list[tuple[int, int]] = []
+    divider_indices = {
+        column.index
+        for column in template.columns
+        if column.filter_out and _is_divider_column(column.key)
+    }
+    for index in sorted(column_indices):
+        if (
+            template.redaction_follow_column_borders
+            and column_ranges
+            and all(
+                gap in divider_indices for gap in range(column_ranges[-1][1], index)
+            )
+        ):
+            # Initials often extend into the blank separator between the two
+            # sensitive fields. Cover that separator along with both fields.
+            column_ranges[-1] = (column_ranges[-1][0], index + 1)
+        else:
+            column_ranges.append((index, index + 1))
+
+    for column_index, end_index in column_ranges:
+        if end_index >= len(grid.col_coords):
             continue
         left = max(0, int(grid.col_coords[column_index]))
-        right = min(max_w, int(grid.col_coords[column_index + 1]))
-        if right <= left or bottom <= top:
+        right = min(max_w, int(grid.col_coords[end_index]))
+        if right <= left:
             continue
+        if column_index in border_lines or end_index in border_lines:
+            left_top, left_bottom = border_lines.get(column_index, (left, left))
+            right_top, right_bottom = border_lines.get(end_index, (right, right))
+            if left_top < right_top and left_bottom < right_bottom:
+                # Cover the printed rule's thickness as well as its interior.
+                polygon = np.array(
+                    [
+                        (int(np.floor(left_top)) - 1, top),
+                        (int(np.ceil(right_top)) + 1, top),
+                        (int(np.ceil(right_bottom)) + 1, bottom - 1),
+                        (int(np.floor(left_bottom)) - 1, bottom - 1),
+                    ],
+                    dtype=np.int32,
+                )
+                cv2.fillConvexPoly(redacted, polygon, fill_color)
+                continue
         cv2.rectangle(
             redacted,
             (left, top),

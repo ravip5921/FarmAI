@@ -129,7 +129,13 @@ def process_table_image(
         raise ValueError("process_table_image expects a 2D binary bitmap image")
 
     stem = _resolve_stem(image_name)
-    line_detection = detect_lines(image)
+    if template is not None and template.min_horizontal_line_length_ratio is not None:
+        line_detection = detect_lines(
+            image,
+            min_horizontal_line_length_ratio=template.min_horizontal_line_length_ratio,
+        )
+    else:
+        line_detection = detect_lines(image)
     if debug_dir is not None and save_line_detection:
         debug_dir.mkdir(parents=True, exist_ok=True)
         line_preview = np.hstack(

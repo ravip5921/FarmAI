@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import unittest
+from dataclasses import replace
 
+import cv2
 import numpy as np
 
 from src.privacy import (
@@ -13,6 +15,44 @@ from src.templates import load_template
 
 
 class TestTemplateRedaction(unittest.TestCase):
+    def test_nursery_masks_follow_slanted_rules_without_covering_comments(self) -> None:
+        template = load_template("nursery_room_4")
+        image = np.full((800, 1200, 3), 255, np.uint8)
+        columns = [60, 120, 183, 243, 303, 315, 375, 462, 474, 990, 1080, 1092, 1152]
+        grid = GridStructure(
+            row_coords=list(range(100, 701, 30)), col_coords=columns, cells=[]
+        )
+        for x in columns:
+            cv2.line(image, (x + 8, 100), (x - 8, 700), (0, 0, 0), 2)
+        for y in grid.row_coords:
+            shift = round(8 - 16 * (y - 100) / 600)
+            cv2.line(image, (60 + shift, y), (1152 + shift, y), (0, 0, 0), 1)
+
+        redacted = redact_filtered_template_columns(image, grid, template)
+        for y in range(110, 691, 20):
+            shift = round(8 - 16 * (y - 100) / 600)
+            self.assertTrue(np.all(redacted[y, 993 + shift : 1149 + shift] == 0))
+            self.assertTrue(
+                np.array_equal(redacted[y, : 985 + shift], image[y, : 985 + shift])
+            )
+        self.assertTrue(np.array_equal(redacted[:100], image[:100]))
+
+        # Turning off border following retains the existing rectangular policy,
+        # including leaving structural dividers alone for other templates.
+        disabled = replace(template, redaction_follow_column_borders=False)
+        rectangular = redact_filtered_template_columns(image, grid, disabled)
+        self.assertTrue(
+            np.array_equal(rectangular[115, 1080:1092], image[115, 1080:1092])
+        )
+
+    def test_nursery_without_visible_borders_uses_grid_bounds(self) -> None:
+        template = load_template("nursery_room_4")
+        image = np.full((40, 130), 255, np.uint8)
+        grid = GridStructure([5, 20, 35], list(range(0, 121, 10)), [])
+        redacted = redact_filtered_template_columns(image, grid, template)
+        self.assertTrue(np.all(redacted[5:35, 90:120] == 0))
+        self.assertTrue(np.all(redacted[5:35, :90] == 255))
+
     def test_empty_and_outside_grid_are_unchanged(self) -> None:
         template = load_template("boar_room")
         image = np.full((10, 10, 3), 255, dtype=np.uint8)

@@ -30,6 +30,8 @@ class FormTemplate:
     uniform_row_height: bool
     columns: tuple[TemplateColumn, ...]
     preserve_header_row: bool = False
+    min_horizontal_line_length_ratio: float | None = None
+    redaction_follow_column_borders: bool = False
 
     @property
     def filtered_column_indices(self) -> set[int]:
@@ -97,6 +99,14 @@ def form_template_from_dict(data: dict[str, Any]) -> FormTemplate:
     if actual_indices != expected_indices:
         raise ValueError("Template column indices must be contiguous from 0")
 
+    line_length_ratio = table.get("min_horizontal_line_length_ratio")
+    if line_length_ratio is not None:
+        line_length_ratio = float(line_length_ratio)
+        if not 0 < line_length_ratio <= 1:
+            raise ValueError(
+                "Template min_horizontal_line_length_ratio must be in (0, 1]"
+            )
+
     return FormTemplate(
         id=str(data["id"]),
         name=str(data.get("name", data["id"])),
@@ -105,6 +115,10 @@ def form_template_from_dict(data: dict[str, Any]) -> FormTemplate:
         uniform_row_height=bool(table.get("uniform_row_height", False)),
         columns=columns,
         preserve_header_row=bool(table.get("preserve_header_row", False)),
+        min_horizontal_line_length_ratio=line_length_ratio,
+        redaction_follow_column_borders=bool(
+            (data.get("redaction") or {}).get("follow_column_borders", False)
+        ),
     )
 
 
