@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 from dataclasses import replace
+from unittest.mock import patch
 
 import cv2
 import numpy as np
@@ -15,6 +16,31 @@ from src.templates import load_template
 
 
 class TestTemplateRedaction(unittest.TestCase):
+    def test_border_masks_accept_both_hough_output_shapes(self) -> None:
+        template = load_template("nursery_room_4")
+        image = np.full((100, 130, 3), 255, np.uint8)
+        grid = GridStructure([10, 30, 50, 70, 90], list(range(0, 121, 10)), [])
+        # Hough coordinates are relative to the cropped table. Both borders
+        # slope left, so a rectangular fallback would expose initials at the
+        # bottom and obscure comments at the top.
+        segments = np.array([[92, 0, 88, 80], [122, 0, 118, 80]], dtype=np.int32)
+        for shape in ((2, 1, 4), (2, 4)):
+            with (
+                self.subTest(shape=shape),
+                patch(
+                    "src.privacy.template_redaction.cv2.HoughLinesP",
+                    return_value=segments.reshape(shape),
+                ),
+            ):
+                redacted = redact_filtered_template_columns(image, grid, template)
+                self.assertTrue(np.all(redacted[15, 93:122] == 0))
+                self.assertTrue(np.all(redacted[85, 89:118] == 0))
+                self.assertTrue(np.all(redacted[15, 90] == 255))
+                self.assertTrue(np.all(redacted[85, 122] == 255))
+                np.testing.assert_array_equal(redacted[:, :85], image[:, :85])
+                np.testing.assert_array_equal(redacted[:10], image[:10])
+                np.testing.assert_array_equal(redacted[90:], image[90:])
+
     def test_finisher_masks_follow_bowed_rules_and_preserve_comments(self) -> None:
         template = load_template("finisher_room_3")
         image = np.full((800, 1250, 3), 255, np.uint8)
@@ -87,6 +113,21 @@ class TestTemplateRedaction(unittest.TestCase):
         redacted = redact_filtered_template_columns(image, grid, template)
         self.assertTrue(np.all(redacted[5:35, 90:120] == 0))
         self.assertTrue(np.all(redacted[5:35, :90] == 255))
+
+    def test_finisher_unreliable_borders_fall_back_to_grid_bounds(self) -> None:
+        template = load_template("finisher_room_3")
+        # A short table cannot support tracing; a taller blank table has no
+        # reliable rule to follow. Both must still mask the sensitive fields.
+        for rows in ([5, 8, 11], [5, 20, 35]):
+            with self.subTest(rows=rows):
+                image = np.full((40, 160, 3), 255, np.uint8)
+                grid = GridStructure(rows, list(range(0, 151, 10)), [])
+                redacted = redact_filtered_template_columns(image, grid, template)
+                self.assertTrue(np.all(redacted[rows[0] : rows[-1], 120:150] == 0))
+                np.testing.assert_array_equal(redacted[:, :120], image[:, :120])
+                np.testing.assert_array_equal(redacted[:, 150:], image[:, 150:])
+                np.testing.assert_array_equal(redacted[: rows[0]], image[: rows[0]])
+                np.testing.assert_array_equal(redacted[rows[-1] :], image[rows[-1] :])
 
     def test_empty_and_outside_grid_are_unchanged(self) -> None:
         template = load_template("boar_room")

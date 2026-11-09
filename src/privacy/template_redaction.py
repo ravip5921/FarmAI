@@ -71,7 +71,8 @@ def _column_border_lines(
         return {}
 
     candidates: list[tuple[float, float, int]] = []
-    for x0, y0, x1, y1 in lines[:, 0]:
+    # OpenCV versions return either (N, 1, 4) or (N, 4) segments.
+    for x0, y0, x1, y1 in np.asarray(lines).reshape(-1, 4):
         dy = int(y1) - int(y0)
         dx = int(x1) - int(x0)
         if abs(dy) < min_length or abs(dx) > abs(dy) * 0.05:

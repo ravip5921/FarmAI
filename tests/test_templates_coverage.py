@@ -65,6 +65,36 @@ class TestTemplatesCoverage(unittest.TestCase):
                     )
                 )
 
+    def test_preprocessing_max_width_rejects_unusable_image_sizes(self) -> None:
+        for value in (-1, 0, 99):
+            with (
+                self.subTest(value=value),
+                self.assertRaisesRegex(ValueError, "max_width must be at least 100"),
+            ):
+                form_template_from_dict(
+                    _template_data(preprocessing={"max_width": value})
+                )
+        template = form_template_from_dict(
+            _template_data(preprocessing={"max_width": 100})
+        )
+        self.assertEqual(template.preprocessing_max_width, 100)
+
+    def test_binarization_k_requires_a_fraction_strictly_between_zero_and_one(
+        self,
+    ) -> None:
+        for value in (-0.1, 0, 1, 1.1, float("nan"), float("inf")):
+            with (
+                self.subTest(value=value),
+                self.assertRaisesRegex(ValueError, "binarization_k must be in"),
+            ):
+                form_template_from_dict(
+                    _template_data(preprocessing={"binarization_k": value})
+                )
+        template = form_template_from_dict(
+            _template_data(preprocessing={"binarization_k": 0.1})
+        )
+        self.assertEqual(template.binarization_k, 0.1)
+
     def test_unknown_template_error_lists_available_choices_when_present(self) -> None:
         with TemporaryDirectory() as tmpdir:
             template_dir = Path(tmpdir)

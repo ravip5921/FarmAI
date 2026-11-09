@@ -42,11 +42,19 @@ class TestLineDetectionHelpers(unittest.TestCase):
             dtype=np.int32,
         )
 
-        with patch("src.table.line_detection.cv2.HoughLinesP", return_value=lines):
-            mask = stage._hough_vertical_mask(binary, min_line_length=5)
+        for shape in ((2, 1, 4), (2, 4)):
+            with (
+                self.subTest(shape=shape),
+                patch(
+                    "src.table.line_detection.cv2.HoughLinesP",
+                    return_value=lines.reshape(shape),
+                ),
+            ):
+                mask = stage._hough_vertical_mask(binary, min_line_length=5)
 
-        self.assertGreater(int(np.count_nonzero(mask)), 0)
-        self.assertEqual(int(mask[2:15, 2].sum()), 255 * 13)
+                self.assertGreater(int(np.count_nonzero(mask)), 0)
+                self.assertEqual(int(mask[2:15, 2].sum()), 255 * 13)
+                self.assertEqual(int(np.count_nonzero(mask[:, 3:])), 0)
 
     def test_hough_vertical_mask_returns_empty_when_no_lines(self) -> None:
         stage = LineDetectionStage()

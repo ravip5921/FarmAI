@@ -115,7 +115,8 @@ class LineDetectionStage(PipelineStage):
         if lines is None:
             return mask
 
-        for line in lines[:, 0]:
+        # OpenCV versions return either (N, 1, 4) or (N, 4) segments.
+        for line in np.asarray(lines).reshape(-1, 4):
             x1, y1, x2, y2 = line
             dx = abs(x2 - x1)
             dy = abs(y2 - y1)

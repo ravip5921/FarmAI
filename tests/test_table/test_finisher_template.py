@@ -1,14 +1,14 @@
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 import numpy as np
 
 from src.application.processing import process_document
 from src.application.result_models import ProcessingSettings
-from src.ocr.base import OcrText
-from src.templates import load_template
 from src.core.image import DocumentImage
+from src.ocr.base import OcrText
 from src.preprocessing.template_image import prepare_template_image
+from src.templates import load_template
 
 
 class TestFinisherTemplate(unittest.TestCase):
