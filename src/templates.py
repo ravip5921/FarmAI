@@ -32,6 +32,9 @@ class FormTemplate:
     preserve_header_row: bool = False
     min_horizontal_line_length_ratio: float | None = None
     redaction_follow_column_borders: bool = False
+    redaction_follow_curved_borders: bool = False
+    preprocessing_max_width: int | None = None
+    binarization_k: float = 0.34
 
     @property
     def filtered_column_indices(self) -> set[int]:
@@ -107,6 +110,16 @@ def form_template_from_dict(data: dict[str, Any]) -> FormTemplate:
                 "Template min_horizontal_line_length_ratio must be in (0, 1]"
             )
 
+    preprocessing = data.get("preprocessing") or {}
+    max_width = preprocessing.get("max_width")
+    if max_width is not None:
+        max_width = int(max_width)
+        if max_width < 100:
+            raise ValueError("Template preprocessing max_width must be at least 100")
+    binarization_k = float(preprocessing.get("binarization_k", 0.34))
+    if not 0 < binarization_k < 1:
+        raise ValueError("Template binarization_k must be in (0, 1)")
+
     return FormTemplate(
         id=str(data["id"]),
         name=str(data.get("name", data["id"])),
@@ -116,6 +129,11 @@ def form_template_from_dict(data: dict[str, Any]) -> FormTemplate:
         columns=columns,
         preserve_header_row=bool(table.get("preserve_header_row", False)),
         min_horizontal_line_length_ratio=line_length_ratio,
+        preprocessing_max_width=max_width,
+        binarization_k=binarization_k,
+        redaction_follow_curved_borders=bool(
+            (data.get("redaction") or {}).get("follow_curved_borders", False)
+        ),
         redaction_follow_column_borders=bool(
             (data.get("redaction") or {}).get("follow_column_borders", False)
         ),

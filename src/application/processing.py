@@ -12,6 +12,7 @@ from src.preprocessing.denoise import MorphologicalDenoiseStage
 from src.preprocessing.grayscale import GrayscaleStage
 from src.preprocessing.sauvola import SauvolaBinarizationStage
 from src.preprocessing.skew import SkewCorrectionStage, rotate_image
+from src.preprocessing.template_image import prepare_template_image
 from src.privacy import redact_filtered_template_columns
 from src.table import process_table_image, render_grid_overlay
 from src.templates import FormTemplate, TemplateColumn, load_template
@@ -52,11 +53,11 @@ def _notify(
     )
 
 
-def _detection_pipeline() -> Pipeline:
+def _detection_pipeline(*, k: float = 0.34) -> Pipeline:
     return Pipeline(
         [
             GrayscaleStage(),
-            SauvolaBinarizationStage(window_size=25, k=0.34),
+            SauvolaBinarizationStage(window_size=25, k=k),
             MorphologicalDenoiseStage(kernel_size=2),
         ]
     )
@@ -176,7 +177,10 @@ def process_document(
             page_count=page_count,
             message="Preparing image",
         )
-        detection_base = _detection_pipeline().run(page)
+        page = prepare_template_image(page, template)
+        detection_base = _detection_pipeline(
+            k=template.binarization_k if template else 0.34
+        ).run(page)
         skew_stage = SkewCorrectionStage()
         skew_angle = skew_stage.estimate_angle(detection_base.image)
         detection_image = rotate_image(

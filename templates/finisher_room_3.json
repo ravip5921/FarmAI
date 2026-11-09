@@ -2,7 +2,9 @@
   "id": "finisher_room_3",
   "name": "Finisher Room",
   "description": "Template for Finisher Room 3 daily log tables.",
-  "table": {"column_widths": [1.5, 1.6, 1.5, 1.5, 0.3, 1.7, 2, 0.3, 1.9, 1.9, 0.3, 12.0, 2.3, 0.3, 1.6], "uniform_row_height": false},
+  "table": {"column_widths": [1.5, 1.6, 1.5, 1.5, 0.3, 1.7, 2, 0.3, 1.9, 1.9, 0.3, 12.0, 2.3, 0.3, 1.6], "uniform_row_height": false, "min_horizontal_line_length_ratio": 0.045},
+  "redaction": {"follow_column_borders": true, "follow_curved_borders": true},
+  "preprocessing": {"max_width": 1200, "binarization_k": 0.1},
   "columns": [
     {"index": 0, "key": "date", "name": "Date", "value_type": "date_dd_mon", "format": "DD-Mon", "common_values": [], "filter_out": false},
     {"index": 1, "key": "current_temperature", "name": "Current Temperature", "value_type": "temperature", "format": "TT.T", "range": {"min": 50.0, "max": 110.0}, "common_values": [], "filter_out": false},

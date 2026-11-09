@@ -15,6 +15,41 @@ from src.templates import load_template
 
 
 class TestTemplateRedaction(unittest.TestCase):
+    def test_finisher_masks_follow_bowed_rules_and_preserve_comments(self) -> None:
+        template = load_template("finisher_room_3")
+        image = np.full((800, 1250, 3), 255, np.uint8)
+        columns = [
+            51,
+            107,
+            166,
+            222,
+            281,
+            290,
+            348,
+            427,
+            437,
+            504,
+            574,
+            582,
+            1024,
+            1105,
+            1118,
+            1172,
+        ]
+        grid = GridStructure(list(range(100, 701, 30)), columns, [])
+        ys = np.arange(100, 700)
+        shift = np.rint(12 * np.cos((ys - 100) * 2 * np.pi / 600)).astype(int)
+        for x in columns:
+            points = np.column_stack((x + shift, ys)).astype(np.int32)
+            cv2.polylines(image, [points], False, (0, 0, 0), 2)
+        redacted = redact_filtered_template_columns(image, grid, template)
+        for y in range(110, 690, 20):
+            offset = shift[y - 100]
+            self.assertTrue(np.all(redacted[y, 1028 + offset : 1168 + offset] == 0))
+            self.assertTrue(
+                np.array_equal(redacted[y, : 1018 + offset], image[y, : 1018 + offset])
+            )
+
     def test_nursery_masks_follow_slanted_rules_without_covering_comments(self) -> None:
         template = load_template("nursery_room_4")
         image = np.full((800, 1200, 3), 255, np.uint8)

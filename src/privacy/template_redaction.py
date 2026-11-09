@@ -96,6 +96,49 @@ def _column_border_lines(
     return matched
 
 
+def _trace_column_border(
+    image: np.ndarray,
+    x: int,
+    top: int,
+    bottom: int,
+    radius: int,
+) -> np.ndarray | None:
+    """Find a continuous printed border, allowing slow curvature in a photo.
+
+    A path can move at most one pixel per row. This favors a sustained rule
+    over the short strokes of handwriting beside it.
+    """
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if image.ndim == 3 else image
+    left, right = max(0, x - radius), min(gray.shape[1], x + radius + 1)
+    if right <= left or bottom - top < 8:
+        return None
+    _, ink = cv2.threshold(
+        gray[top:bottom, left:right], 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
+    )
+    cost = (ink == 0).astype(np.float64)
+    cost += np.abs(np.arange(left, right) - x)[None, :] * (0.005 / max(1, radius))
+    previous = cost[0].copy()
+    back = np.zeros(cost.shape, dtype=np.int8)
+    for row in range(1, len(cost)):
+        choices = np.stack(
+            (
+                np.r_[np.inf, previous[:-1] + 0.15],
+                previous,
+                np.r_[previous[1:] + 0.15, np.inf],
+            )
+        )
+        best = np.argmin(choices, axis=0)
+        back[row] = best - 1
+        previous = cost[row] + np.min(choices, axis=0)
+    path: np.ndarray = np.empty(len(cost), dtype=np.int32)
+    path[-1] = int(np.argmin(previous))
+    for row in range(len(path) - 1, 0, -1):
+        path[row - 1] = path[row] + back[row, path[row]]
+    if np.mean(ink[np.arange(len(path)), path] > 0) < 0.55:
+        return None
+    return path + left
+
+
 def redact_filtered_template_columns(
     image: np.ndarray,
     grid: GridStructure,
@@ -150,6 +193,30 @@ def redact_filtered_template_columns(
         right = min(max_w, int(grid.col_coords[end_index]))
         if right <= left:
             continue
+        if template.redaction_follow_curved_borders:
+            radius = max(
+                5, round((max(grid.col_coords) - min(grid.col_coords)) * 0.035)
+            )
+            # Stay within the adjacent field's scale so a dark page edge or
+            # another printed column cannot win over the intended border.
+            left_radius = min(
+                radius, max(3, round((grid.col_coords[column_index + 1] - left) * 0.4))
+            )
+            right_radius = min(
+                radius, max(3, round((right - grid.col_coords[end_index - 1]) * 0.4))
+            )
+            left_path = _trace_column_border(image, left, top, bottom, left_radius)
+            right_path = _trace_column_border(image, right, top, bottom, right_radius)
+            if (
+                left_path is not None
+                and right_path is not None
+                and np.all(left_path < right_path)
+            ):
+                for offset, (start, end) in enumerate(zip(left_path, right_path)):
+                    redacted[
+                        top + offset, max(0, int(start) - 2) : min(max_w, int(end) + 3)
+                    ] = (fill_color if redacted.ndim == 3 else fill_color[0])
+                continue
         if column_index in border_lines or end_index in border_lines:
             left_top, left_bottom = border_lines.get(column_index, (left, left))
             right_top, right_bottom = border_lines.get(end_index, (right, right))

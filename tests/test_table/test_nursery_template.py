@@ -60,9 +60,9 @@ class TestNurseryTemplate(unittest.TestCase):
                 self.assertEqual(len(repaired.grid.row_coords), len(rows))
                 self.assertEqual(len(repaired.grid.col_coords), 13)
 
-    def test_detection_override_is_opt_in_and_only_enabled_for_nursery(self) -> None:
+    def test_detection_override_is_opt_in_for_nursery_and_finisher(self) -> None:
         for template_id in get_template_ids():
-            if template_id == "nursery_room_4":
+            if template_id in {"nursery_room_4", "finisher_room_3"}:
                 continue
             with self.subTest(template=template_id):
                 template = load_template(template_id)

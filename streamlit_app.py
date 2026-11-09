@@ -30,13 +30,13 @@ from src.preprocessing.grayscale import GrayscaleStage
 from src.preprocessing.sauvola import SauvolaBinarizationStage
 from src.preprocessing.skew import SkewCorrectionStage
 from src.templates import FormTemplate, get_template_ids, load_template
+from src.preprocessing.template_image import prepare_template_image
 from src.table import (
     TablePipelineResult,
     process_table_image,
     render_grid_overlay,
     render_grid_structure,
 )
-
 
 LOW_CONFIDENCE_THRESHOLD = 90.0
 SUPPORTED_TYPES = ["png", "jpg", "jpeg", "tif", "tiff", "bmp", "pdf"]
@@ -134,9 +134,7 @@ def resolve_template_filter_indices(
 
 def summarize_ocr(table: OcrTable) -> tuple[int, int, int]:
     confidences = [
-        float(cell.confidence)
-        for cell in table.cells
-        if cell.confidence is not None
+        float(cell.confidence) for cell in table.cells if cell.confidence is not None
     ]
     average = round(sum(confidences) / len(confidences)) if confidences else 0
     flagged = sum(
@@ -170,9 +168,10 @@ def run_farmai(
     filter_out_columns: Collection[str] | None = None,
 ) -> AppResult:
     page = load_first_page(uploaded_file)
-    pipeline = build_pipeline()
-    processed = pipeline.run(page)
     template = load_template(template_id) if template_id else None
+    page = prepare_template_image(page, template)
+    pipeline = build_pipeline(k=template.binarization_k if template else 0.34)
+    processed = pipeline.run(page)
     table_result = process_table_image(
         processed.image,
         image_name=uploaded_file.name,

@@ -26,6 +26,7 @@ from src.preprocessing.grayscale import GrayscaleStage
 from src.templates import FormTemplate, get_template_ids, load_template
 from src.preprocessing.sauvola import SauvolaBinarizationStage
 from src.preprocessing.skew import SkewCorrectionStage
+from src.preprocessing.template_image import prepare_template_image
 from src.table import (
     TablePipelineResult,
     correct_table_perspective,
@@ -239,6 +240,7 @@ def _run_page(
         if debug_dir is not None
         else None
     )
+    page = prepare_template_image(page, template)
     result = process_image(
         page,
         pipeline,
@@ -402,9 +404,7 @@ def process_ocr(
         column_keys = template.column_keys
         column_ocr_rules = build_column_ocr_rules(template.columns)
     llm_verifier = (
-        None
-        if llm_verify_mode == "off"
-        else LlmOcrVerifier(mode=llm_verify_mode)
+        None if llm_verify_mode == "off" else LlmOcrVerifier(mode=llm_verify_mode)
     )
     return export_table_ocr(
         image,
@@ -428,12 +428,16 @@ def main() -> None:
     args = parse_args()
     image_path = args.image_path
     debug_dir = None if args.no_debug else args.debug_dir
-    pipeline = build_pipeline(window_size=25, k=0.34, denoise_kernel=2)
+    template = load_template(args.template) if args.template else None
+    pipeline = build_pipeline(
+        window_size=25,
+        k=template.binarization_k if template else 0.34,
+        denoise_kernel=2,
+    )
     ocr_engine = create_ocr_engine(
         args.ocr_engine,
         model_name=args.trocr_model,
     )
-    template = load_template(args.template) if args.template else None
     loaded = load_document(image_path)
 
     if isinstance(loaded, LoadedDocument):

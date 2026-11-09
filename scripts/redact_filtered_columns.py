@@ -12,6 +12,7 @@ from src.preprocessing.denoise import MorphologicalDenoiseStage
 from src.preprocessing.grayscale import GrayscaleStage
 from src.preprocessing.sauvola import SauvolaBinarizationStage
 from src.preprocessing.skew import SkewCorrectionStage, rotate_image
+from src.preprocessing.template_image import prepare_template_image
 from src.privacy import redact_filtered_template_columns
 from src.table import process_table_image
 from src.templates import FormTemplate, get_template_ids, load_template
@@ -64,11 +65,11 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def detection_pipeline() -> Pipeline:
+def detection_pipeline(*, k: float = 0.34) -> Pipeline:
     return Pipeline(
         [
             GrayscaleStage(),
-            SauvolaBinarizationStage(window_size=25, k=0.34),
+            SauvolaBinarizationStage(window_size=25, k=k),
             MorphologicalDenoiseStage(kernel_size=2),
         ]
     )
@@ -116,8 +117,12 @@ def pages(loaded: DocumentImage | LoadedDocument) -> list[DocumentImage]:
     return loaded.pages if isinstance(loaded, LoadedDocument) else [loaded]
 
 
-def output_path_for(source: Path, page_number: int, page_count: int, output_dir: Path) -> Path:
-    suffix = f"_p{page_number}" if page_count > 1 or source.suffix.lower() == ".pdf" else ""
+def output_path_for(
+    source: Path, page_number: int, page_count: int, output_dir: Path
+) -> Path:
+    suffix = (
+        f"_p{page_number}" if page_count > 1 or source.suffix.lower() == ".pdf" else ""
+    )
     return output_dir / f"{source.stem}{suffix}_redacted.png"
 
 
@@ -127,7 +132,8 @@ def redact_page(
     template: FormTemplate,
     image_name: str,
 ) -> tuple[object, float]:
-    base = detection_pipeline().run(page)
+    page = prepare_template_image(page, template)
+    base = detection_pipeline(k=template.binarization_k).run(page)
     skew_stage = SkewCorrectionStage()
     skew_angle = skew_stage.estimate_angle(base.image)
     detection_image = rotate_image(base.image, skew_angle, is_binary=True)

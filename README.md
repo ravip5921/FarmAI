@@ -150,11 +150,20 @@ application additionally redacts filtered columns before OCR and previewing.
 
 The Nursery Room template (`nursery_room_4`) includes both employee AM/PM
 initials and the detached manager-initials column, and filters both from OCR.
-Only this template opts into `table.min_horizontal_line_length_ratio` to retain
+This template and Finisher Room opt into `table.min_horizontal_line_length_ratio` to retain
 the short rules in that final column. The threshold scales with image width;
 other templates and detected-table mode keep their existing detection settings.
 Nursery also enables `redaction.follow_column_borders` so masks follow slightly
 slanted printed borders and cover the separator between the initials fields.
+
+Finisher Room (`finisher_room_3`) reuses these settings to retain its narrow
+manager-initials field and align the initials masks with the printed borders,
+preserving the adjacent comments. Both initials fields remain excluded from OCR.
+For finisher only, `preprocessing.max_width` normalizes large photographs to
+1200 pixels wide, and `preprocessing.binarization_k` retains faint printed
+rules. Detection, OCR, and previews use the same resized source coordinates.
+`redaction.follow_curved_borders` tracks bowed paper borders as well as straight
+rules. These options are off (or retain their original defaults) for other forms.
 
 Inspect its grid with `farm-ai` using `--template nursery_room_4`. To generate
 the same redacted source preview used by the web pipeline without running OCR:
