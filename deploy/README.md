@@ -182,8 +182,11 @@ For every release, `deploy-release.sh` performs these operations:
 1. Fetch and verify that the requested full SHA is on `origin/main`.
 2. Export that SHA to a new release directory; install isolated dependencies;
    lint/build the frontend again.
-3. Start the candidate API on the loopback smoke port with a temporary database,
-   verify API/schema/frontend health, and run an empty-queue worker smoke test.
+3. Start the candidate API on a private Unix socket in its temporary smoke-test
+   directory, with a temporary database. Verify API/schema/frontend health and
+   run an empty-queue worker smoke test. HTTP checks stop if the candidate exits.
+   Existing `FARMAI_SMOKE_PORT` settings are no longer used; occupied TCP ports
+   cannot redirect the smoke checks to another application.
 4. Request a production drain. The current worker finishes its active job and
    reports fresh `drained` heartbeats before it is stopped.
 5. Stop the API, make a consistent SQLite backup, and invoke:

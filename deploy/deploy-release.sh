@@ -53,7 +53,6 @@ NODE_VERSION="${FARMAI_NODE_VERSION:-22}"
 API_SERVICE="${FARMAI_API_SERVICE:-farmai-api.service}"
 WORKER_SERVICE="${FARMAI_WORKER_SERVICE:-farmai-worker.service}"
 API_URL="${FARMAI_API_URL:-http://127.0.0.1:8000}"
-SMOKE_PORT="${FARMAI_SMOKE_PORT:-18080}"
 HTTP_ATTEMPTS="${FARMAI_HTTP_ATTEMPTS:-30}"
 HTTP_DELAY_SECONDS="${FARMAI_HTTP_DELAY_SECONDS:-2}"
 DRAIN_TIMEOUT_SECONDS="${FARMAI_DRAIN_TIMEOUT_SECONDS:-3600}"
@@ -63,7 +62,6 @@ WORKER_STATUS_MAX_AGE_SECONDS="${FARMAI_WORKER_STATUS_MAX_AGE_SECONDS:-30}"
 require_absolute_path "FARMAI_SOURCE_REPO" "$SOURCE_REPO"
 require_absolute_path "FARMAI_DEPLOY_BASE" "$DEPLOY_BASE"
 require_absolute_path "FARMAI_APP_ENV_FILE" "$APP_ENV_FILE"
-require_positive_integer "FARMAI_SMOKE_PORT" "$SMOKE_PORT"
 require_positive_integer "FARMAI_NODE_VERSION" "$NODE_VERSION"
 require_positive_integer "FARMAI_HTTP_ATTEMPTS" "$HTTP_ATTEMPTS"
 require_positive_integer "FARMAI_HTTP_DELAY_SECONDS" "$HTTP_DELAY_SECONDS"
@@ -155,16 +153,18 @@ safe_remove_tree() {
 wait_for_http() {
   local url="$1"
   local output="$2"
+  local socket_path="${3:-}"
+  local -a curl_args=(--fail --silent --show-error --connect-timeout 2 --max-time 10)
+  if [ -n "$socket_path" ]; then
+    curl_args+=(--unix-socket "$socket_path" --noproxy '*')
+  fi
   local attempt
   for ((attempt = 1; attempt <= HTTP_ATTEMPTS; attempt += 1)); do
-    if curl \
-      --fail \
-      --silent \
-      --show-error \
-      --connect-timeout 2 \
-      --max-time 10 \
-      "$url" \
-      > "$output"; then
+    if [ -n "$socket_path" ] && ! kill -0 "$SMOKE_PID" 2>/dev/null; then
+      log "Candidate API exited before its HTTP check completed"
+      return 1
+    fi
+    if curl "${curl_args[@]}" "$url" > "$output"; then
       return 0
     fi
     sleep "$HTTP_DELAY_SECONDS"
@@ -368,31 +368,34 @@ API_HEALTH_HELPER="$CANDIDATE_DIR/deploy/check-api-health.py"
 [ -x "$BACKUP_HELPER" ] || fail "database backup helper is not executable"
 [ -x "$API_HEALTH_HELPER" ] || fail "API health helper is not executable"
 
-log "Smoke-testing candidate API and frontend on port $SMOKE_PORT"
+log "Smoke-testing candidate API and frontend through a private Unix socket"
 SMOKE_DIR="$(mktemp -d "$TEMP_DIR/candidate-smoke-$SHORT_COMMIT.XXXXXX")"
 SMOKE_RUNTIME="$SMOKE_DIR/runtime"
 install -d -m 0750 "$SMOKE_RUNTIME"
 SMOKE_LOG="$SMOKE_DIR/api.log"
+SMOKE_SOCKET="$SMOKE_DIR/api.sock"
 FARMAI_UI_RUNTIME_DIR="$SMOKE_RUNTIME" \
   "$CANDIDATE_DIR/.venv/bin/python" \
   -m uvicorn user_interface.backend.app:app \
   --app-dir "$CANDIDATE_DIR" \
-  --host 127.0.0.1 \
-  --port "$SMOKE_PORT" \
+  --uds "$SMOKE_SOCKET" \
   > "$SMOKE_LOG" 2>&1 &
 SMOKE_PID="$!"
 
 if ! wait_for_http \
-  "http://127.0.0.1:$SMOKE_PORT/api/health" \
-  "$SMOKE_DIR/health.json"; then
+  "http://localhost/api/health" \
+  "$SMOKE_DIR/health.json" \
+  "$SMOKE_SOCKET"; then
   sed -n '1,240p' "$SMOKE_LOG" >&2
   fail "candidate API smoke test failed"
 fi
 "$API_HEALTH_HELPER" "$SMOKE_DIR/health.json" \
   || fail "candidate API returned an invalid health response"
 if ! wait_for_http \
-  "http://127.0.0.1:$SMOKE_PORT/" \
-  "$SMOKE_DIR/index.html"; then
+  "http://localhost/" \
+  "$SMOKE_DIR/index.html" \
+  "$SMOKE_SOCKET"; then
+  sed -n '1,240p' "$SMOKE_LOG" >&2
   fail "candidate frontend smoke test failed"
 fi
 grep -Eq '<div[^>]+id="root"' "$SMOKE_DIR/index.html" \
